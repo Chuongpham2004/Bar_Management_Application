@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.bar_management_application.controller.TableController"
+      spacing="10" styleClass="content-pane">
+
+    <Label text="Table Management" styleClass="section-title"/>
+
+    <TableView fx:id="tableTableView" prefHeight="500">
+        <columns>
+            <TableColumn text="Table ID" fx:id="colTableId" prefWidth="100"/>
+            <TableColumn text="Name" fx:id="colTableName" prefWidth="150"/>
+            <TableColumn text="Status" fx:id="colStatus" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button fx:id="btnAddTable" text="Add Table" styleClass="primary-button"/>
+        <Button fx:id="btnEditTable" text="Edit Table" styleClass="secondary-button"/>
+        <Button fx:id="btnDeleteTable" text="Delete Table" styleClass="danger-button"/>
+    </HBox>
+
+</VBox>

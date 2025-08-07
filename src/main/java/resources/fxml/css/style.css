@@ -1,0 +1,134 @@
+/* =======================
+   GLOBAL
+======================= */
+
+.root {
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #f5f6fa;
+}
+
+/* Tiêu đề section */
+.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2f3640;
+    -fx-padding: 0 0 10 0;
+}
+
+/* =======================
+   MAIN LAYOUT
+======================= */
+
+.main-container {
+    -fx-background-color: #f5f6fa;
+}
+
+.header-bar {
+    -fx-background-color: linear-gradient(to right, #273c75, #192a56);
+    -fx-padding: 0 20 0 20;
+    -fx-alignment: center-left;
+}
+
+.app-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.datetime-label {
+    -fx-text-fill: white;
+}
+
+/* =======================
+   NAVIGATION PANEL
+======================= */
+
+.navigation-panel {
+    -fx-background-color: #353b48;
+    -fx-padding: 10;
+}
+
+.welcome-label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #dcdde1;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 0 0 20;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #718093;
+    -fx-text-fill: white;
+}
+
+/* =======================
+   CONTENT PANE
+======================= */
+
+.content-pane {
+    -fx-padding: 20;
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+}
+
+/* =======================
+   TABLE VIEW
+======================= */
+
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #dcdde1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.table-view .column-header {
+    -fx-background-color: #273c75;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-view .cell {
+    -fx-padding: 8;
+}
+
+/* =======================
+   BUTTONS (CRUD)
+======================= */
+
+.button {
+    -fx-background-color: #273c75;
+    -fx-text-fill: white;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+    -fx-padding: 6 16 6 16;
+}
+
+.button:hover {
+    -fx-background-color: #40739e;
+}
+
+/* =======================
+   CHARTS
+======================= */
+
+.chart-plot-background {
+    -fx-background-color: #f5f6fa;
+}
+
+.chart-title {
+    -fx-text-fill: #2f3640;
+    -fx-font-weight: bold;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}

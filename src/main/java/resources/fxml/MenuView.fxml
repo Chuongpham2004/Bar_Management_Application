@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.bar_management_application.controller.MenuController"
+      spacing="10" styleClass="content-pane">
+
+    <Label text="Menu Management" styleClass="section-title"/>
+
+    <TableView fx:id="menuTableView" prefHeight="500">
+        <columns>
+            <TableColumn text="Item ID" fx:id="colItemId" prefWidth="100"/>
+            <TableColumn text="Name" fx:id="colItemName" prefWidth="200"/>
+            <TableColumn text="Category" fx:id="colCategory" prefWidth="150"/>
+            <TableColumn text="Price" fx:id="colPrice" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button fx:id="btnAddMenuItem" text="Add Item" styleClass="primary-button"/>
+        <Button fx:id="btnEditMenuItem" text="Edit Item" styleClass="secondary-button"/>
+        <Button fx:id="btnDeleteMenuItem" text="Delete Item" styleClass="danger-button"/>
+    </HBox>
+
+</VBox>
+

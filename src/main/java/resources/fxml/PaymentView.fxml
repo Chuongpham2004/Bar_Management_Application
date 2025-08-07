@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.bar_management_application.controller.PaymentController"
+      spacing="10" styleClass="content-pane">
+
+    <Label text="Payment Processing" styleClass="section-title"/>
+
+    <TableView fx:id="paymentTableView" prefHeight="500">
+        <columns>
+            <TableColumn text="Payment ID" fx:id="colPaymentId" prefWidth="100"/>
+            <TableColumn text="Order ID" fx:id="colPaymentOrderId" prefWidth="100"/>
+            <TableColumn text="Amount" fx:id="colPaymentAmount" prefWidth="120"/>
+            <TableColumn text="Method" fx:id="colPaymentMethod" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button fx:id="btnConfirmPayment" text="Confirm" styleClass="primary-button"/>
+        <Button fx:id="btnCancelPayment" text="Cancel" styleClass="danger-button"/>
+    </HBox>
+
+</VBox>
+
