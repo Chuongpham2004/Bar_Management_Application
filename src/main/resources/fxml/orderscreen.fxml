@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.barmanagement.controller.OrderScreenController">
+
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT" padding="5">
+            <Button text="← Quay lại" onAction="#handleBack" />
+            <Label fx:id="tableInfoLabel" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+        </HBox>
+    </top>
+
+    <!-- Left: Category list -->
+    <left>
+        <VBox spacing="10" prefWidth="150" BorderPane.alignment="CENTER">
+            <Label text="Nhóm món" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+            <ListView fx:id="categoryListView" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </left>
+
+    <!-- Center: Menu items -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <FlowPane fx:id="menuFlowPane" hgap="10" vgap="10" padding="10">
+                <!-- Các button món sẽ được load bằng code -->
+            </FlowPane>
+        </ScrollPane>
+    </center>
+
+    <!-- Right: Cart -->
+    <right>
+        <VBox spacing="10" prefWidth="300" BorderPane.alignment="CENTER">
+            <Label text="Giỏ hàng" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+            <TableView fx:id="cartTableView" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="cartItemNameColumn" text="Món" prefWidth="120"/>
+                    <TableColumn fx:id="cartItemQuantityColumn" text="SL" prefWidth="50"/>
+                    <TableColumn fx:id="cartItemPriceColumn" text="Thành tiền" prefWidth="100"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT" padding="5">
+                <Label fx:id="totalLabel" text="Tổng: 0₫" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+                <Button text="Thanh toán" onAction="#handleCheckout" style="-fx-background-color: green; -fx-text-fill: white;" />
+            </HBox>
+        </VBox>
+    </right>
+
+    <!-- Padding cho toàn bộ layout -->
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+</BorderPane>
+
