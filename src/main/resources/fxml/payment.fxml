@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20" style="-fx-background-color: #f5f5f5;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.PaymentController">
+   <children>
+      <Label text="💳 Thanh toán" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+      
+      <HBox spacing="30" alignment="CENTER">
+         <children>
+            <!-- Left side - Order details -->
+            <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20;" minWidth="300">
+               <children>
+                  <Label text="Chi tiết đơn hàng" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+                  <Label fx:id="tableLabel" text="Bàn 1" style="-fx-font-size: 16px;" />
+                  
+                  <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+                     <children>
+                        <VBox fx:id="orderItemsContainer" spacing="5" />
+                     </children>
+                  </ScrollPane>
+                  
+                  <Separator />
+                  
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <children>
+                        <Label text="Tạm tính:" />
+                        <Label fx:id="subtotalLabel" text="0 VNĐ" style="-fx-font-weight: bold;" />
+                     </children>
+                  </HBox>
+                  
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <children>
+                        <Label text="Thuế (10%):" />
+                        <Label fx:id="taxLabel" text="0 VNĐ" style="-fx-font-weight: bold;" />
+                     </children>
+                  </HBox>
+                  
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <children>
+                        <Label text="Tổng cộng:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="totalLabel" text="0 VNĐ" style="-fx-font-weight: bold; -fx-text-fill: #e74c3c; -fx-font-size: 16px;" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Right side - Payment -->
+            <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20;" minWidth="300">
+               <children>
+                  <Label text="Phương thức thanh toán" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+                  
+                  <VBox spacing="10">
+                     <children>
+                        <Label text="Chọn phương thức:" />
+                        <ComboBox fx:id="paymentMethodCombo" style="-fx-font-size: 14px;" />
+                     </children>
+                  </VBox>
+                  
+                  <VBox spacing="10">
+                     <children>
+                        <Label text="Số tiền nhận:" />
+                        <TextField fx:id="receivedAmountField" promptText="Nhập số tiền" style="-fx-font-size: 14px;" />
+                     </children>
+                  </VBox>
+                  
+                  <HBox alignment="CENTER_LEFT" spacing="10">
+                     <children>
+                        <Label text="Tiền thối:" />
+                        <Label fx:id="changeLabel" text="0 VNĐ" style="-fx-font-weight: bold;" />
+                     </children>
+                  </HBox>
+                  
+                  <VBox spacing="10">
+                     <children>
+                        <Button fx:id="processPaymentButton" text="Xác nhận thanh toán" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 15;" onAction="#processPayment" />
+                        <Button fx:id="backButton" text="← Quay lại" style="-fx-background-color: #666; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;" onAction="#goBack" />
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

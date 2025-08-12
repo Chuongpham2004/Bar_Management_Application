@@ -1,256 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Hyperlink?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.paint.Color?>
-<?import javafx.scene.paint.LinearGradient?>
-<?import javafx.scene.paint.Stop?>
-<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.LoginController">
-    <children>
-        <!-- Background -->
-        <Rectangle arcHeight="0.0" arcWidth="0.0" fill="#1a1a2e" height="600.0" width="900.0" />
-
-        <!-- Left Side - Branding -->
-        <VBox alignment="CENTER" layoutX="0.0" layoutY="0.0" prefHeight="600.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(45deg, #667eea 0%, #764ba2 100%);">
-            <children>
-                <!-- Logo -->
-                <ImageView fitHeight="120.0" fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/bar-logo.png" />
-                    </image>
-                </ImageView>
-
-                <!-- App Title -->
-                <Label text="Bar Management" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="32.0" />
-                    </font>
-                    <VBox.margin>
-                        <Insets top="20.0" />
-                    </VBox.margin>
-                </Label>
-
-                <!-- Subtitle -->
-                <Label text="Hệ thống quản lý quầy bar hiện đại" textFill="#E8E8E8">
-                    <font>
-                        <Font size="16.0" />
-                    </font>
-                    <VBox.margin>
-                        <Insets top="10.0" />
-                    </VBox.margin>
-                </Label>
-
-                <!-- Features List -->
-                <VBox alignment="CENTER_LEFT" spacing="15.0">
-                    <children>
-                        <HBox alignment="CENTER_LEFT" spacing="10.0">
-                            <children>
-                                <Label text="✓" textFill="#4CAF50">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                </Label>
-                                <Label text="Quản lý bàn thông minh" textFill="WHITE">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                            </children>
-                        </HBox>
-
-                        <HBox alignment="CENTER_LEFT" spacing="10.0">
-                            <children>
-                                <Label text="✓" textFill="#4CAF50">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                </Label>
-                                <Label text="Đặt hàng nhanh chóng" textFill="WHITE">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                            </children>
-                        </HBox>
-
-                        <HBox alignment="CENTER_LEFT" spacing="10.0">
-                            <children>
-                                <Label text="✓" textFill="#4CAF50">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                </Label>
-                                <Label text="Báo cáo doanh thu chi tiết" textFill="WHITE">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                            </children>
-                        </HBox>
-
-                        <HBox alignment="CENTER_LEFT" spacing="10.0">
-                            <children>
-                                <Label text="✓" textFill="#4CAF50">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                </Label>
-                                <Label text="Quản lý kho hàng hiệu quả" textFill="WHITE">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                            </children>
-                        </HBox>
-                    </children>
-                    <VBox.margin>
-                        <Insets top="40.0" />
-                    </VBox.margin>
-                </VBox>
-            </children>
-        </VBox>
-
-        <!-- Right Side - Login Form -->
-        <VBox alignment="CENTER" layoutX="450.0" layoutY="0.0" prefHeight="600.0" prefWidth="450.0" spacing="25.0" style="-fx-background-color: #16213e;">
-            <children>
-                <!-- Welcome Message -->
-                <VBox alignment="CENTER" spacing="10.0">
-                    <children>
-                        <Label text="🍸" textFill="#e16428">
-                            <font>
-                                <Font size="48.0" />
-                            </font>
-                        </Label>
-
-                        <Label fx:id="welcomeLabel" text="Chào mừng trở lại!" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="24.0" />
-                            </font>
-                        </Label>
-
-                        <Label text="Đăng nhập để tiếp tục" textFill="#B0B0B0">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                        </Label>
-                    </children>
-                </VBox>
-
-                <!-- Login Form -->
-                <VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #1a1a2e; -fx-background-radius: 15; -fx-padding: 30;">
-                    <children>
-                        <!-- Username Field -->
-                        <VBox spacing="8.0">
-                            <children>
-                                <Label text="Tên đăng nhập" textFill="WHITE">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
-                                <TextField fx:id="usernameField" prefHeight="45.0" prefWidth="300.0" promptText="Nhập tên đăng nhập..." style="-fx-background-color: #0f3460; -fx-text-fill: white; -fx-prompt-text-fill: #B0B0B0; -fx-background-radius: 8; -fx-font-size: 14px; -fx-padding: 10;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </TextField>
-                            </children>
-                        </VBox>
-
-                        <!-- Password Field -->
-                        <VBox spacing="8.0">
-                            <children>
-                                <Label text="Mật khẩu" textFill="WHITE">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
-                                <PasswordField fx:id="passwordField" prefHeight="45.0" prefWidth="300.0" promptText="Nhập mật khẩu..." style="-fx-background-color: #0f3460; -fx-text-fill: white; -fx-prompt-text-fill: #B0B0B0; -fx-background-radius: 8; -fx-font-size: 14px; -fx-padding: 10;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </PasswordField>
-                            </children>
-                        </VBox>
-
-                        <!-- Remember Me & Forgot Password -->
-                        <HBox alignment="CENTER" prefWidth="300.0" spacing="80.0">
-                            <children>
-                                <CheckBox fx:id="rememberMeCheckbox" text="Ghi nhớ đăng nhập" textFill="#B0B0B0">
-                                    <font>
-                                        <Font size="12.0" />
-                                    </font>
-                                </CheckBox>
-
-                                <Hyperlink onAction="#handleForgotPassword" text="Quên mật khẩu?" textFill="#e16428">
-                                    <font>
-                                        <Font size="12.0" />
-                                    </font>
-                                </Hyperlink>
-                            </children>
-                        </HBox>
-
-                        <!-- Status Label -->
-                        <Label fx:id="statusLabel" prefWidth="300.0" textAlignment="CENTER" wrapText="true">
-                            <font>
-                                <Font size="12.0" />
-                            </font>
-                        </Label>
-
-                        <!-- Login Button with Loading -->
-                        <VBox alignment="CENTER" spacing="10.0">
-                            <children>
-                                <Button fx:id="loginButton" onAction="#handleLogin" prefHeight="50.0" prefWidth="300.0" style="-fx-background-color: linear-gradient(45deg, #e16428 0%, #f5576c 100%); -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 25; -fx-cursor: hand;" text="Đăng nhập">
-                                    <font>
-                                        <Font name="System Bold" size="16.0" />
-                                    </font>
-                                    <effect>
-                                        <DropShadow color="#e16428" radius="15.0" />
-                                    </effect>
-                                </Button>
-
-                                <ProgressIndicator fx:id="loadingIndicator" prefHeight="30.0" prefWidth="30.0" style="-fx-progress-color: #e16428;" />
-                            </children>
-                        </VBox>
-                    </children>
-                    <effect>
-                        <DropShadow color="#000000" radius="20.0" />
-                    </effect>
-                </VBox>
-
-                <!-- Footer -->
-                <VBox alignment="CENTER" spacing="5.0">
-                    <children>
-                        <Label text="Bar Management System v1.0" textFill="#666666">
-                            <font>
-                                <Font size="11.0" />
-                            </font>
-                        </Label>
-
-                        <Label text="© 2024 - Designed for professional bar management" textFill="#666666">
-                            <font>
-                                <Font size="10.0" />
-                            </font>
-                        </Label>
-                    </children>
-                </VBox>
-            </children>
-            <padding>
-                <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-            </padding>
-        </VBox>
-    </children>
-</AnchorPane>
+<VBox alignment="CENTER" spacing="20" style="-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.LoginController">
+   <children>
+      <Label text="BAR MANAGEMENT" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;" />
+      <Label text="Hệ thống quản lý quầy bar" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+      
+      <VBox alignment="CENTER" spacing="15" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 30;" maxWidth="400">
+         <children>
+            <Label text="ĐĂNG NHẬP" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+            
+            <VBox spacing="10">
+               <Label text="Tên đăng nhập:" />
+               <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập" style="-fx-font-size: 14px;" />
+            </VBox>
+            
+            <VBox spacing="10">
+               <Label text="Mật khẩu:" />
+               <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" style="-fx-font-size: 14px;" />
+            </VBox>
+            
+            <Button fx:id="loginButton" text="Đăng nhập" style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 20;" onAction="#handleLogin" />
+            
+            <Label text="Demo: admin/admin123" style="-fx-text-fill: #666; -fx-font-size: 12px;" />
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

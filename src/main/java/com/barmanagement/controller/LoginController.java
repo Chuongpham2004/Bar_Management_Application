@@ -1,13 +1,12 @@
 package com.barmanagement.controller;
 
-import com.barmanagement.dao.StaffDAO;
-import com.barmanagement.model.Staff;
-import javafx.event.ActionEvent;
+import com.barmanagement.service.AuthService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -15,55 +14,71 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class LoginController {
-
+    
     @FXML
-    private TextField txtUsername;
-
+    private TextField usernameField;
+    
     @FXML
-    private PasswordField txtPassword;
-
-    // Sự kiện khi nhấn nút "Đăng nhập"
+    private PasswordField passwordField;
+    
     @FXML
-    private void handleLogin(ActionEvent event) {
-        String username = txtUsername.getText().trim();
-        String password = txtPassword.getText().trim();
-
+    private Button loginButton;
+    
+    private AuthService authService;
+    
+    @FXML
+    public void initialize() {
+        authService = new AuthService();
+        
+        // Set default focus
+        usernameField.requestFocus();
+        
+        // Add enter key handlers
+        usernameField.setOnAction(e -> passwordField.requestFocus());
+        passwordField.setOnAction(e -> handleLogin());
+    }
+    
+    @FXML
+    private void handleLogin() {
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText();
+        
         if (username.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
+            showAlert("Lỗi", "Vui lòng nhập đầy đủ thông tin đăng nhập", Alert.AlertType.ERROR);
             return;
         }
-
-        Staff staff = StaffDAO.getInstance().login(username, password);
-
-        if (staff != null) {
+        
+        if (authService.login(username, password)) {
             try {
-                // Load Dashboard
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/barmanagement/view/Dashboard.fxml"));
+                // Load dashboard
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
                 Parent root = loader.load();
-
-                // Truyền staff sang DashboardController
+                
                 DashboardController dashboardController = loader.getController();
-                dashboardController.setCurrentStaff(staff);
-
-                Stage stage = (Stage) txtUsername.getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.setTitle("Dashboard - Quản lý quầy bar");
+                dashboardController.setCurrentUser(authService.getCurrentUser());
+                
+                Stage stage = (Stage) loginButton.getScene().getWindow();
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.setTitle("Bar Management - Dashboard");
                 stage.show();
-
+                
             } catch (IOException e) {
                 e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Không thể tải Dashboard.");
+                showAlert("Lỗi", "Không thể tải màn hình dashboard", Alert.AlertType.ERROR);
             }
         } else {
-            showAlert(Alert.AlertType.ERROR, "Tên đăng nhập hoặc mật khẩu không chính xác.");
+            showAlert("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng", Alert.AlertType.ERROR);
+            passwordField.clear();
+            passwordField.requestFocus();
         }
     }
-
-    private void showAlert(Alert.AlertType type, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle("Thông báo");
+    
+    private void showAlert(String title, String content, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText(content);
         alert.showAndWait();
     }
 }
