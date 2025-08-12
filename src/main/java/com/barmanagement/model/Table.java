@@ -2,48 +2,33 @@ package com.barmanagement.model;
 
 public class Table {
     private int id;
-    private String name;
-    private String status; // "AVAILABLE", "OCCUPIED", "RESERVED"...
+    private int tableNumber;
+    private int capacity;
+    private String status; // available, occupied, reserved
 
-    public Table(int id, String name) {
-        this.id = id;
-        this.name = name;
-        this.status = "AVAILABLE";
-    }
+    public Table() {}
 
-    public Table(int id, String name, String status) {
+    public Table(int id, int tableNumber, int capacity, String status) {
         this.id = id;
-        this.name = name;
+        this.tableNumber = tableNumber;
+        this.capacity = capacity;
         this.status = status;
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getTableNumber() { return tableNumber; }
+    public void setTableNumber(int tableNumber) { this.tableNumber = tableNumber; }
 
-    public String getName() {
-        return name;
-    }
+    public int getCapacity() { return capacity; }
+    public void setCapacity(int capacity) { this.capacity = capacity; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     @Override
     public String toString() {
-        return name + " (" + status + ")";
+        return "Table #" + tableNumber + " (" + status + ")";
     }
 }
-

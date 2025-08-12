@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.MenuController">
+    <children>
+        <!-- Sidebar Navigation -->
+        <VBox layoutX="0.0" layoutY="0.0" prefHeight="800.0" prefWidth="260.0" style="-fx-background-color: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <!-- Logo Section -->
+                <HBox alignment="CENTER" prefHeight="80.0" prefWidth="260.0" style="-fx-background-color: rgba(0,0,0,0.1);">
+                    <children>
+                        <Circle fill="#667eea" radius="18.0">
+                            <effect>
+                                <DropShadow color="#667eea" radius="5.0" />
+                            </effect>
+                        </Circle>
+                        <Label text="BarFlow" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="20.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets left="12.0" />
+                            </HBox.margin>
+                        </Label>
+                    </children>
+                </HBox>
+
+                <!-- Navigation Menu -->
+                <VBox prefHeight="640.0" prefWidth="260.0" spacing="8.0">
+                    <children>
+                        <Button fx:id="dashboardBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#showDashboard" prefHeight="50.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: #e2e8f0; -fx-font-size: 14px; -fx-background-radius: 8;" text="  📊 Dashboard" />
+
+                        <Label text="QUẢN LÝ KHÁC" textFill="#a0aec0">
+                            <font>
+                                <Font name="System Bold" size="11.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets left="10.0" top="15.0" />
+                            </VBox.margin>
+                        </Label>
+
+                        <Button fx:id="menuBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#showMenu" prefHeight="45.0" prefWidth="240.0" style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;" text="  📋 Menu đồ uống">
+                            <effect>
+                                <DropShadow color="#667eea" radius="5.0" />
+                            </effect>
+                        </Button>
+
+                        <Button fx:id="inventoryBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#showInventory" prefHeight="45.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: #e2e8f0; -fx-font-size: 13px; -fx-background-radius: 8;" text="  📦 Kho hàng" />
+
+                        <Button fx:id="customersBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#showCustomers" prefHeight="45.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: #e2e8f0; -fx-font-size: 13px; -fx-background-radius: 8;" text="  👥 Khách hàng" />
+
+                        <Button fx:id="staffBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#showStaff" prefHeight="45.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: #e2e8f0; -fx-font-size: 13px; -fx-background-radius: 8;" text="  👨‍💼 Nhân viên" />
+
+                        <Button fx:id="reportsBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#showReports" prefHeight="45.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: #e2e8f0; -fx-font-size: 13px; -fx-background-radius: 8;" text="  📈 Báo cáo" />
+
+                        <Button fx:id="settingsBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#showSettings" prefHeight="45.0" prefWidth="240.0" style="-fx-background-color: transparent; -fx-text-fill: #e2e8f0; -fx-font-size: 13px; -fx-background-radius: 8;" text="  ⚙️ Cài đặt" />
+                    </children>
+                    <VBox.margin>
+                        <Insets top="20.0" />
+                    </VBox.margin>
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </padding>
+                </VBox>
+
+                <!-- User Info Footer -->
+                <VBox alignment="CENTER" prefHeight="80.0" prefWidth="260.0" style="-fx-background-color: rgba(0,0,0,0.1);">
+                    <children>
+                        <HBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <Circle fill="#4fd1c7" radius="16.0" stroke="WHITE" strokeWidth="2.0" />
+                                <VBox alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label fx:id="staffNameLabel" text="Admin User" textFill="WHITE">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="Quản trị viên" textFill="#a0aec0">
+                                            <font>
+                                                <Font size="10.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <Button mnemonicParsing="false" onAction="#logout" prefHeight="25.0" prefWidth="180.0" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 11px; -fx-background-radius: 12;" text="🚪 Đăng xuất">
+                            <VBox.margin>
+                                <Insets top="8.0" />
+                            </VBox.margin>
+                        </Button>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+
+        <!-- Main Content Area -->
+        <AnchorPane layoutX="260.0" layoutY="0.0" prefHeight="800.0" prefWidth="940.0" style="-fx-background-color: #f8fafc;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <!-- Top Header -->
+                <HBox layoutX="0.0" layoutY="0.0" prefHeight="70.0" prefWidth="940.0" style="-fx-background-color: WHITE; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="470.0">
+                            <children>
+                                <Label text="📋 Quản lý Menu" textFill="#2d3748">
+                                    <font>
+                                        <Font name="System Bold" size="24.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                            <padding>
+                                <Insets left="30.0" />
+                            </padding>
+                        </HBox>
+
+                        <HBox alignment="CENTER_RIGHT" prefWidth="470.0" spacing="15.0">
+                            <children>
+                                <TextField fx:id="searchField" prefWidth="200.0" promptText="🔍 Tìm món..." style="-fx-background-radius: 8;" />
+                                <ComboBox fx:id="categoryFilterCombo" prefWidth="150.0" promptText="Danh mục" style="-fx-background-radius: 8;" />
+                                <Button fx:id="addMenuItemBtn" onAction="#addMenuItem" style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16 8 16;" text="➕ Thêm món" />
+                            </children>
+                            <padding>
+                                <Insets right="30.0" />
+                            </padding>
+                        </HBox>
+                    </children>
+                </HBox>
+
+                <!-- Categories Tabs -->
+                <HBox layoutX="0.0" layoutY="70.0" prefHeight="50.0" prefWidth="940.0" spacing="10.0" style="-fx-background-color: #667eea;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                    <children>
+                        <Button fx:id="allTab" onAction="#showAllItems" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: WHITE; -fx-text-fill: #667eea; -fx-background-radius: 8; -fx-font-weight: bold;" text="Tất cả" />
+                        <Button fx:id="cocktailsTab" onAction="#showCocktails" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 8;" text="🍸 Cocktails" />
+                        <Button fx:id="beersTab" onAction="#showBeers" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 8;" text="🍺 Bia" />
+                        <Button fx:id="winesTab" onAction="#showWines" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 8;" text="🍷 Rượu vang" />
+                        <Button fx:id="spiritsTab" onAction="#showSpirits" prefHeight="35.0" prefWidth="90.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 8;" text="🥃 Spirits" />
+                        <Button fx:id="softDrinksTab" onAction="#showSoftDrinks" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 8;" text="🥤 Nước ngọt" />
+                        <Button fx:id="foodTab" onAction="#showFood" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 8;" text="🍽️ Đồ ăn" />
+                    </children>
+                    <padding>
+                        <Insets bottom="7.5" left="30.0" right="30.0" top="7.5" />
+                    </padding>
+                </HBox>
+
+                <!-- Menu Items Grid -->
+                <ScrollPane layoutX="0.0" layoutY="120.0" prefHeight="680.0" prefWidth="940.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="120.0">
+                    <content>
+                        <GridPane fx:id="menuItemsGrid" hgap="20.0" prefWidth="920.0" vgap="20.0">
+                            <!-- Menu items will be populated by controller -->
+                            <padding>
+                                <Insets bottom="30.0" left="30.0" right="30.0" top="20.0" />
+                            </padding>
+                            <columnConstraints>
+                                <ColumnConstraints />
+                                <ColumnConstraints />
+                                <ColumnConstraints />
+                                <ColumnConstraints />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints />
+                            </rowConstraints>
+                        </GridPane>
+                    </content>
+                </ScrollPane>
+
+                <!-- Loading Indicator -->
+                <ProgressIndicator fx:id="loadingIndicator" layoutX="450.0" layoutY="400.0" prefHeight="50.0" prefWidth="50.0" visible="false" />
+            </children>
+        </AnchorPane>
+    </children>
+</AnchorPane>
