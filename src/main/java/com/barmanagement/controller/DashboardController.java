@@ -1,4 +1,4 @@
 package com.barmanagement.controller;
 
-public class ChartController {
+public class DashboardController {
 }
