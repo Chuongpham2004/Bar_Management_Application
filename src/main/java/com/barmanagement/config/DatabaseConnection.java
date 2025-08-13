@@ -19,7 +19,7 @@ public class DatabaseConnection {
     // Database configuration
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/bar_management?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8";
     private static final String DEFAULT_USERNAME = "root";
-    private static final String DEFAULT_PASSWORD = "200426";
+    private static final String DEFAULT_PASSWORD = "Nghia537991014@";
     private static final String DRIVER_CLASS = "com.mysql.cj.jdbc.Driver";
 
     private String url;
@@ -184,5 +184,9 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             System.err.println("❌ Error creating database: " + e.getMessage());
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(DatabaseConnection.getInstance());
     }
 }
