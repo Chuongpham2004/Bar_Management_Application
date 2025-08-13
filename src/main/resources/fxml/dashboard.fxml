@@ -1,44 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.barmanagement.controller.DashboardController"
-            prefWidth="900" prefHeight="600"
-            stylesheets="@/css/style.css">
+            fx:controller="com.barmanagement.DashboardController">
+            stylesheets="@../css/style.css">
 
     <top>
         <ToolBar>
-            <Button text="🏷 Quản lý bàn" onAction="#handleManageTables" />
-            <Button text="🍹 Quản lý menu" onAction="#handleManageMenu" />
-            <Button text="💰 Doanh thu" onAction="#handleViewRevenue" />
-            <Pane HBox.hgrow="ALWAYS"/>
-            <Button text="🚪 Thoát" onAction="#handleLogout" />
+            <Button text="Quản lý bàn" onAction="#handleManageTables"/>
+            <Button text="Thoát" onAction="#handleLogout"/>
         </ToolBar>
     </top>
 
     <center>
-        <VBox alignment="CENTER" spacing="20">
-            <Label text="🍺 Chào mừng đến Bar Management Dashboard">
-                <font>
-                    <Font size="24"/>
-                </font>
-            </Label>
-            <Label text="Hãy chọn một chức năng bên trên để bắt đầu" style="-fx-font-size: 16px; -fx-text-fill: gray;"/>
-        </VBox>
+        <Label text="Chào mừng đến Bar Management Dashboard" style="-fx-font-size: 18px;"/>
     </center>
-
-    <bottom>
-        <Label text="© 2025 Bar Management Application - All Rights Reserved"
-               style="-fx-padding: 10; -fx-background-color: #f0f0f0; -fx-alignment: center;"/>
-    </bottom>
-
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
 
 </BorderPane>

@@ -3,14 +3,19 @@ package com.barmanagement.controller;
 import com.barmanagement.dao.JDBCConnect;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 
+import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ResourceBundle;
 
 public class LoginController {
 
@@ -26,6 +31,12 @@ public class LoginController {
     @FXML
     private Button loginButton;
 
+    public void initialize(URL location, ResourceBundle resources) {
+        usernameField.requestFocus();
+        setupKeyEvents();
+        setupButtonEffects();
+    }
+
     @FXML
     private void handleLogin(ActionEvent event) {
         String username = usernameField.getText().trim();
@@ -36,12 +47,38 @@ public class LoginController {
             return;
         }
 
-        if (checkLogin(username, password)) {
-            openScene("/fxml/dashboard.fxml", "Bar Management System - Dashboard");
-        } else {
-            showError("Tên đăng nhập hoặc mật khẩu không đúng.");
-        }
+        loginButton.setDisable(true);
+        loginButton.setText("Đang đăng nhập...");
+
+        new Thread(() -> {
+            try {
+                if (checkLogin(username, password)) {
+                    javafx.application.Platform.runLater(() -> {
+                        try {
+                            openDashboard();
+                        } catch (IOException e) {
+                            showError("Không thể mở màn hình chính.");
+                            resetLoginButton();
+                        }
+                    });
+                } else {
+                    javafx.application.Platform.runLater(() -> {
+                        showError("Tên đăng nhập hoặc mật khẩu không đúng.");
+                        resetLoginButton();
+                        passwordField.clear();
+                        passwordField.requestFocus();
+                    });
+                }
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> {
+                    showError("Lỗi kết nối cơ sở dữ liệu.");
+                    resetLoginButton();
+                });
+            }
+        }).start();
     }
+
+
 
     @FXML
     private void handleForgotPassword(ActionEvent event) {
@@ -69,22 +106,69 @@ public class LoginController {
         }
     }
 
+    private String hashPassword(String password) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            byte[] array = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : array) {
+                sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            return password;
+        }
+    }
+
+    private void openDashboard() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
+        Scene scene = new Scene(loader.load());
+
+        Stage stage = (Stage) loginButton.getScene().getWindow();
+        stage.setScene(scene);
+        stage.setTitle("Bar Management System - Dashboard");
+        stage.centerOnScreen();
+        stage.show();
+    }
+
     private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
     }
 
-    private void openScene(String fxmlPath, String title) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Scene scene = new Scene(loader.load());
-            Stage stage = (Stage) loginButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(title);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Không thể tải màn hình.");
-        }
+    private void resetLoginButton() {
+        loginButton.setDisable(false);
+        loginButton.setText("Đăng nhập");
+    }
+
+    private void setupKeyEvents() {
+        // Enter key trong username field sẽ focus vào password
+        usernameField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                passwordField.requestFocus();
+            }
+        });
+
+        // Enter key trong password field sẽ thực hiện login
+        passwordField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                handleLogin(null);
+            }
+        });
+    }
+
+    private void setupButtonEffects() {
+        // Hiệu ứng hover cho login button
+        loginButton.setOnMouseEntered(e -> {
+            if (!loginButton.isDisabled()) {
+                loginButton.setStyle("-fx-background-color: #2980b9; -fx-text-fill: #3620cf; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
+            }
+        });
+
+        loginButton.setOnMouseExited(e -> {
+            if (!loginButton.isDisabled()) {
+                loginButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: #3620cf ; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
+            }
+        });
     }
 }
