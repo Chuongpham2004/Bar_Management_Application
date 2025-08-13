@@ -4,37 +4,54 @@ import com.barmanagement.config.DatabaseConnection;
 import com.barmanagement.model.Table;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TableDAO {
 
     public List<Table> findAll() throws SQLException {
-        String sql = "SELECT id, table_number, capacity, status FROM tables ORDER BY table_number";
+        String sql = "SELECT id, table_number, capacity, status, created_at FROM `tables` ORDER BY table_number";
+        List<Table> list = new ArrayList<>();
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            List<Table> list = new ArrayList<>();
             while (rs.next()) {
-                list.add(map(rs));
+                Table t = new Table(
+                        rs.getInt("id"),
+                        rs.getInt("table_number"),
+                        rs.getInt("capacity"),
+                        rs.getString("status"),
+                        rs.getTimestamp("created_at").toLocalDateTime()
+                );
+                list.add(t);
             }
-            return list;
         }
+        return list;
     }
 
     public Table findById(int id) throws SQLException {
-        String sql = "SELECT id, table_number, capacity, status FROM tables WHERE id=?";
+        String sql = "SELECT id, table_number, capacity, status, created_at FROM `tables` WHERE id = ?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? map(rs) : null;
+                if (rs.next()) {
+                    return new Table(
+                            rs.getInt("id"),
+                            rs.getInt("table_number"),
+                            rs.getInt("capacity"),
+                            rs.getString("status"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                }
             }
         }
+        return null;
     }
 
-    public Table insert(Table t) throws SQLException {
-        String sql = "INSERT INTO tables (table_number, capacity, status) VALUES (?, ?, ?)";
+    public int create(Table t) throws SQLException {
+        String sql = "INSERT INTO `tables`(table_number, capacity, status) VALUES(?,?,?)";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, t.getTableNumber());
@@ -42,14 +59,14 @@ public class TableDAO {
             ps.setString(3, t.getStatus());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) t.setId(keys.getInt(1));
+                if (keys.next()) return keys.getInt(1);
             }
-            return t;
         }
+        return 0;
     }
 
     public boolean update(Table t) throws SQLException {
-        String sql = "UPDATE tables SET table_number=?, capacity=?, status=? WHERE id=?";
+        String sql = "UPDATE `tables` SET table_number=?, capacity=?, status=? WHERE id=?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, t.getTableNumber());
@@ -60,31 +77,22 @@ public class TableDAO {
         }
     }
 
-    public boolean updateStatus(int id, String status) throws SQLException {
-        String sql = "UPDATE tables SET status=? WHERE id=?";
+    public boolean updateStatus(int tableId, String status) throws SQLException {
+        String sql = "UPDATE `tables` SET status=? WHERE id=?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, status);
-            ps.setInt(2, id);
+            ps.setInt(2, tableId);
             return ps.executeUpdate() > 0;
         }
     }
 
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM tables WHERE id=?";
+        String sql = "DELETE FROM `tables` WHERE id=?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         }
-    }
-
-    private Table map(ResultSet rs) throws SQLException {
-        return new Table(
-                rs.getInt("id"),
-                rs.getInt("table_number"),
-                rs.getInt("capacity"),
-                rs.getString("status")
-        );
     }
 }
