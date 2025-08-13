@@ -1,145 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.PaymentController"
-      alignment="CENTER" spacing="20" styleClass="payment-container">
-   <padding>
-      <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-   </padding>
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.barmanagement.PaymentController"
+      spacing="10" padding="10">
+      stylesheets="@../css/style.css">
 
-   <!-- Header -->
-   <VBox alignment="CENTER" spacing="10">
-      <Label text="💳" styleClass="payment-icon">
-         <font>
-            <Font size="36.0" />
-         </font>
-      </Label>
+   <Label text="Thanh toán" style="-fx-font-size: 18px;"/>
+   <Label fx:id="totalAmountLabel" style="-fx-font-size: 16px;"/>
+   <ComboBox fx:id="paymentMethodCombo" promptText="Chọn phương thức thanh toán"/>
+   <Button text="Xác nhận thanh toán" onAction="#handleConfirmPayment"/>
 
-      <Label text="Thanh toán" styleClass="payment-title">
-         <font>
-            <Font name="System Bold" size="24.0" />
-         </font>
-      </Label>
-   </VBox>
-
-   <!-- Payment Details -->
-   <VBox spacing="20" styleClass="payment-details" fx:id="paymentDetailsBox">
-      <VBox spacing="10">
-         <Label text="Thông tin đơn hàng" styleClass="section-header">
-            <font>
-               <Font name="System Bold" size="16.0" />
-            </font>
-         </Label>
-
-         <HBox alignment="CENTER_LEFT" spacing="10">
-            <Label text="Bàn số:" styleClass="detail-label">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <Label fx:id="tableNumberLabel" text="1" styleClass="detail-value">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-         </HBox>
-
-         <HBox alignment="CENTER_LEFT" spacing="10">
-            <Label text="Tổng tiền:" styleClass="detail-label">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <Label fx:id="totalAmountLabel" text="0 VND" styleClass="total-amount">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-            </Label>
-         </HBox>
-      </VBox>
-
-      <Separator />
-
-      <!-- Payment Method -->
-      <VBox spacing="10">
-         <Label text="Phương thức thanh toán" styleClass="section-header">
-            <font>
-               <Font name="System Bold" size="16.0" />
-            </font>
-         </Label>
-
-         <ComboBox fx:id="paymentMethodCombo" prefWidth="300" styleClass="payment-method-combo">
-            <padding>
-               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-            </padding>
-         </ComboBox>
-      </VBox>
-
-      <!-- Customer Payment (for cash) -->
-      <VBox spacing="10">
-         <Label text="Tiền khách đưa:" styleClass="section-header">
-            <font>
-               <Font name="System Bold" size="14.0" />
-            </font>
-         </Label>
-
-         <TextField fx:id="customerPaymentField" promptText="Nhập số tiền khách đưa"
-                    styleClass="payment-field" prefHeight="40">
-            <font>
-               <Font size="14.0" />
-            </font>
-         </TextField>
-
-         <Label fx:id="changeLabel" text="Trả lại: 0 VND" styleClass="change-label">
-            <font>
-               <Font name="System Bold" size="14.0" />
-            </font>
-         </Label>
-      </VBox>
-
-      <Separator />
-
-      <!-- Action Buttons -->
-      <VBox spacing="15">
-         <Button fx:id="confirmPaymentButton" text="✅ Xác nhận thanh toán" onAction="#handleConfirmPayment"
-                 styleClass="confirm-payment-button" prefHeight="50" maxWidth="Infinity">
-            <font>
-               <Font name="System Bold" size="16.0" />
-            </font>
-         </Button>
-
-         <HBox spacing="10" alignment="CENTER">
-            <Button fx:id="cancelButton" text="❌ Hủy" onAction="#handleCancel"
-                    styleClass="cancel-button" prefWidth="140" prefHeight="40">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
-
-            <Button text="🖨️ In hóa đơn" styleClass="print-button" prefWidth="140" prefHeight="40">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
-         </HBox>
-      </VBox>
-   </VBox>
-
-   <!-- Footer -->
-   <VBox alignment="CENTER" spacing="5">
-      <Label text="Kiểm tra kỹ thông tin trước khi xác nhận thanh toán" styleClass="footer-warning">
-         <font>
-            <Font size="12.0" />
-         </font>
-      </Label>
-   </VBox>
 </VBox>

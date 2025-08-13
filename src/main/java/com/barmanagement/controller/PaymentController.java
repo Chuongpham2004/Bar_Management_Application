@@ -7,37 +7,39 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class OrderController {
+public class PaymentController {
 
     @FXML
-    private TableView<?> orderTable;
+    private Label totalLabel;
 
     @FXML
-    private Button addItemButton;
+    private ComboBox<String> paymentMethodCombo;
 
     @FXML
-    private Button paymentButton;
+    private Button confirmButton;
 
     @FXML
     private Button backButton;
 
     @FXML
-    private void handleAddItem(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thêm món");
-        alert.setHeaderText(null);
-        alert.setContentText("Chức năng thêm món chưa được cài đặt.");
-        alert.showAndWait();
+    private void initialize() {
+        paymentMethodCombo.getItems().addAll("Tiền mặt", "Thẻ", "Chuyển khoản");
     }
 
     @FXML
-    private void handlePayment(ActionEvent event) {
-        openScene("/fxml/payment.fxml", "Thanh toán");
+    private void handleConfirmPayment(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Thanh toán");
+        alert.setHeaderText(null);
+        alert.setContentText("Thanh toán thành công!");
+        alert.showAndWait();
+
+        openScene("/fxml/dashboard.fxml", "Dashboard");
     }
 
     @FXML
     private void handleBack(ActionEvent event) {
-        openScene("/fxml/table_management.fxml", "Quản lý bàn");
+        openScene("/fxml/order.fxml", "Order");
     }
 
     private void openScene(String fxmlPath, String title) {
@@ -53,4 +55,3 @@ public class OrderController {
         }
     }
 }
-

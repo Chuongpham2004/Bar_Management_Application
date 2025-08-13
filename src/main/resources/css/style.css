@@ -1,0 +1,153 @@
+/* =====================
+   GLOBAL STYLE
+   ===================== */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #f4f4f4;
+}
+
+/* =====================
+   LOGIN SCREEN
+   ===================== */
+.login-container {
+    -fx-background-color: white;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 5);
+}
+
+.logo-icon {
+    -fx-text-fill: #ffb703;
+}
+
+.app-title {
+    -fx-text-fill: #023047;
+}
+
+.app-subtitle {
+    -fx-text-fill: #555;
+}
+
+.login-form {
+    -fx-padding: 20;
+}
+
+.form-title {
+    -fx-text-fill: #023047;
+}
+
+.field-label {
+    -fx-text-fill: #333;
+}
+
+.login-field {
+    -fx-background-color: #fff;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 0 10;
+    -fx-font-size: 14px;
+}
+
+.login-field:focused {
+    -fx-border-color: #219ebc;
+}
+
+.primary-button {
+    -fx-background-color: #219ebc;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+}
+
+.primary-button:hover {
+    -fx-background-color: #126782;
+}
+
+.link-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #219ebc;
+    -fx-underline: true;
+}
+
+.error-label {
+    -fx-text-fill: red;
+    -fx-font-size: 12px;
+}
+
+/* =====================
+   DASHBOARD
+   ===================== */
+.tool-bar {
+    -fx-background-color: #219ebc;
+}
+
+.tool-bar .button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.tool-bar .button:hover {
+    -fx-background-color: rgba(255,255,255,0.2);
+}
+
+/* =====================
+   TABLE MANAGEMENT
+   ===================== */
+#tableContainer .button {
+    -fx-background-color: #8ecae6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 15;
+}
+
+#tableContainer .button:hover {
+    -fx-background-color: #219ebc;
+}
+
+/* =====================
+   ORDER SCREEN
+   ===================== */
+.table-view {
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #219ebc;
+}
+
+.table-view .column-header, .table-view .label {
+    -fx-text-fill: white;
+}
+
+/* =====================
+   PAYMENT SCREEN
+   ===================== */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.combo-box:focused {
+    -fx-border-color: #219ebc;
+}
+
+.button {
+    -fx-background-radius: 5;
+}
+
+.button:hover {
+    -fx-opacity: 0.9;
+}
+
+/* =====================
+   FOOTER
+   ===================== */
+.footer-text {
+    -fx-text-fill: #888;
+}

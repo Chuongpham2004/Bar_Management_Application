@@ -2,42 +2,34 @@ package com.barmanagement.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class OrderController {
+public class TableManagementController {
 
     @FXML
-    private TableView<?> orderTable;
+    private Button table1Button;
 
     @FXML
-    private Button addItemButton;
-
-    @FXML
-    private Button paymentButton;
+    private Button table2Button;
 
     @FXML
     private Button backButton;
 
     @FXML
-    private void handleAddItem(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thêm món");
-        alert.setHeaderText(null);
-        alert.setContentText("Chức năng thêm món chưa được cài đặt.");
-        alert.showAndWait();
-    }
+    private void handleSelectTable(ActionEvent event) {
+        Button clicked = (Button) event.getSource();
+        String tableName = clicked.getText();
+        System.out.println("Đã chọn bàn: " + tableName);
 
-    @FXML
-    private void handlePayment(ActionEvent event) {
-        openScene("/fxml/payment.fxml", "Thanh toán");
+        openScene("/fxml/order.fxml", "Order - " + tableName);
     }
 
     @FXML
     private void handleBack(ActionEvent event) {
-        openScene("/fxml/table_management.fxml", "Quản lý bàn");
+        openScene("/fxml/dashboard.fxml", "Dashboard");
     }
 
     private void openScene(String fxmlPath, String title) {

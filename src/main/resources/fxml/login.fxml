@@ -1,86 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.LoginController" alignment="CENTER" spacing="20" styleClass="login-container">
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.barmanagement.LoginController"
+      alignment="CENTER" spacing="20" styleClass="login-container"
+      stylesheets="@../css/style.css">
    <padding>
-      <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+      <Insets top="40" right="40" bottom="40" left="40"/>
    </padding>
 
-   <!-- Logo và Title -->
-   <VBox alignment="CENTER" spacing="10">
-      <Label text="🍺" styleClass="logo-icon">
-         <font>
-            <Font size="48.0" />
-         </font>
-      </Label>
-      <Label text="Bar Management System" styleClass="app-title">
-         <font>
-            <Font name="System Bold" size="24.0" />
-         </font>
-      </Label>
-      <Label text="Hệ thống quản lý quầy bar" styleClass="app-subtitle">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Label>
-   </VBox>
+   <!-- Logo -->
+   <Label text="🍺" styleClass="logo-icon">
+      <font><Font size="48"/></font>
+   </Label>
+   <Label text="Bar Management System" styleClass="app-title">
+      <font><Font name="System Bold" size="24"/></font>
+   </Label>
+   <Label text="Hệ thống quản lý quầy bar" styleClass="app-subtitle"/>
 
-   <!-- Form đăng nhập -->
-   <VBox spacing="15" styleClass="login-form">
-      <Label text="Đăng nhập" styleClass="form-title">
-         <font>
-            <Font name="System Bold" size="18.0" />
-         </font>
-      </Label>
+   <!-- Form -->
+   <VBox spacing="10" styleClass="login-form">
+      <Label text="Tên đăng nhập:" styleClass="field-label"/>
+      <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập" styleClass="login-field"/>
 
-      <VBox spacing="5">
-         <Label text="Tên đăng nhập:" styleClass="field-label" />
-         <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập" styleClass="login-field" prefHeight="40.0" />
-      </VBox>
+      <Label text="Mật khẩu:" styleClass="field-label"/>
+      <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="login-field"/>
 
-      <VBox spacing="5">
-         <Label text="Mật khẩu:" styleClass="field-label" />
-         <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="login-field" prefHeight="40.0" />
-      </VBox>
+      <Label fx:id="errorLabel" visible="false" styleClass="error-label"/>
 
-      <!-- Error label -->
-      <Label fx:id="errorLabel" text="Lỗi đăng nhập" styleClass="error-label" visible="false" />
-
-      <!-- Buttons -->
-      <VBox spacing="10">
-         <Button fx:id="loginButton" text="Đăng nhập" onAction="#handleLogin" styleClass="primary-button" prefHeight="45.0" maxWidth="Infinity">
-            <font>
-               <Font name="System Bold" size="14.0" />
-            </font>
-         </Button>
-
-         <Button text="Quên mật khẩu?" onAction="#handleForgotPassword" styleClass="link-button">
-            <font>
-               <Font size="12.0" />
-            </font>
-         </Button>
-      </VBox>
-   </VBox>
-
-   <!-- Footer -->
-   <VBox alignment="CENTER" spacing="5">
-      <Label text="Phiên bản 1.0" styleClass="footer-text">
-         <font>
-            <Font size="10.0" />
-         </font>
-      </Label>
-      <Label text="© 2025 Bar Management System" styleClass="footer-text">
-         <font>
-            <Font size="10.0" />
-         </font>
-      </Label>
+      <Button fx:id="loginButton" text="Đăng nhập" styleClass="primary-button" onAction="#handleLogin"/>
+      <Button text="Quên mật khẩu?" styleClass="link-button" onAction="#handleForgotPassword"/>
    </VBox>
 </VBox>
