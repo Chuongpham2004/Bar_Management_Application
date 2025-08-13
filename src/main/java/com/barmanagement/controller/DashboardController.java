@@ -7,10 +7,18 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 
+import java.io.IOException;
+
 public class DashboardController {
 
     @FXML
     private Button manageTablesButton;
+
+    @FXML
+    private Button manageMenuButton;
+
+    @FXML
+    private Button revenueReportButton;
 
     @FXML
     private Button logoutButton;
@@ -18,6 +26,16 @@ public class DashboardController {
     @FXML
     private void handleManageTables(ActionEvent event) {
         openScene("/fxml/table_management.fxml", "Quản lý bàn");
+    }
+
+    @FXML
+    private void handleManageMenu(ActionEvent event) {
+        openScene("/fxml/menu_management.fxml", "Quản lý thực đơn");
+    }
+
+    @FXML
+    private void handleRevenueReport(ActionEvent event) {
+        openScene("/fxml/revenue_report.fxml", "Báo cáo doanh thu");
     }
 
     @FXML
@@ -33,9 +51,8 @@ public class DashboardController {
             stage.setScene(scene);
             stage.setTitle(title);
             stage.show();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 }
-

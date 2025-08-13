@@ -5,18 +5,22 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.barmanagement.DashboardController">
+            fx:controller="com.barmanagement.controller.DashboardController"
+            prefWidth="900" prefHeight="600"
             stylesheets="@../css/style.css">
 
     <top>
         <ToolBar>
             <Button text="Quản lý bàn" onAction="#handleManageTables"/>
+            <Button text="Quản lý thực đơn" onAction="#handleManageMenu"/>
+            <Button text="Báo cáo doanh thu" onAction="#handleRevenueReport"/>
             <Button text="Thoát" onAction="#handleLogout"/>
         </ToolBar>
     </top>
 
     <center>
-        <Label text="Chào mừng đến Bar Management Dashboard" style="-fx-font-size: 18px;"/>
+        <Label text="Chào mừng đến Bar Management Dashboard"
+               style="-fx-font-size: 18px;"/>
     </center>
 
 </BorderPane>
