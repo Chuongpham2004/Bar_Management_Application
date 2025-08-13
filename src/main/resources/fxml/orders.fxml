@@ -1,31 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox spacing="20" style="-fx-background-color: #f5f5f5;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.OrdersController">
-   <children>
-      <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: white; -fx-padding: 20;">
-         <children>
-            <Label fx:id="welcomeLabel" text="Quản lý Đơn hàng" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
-         </children>
-      </HBox>
-      
-      <VBox alignment="CENTER" spacing="20" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 40;">
-         <children>
-            <Label text="🍸 Quản lý Đơn hàng" style="-fx-font-size: 32px; -fx-font-weight: bold;" />
-            <Label text="Chức năng đang được phát triển..." style="-fx-font-size: 16px; -fx-text-fill: #666;" />
-         </children>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.OrderController" styleClass="order-container">
+
+   <!-- Header -->
+   <top>
+      <VBox styleClass="header-section">
+         <HBox alignment="CENTER_LEFT" spacing="20">
+            <padding>
+               <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+            </padding>
+
+            <Button fx:id="backButton" text="← Quay lại" onAction="#handleBack" styleClass="back-button">
+               <font>
+                  <Font size="12.0" />
+               </font>
+            </Button>
+
+            <Label fx:id="tableNumberLabel" text="Bàn 1" styleClass="page-title">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+
+            <HBox HBox.hgrow="ALWAYS" />
+
+            <Label text="Lọc theo danh mục:" styleClass="filter-label">
+               <font>
+                  <Font size="12.0" />
+               </font>
+            </Label>
+
+            <ComboBox fx:id="categoryFilter" prefWidth="200" styleClass="category-filter" />
+         </HBox>
+         <Separator />
       </VBox>
-      
-      <HBox alignment="CENTER">
-         <children>
-            <Button fx:id="backButton" text="← Quay lại" style="-fx-background-color: #666; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5; -fx-padding: 10 20;" onAction="#goBack" />
-         </children>
-      </HBox>
-   </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
-</VBox>
+   </top>
+
+   <!-- Main Content -->
+   <center>
+      <SplitPane dividerPositions="0.6" styleClass="main-split">
+
+         <!-- Left Side - Products -->
+         <VBox styleClass="products-section">
+            <Label text="Danh sách sản phẩm" styleClass="section-title">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="products-scroll">
+               <VBox>
+                  <padding>
+                     <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                  </padding>
+
+                  <GridPane fx:id="productsGrid" hgap="15" vgap="15">
+                     <!-- Products will be added dynamically -->
+                  </GridPane>
+               </VBox>
+            </ScrollPane>
+         </VBox>
+
+         <!-- Right Side - Order Summary -->
+         <VBox styleClass="order-section">
+            <Label text="Đơn hàng" styleClass="section-title">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+
+            <!-- Order Table -->
+            <TableView fx:id="orderTable" VBox.vgrow="ALWAYS" styleClass="order-table">
+               <columns>
+                  <TableColumn fx:id="productNameColumn" text="Sản phẩm" prefWidth="120" />
+                  <TableColumn fx:id="quantityColumn" text="SL" prefWidth="40" />
+                  <TableColumn fx:id="priceColumn" text="Đơn giá" prefWidth="80" />
+                  <TableColumn fx:id="subtotalColumn" text="Thành tiền" prefWidth="90" />
+               </columns>
+            </TableView>
+
+            <!-- Order Summary -->
+            <VBox spacing="15" styleClass="order-summary">
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+
+               <Separator />
+
+               <HBox alignment="CENTER_RIGHT" spacing="10">
+                  <Label text="Tổng cộng:" styleClass="total-label">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+
+                  <Label fx:id="totalAmountLabel" text="0 VND" styleClass="total-amount">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+               </HBox>
+
+               <!-- Action Buttons -->
+               <VBox spacing="10">
+                  <Button fx:id="paymentButton" text="💳 Thanh toán" onAction="#handlePayment"
+                          styleClass="payment-button" prefHeight="45" maxWidth="Infinity" disable="true">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Button>
+
+                  <Button text="🗑️ Xóa đơn hàng" styleClass="danger-button" prefHeight="35" maxWidth="Infinity">
+                     <font>
+                        <Font size="12.0" />
+                     </font>
+                  </Button>
+               </VBox>
+            </VBox>
+         </VBox>
+
+      </SplitPane>
+   </center>
+
+   <!-- Footer -->
+   <bottom>
+      <VBox styleClass="footer-section">
+         <Separator />
+         <HBox alignment="CENTER_LEFT" spacing="20">
+            <padding>
+               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+
+            <Label text="Nhấp + hoặc - để thêm/bớt sản phẩm vào đơn hàng" styleClass="instruction-text">
+               <font>
+                  <Font size="12.0" />
+               </font>
+            </Label>
+
+            <HBox HBox.hgrow="ALWAYS" />
+
+            <Label text="Chuột phải trên đơn hàng để xóa sản phẩm" styleClass="instruction-text">
+               <font>
+                  <Font size="12.0" />
+               </font>
+            </Label>
+         </HBox>
+      </VBox>
+   </bottom>
+</BorderPane>
