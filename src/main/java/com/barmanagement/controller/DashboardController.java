@@ -25,29 +25,29 @@ public class DashboardController {
 
     @FXML
     private void handleManageTables(ActionEvent event) {
-        openScene("/fxml/table_management.fxml", "Quản lý bàn");
+        openScene(event, "/fxml/table_management.fxml", "Quản lý bàn");
     }
 
     @FXML
     private void handleManageMenu(ActionEvent event) {
-        openScene("/fxml/menu_management.fxml", "Quản lý thực đơn");
+        openScene(event, "/fxml/menu_management.fxml", "Quản lý thực đơn");
     }
 
     @FXML
     private void handleRevenueReport(ActionEvent event) {
-        openScene("/fxml/revenue_report.fxml", "Báo cáo doanh thu");
+        openScene(event, "/fxml/revenue_report.fxml", "Báo cáo doanh thu");
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        openScene("/fxml/login.fxml", "Đăng nhập");
+        openScene(event, "/fxml/login.fxml", "Đăng nhập");
     }
 
-    private void openScene(String fxmlPath, String title) {
+    private void openScene(ActionEvent event, String fxmlPath, String title) {
         try {
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Scene scene = new Scene(loader.load());
-            Stage stage = (Stage) manageTablesButton.getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle(title);
             stage.show();
