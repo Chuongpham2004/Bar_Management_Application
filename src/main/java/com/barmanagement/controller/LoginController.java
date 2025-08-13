@@ -1,6 +1,7 @@
 package com.barmanagement.controller;
 
 import com.barmanagement.dao.JDBCConnect;
+import com.barmanagement.dao.UserDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -31,10 +32,11 @@ public class LoginController {
     @FXML
     private Button loginButton;
 
-    public void initialize(URL location, ResourceBundle resources) {
-        usernameField.requestFocus();
-        setupKeyEvents();
-        setupButtonEffects();
+    private UserDAO userDAO;
+
+    public void initialize() {
+        userDAO = new UserDAO();
+        errorLabel.setVisible(false);
     }
 
     @FXML
@@ -50,32 +52,14 @@ public class LoginController {
         loginButton.setDisable(true);
         loginButton.setText("Đang đăng nhập...");
 
-        new Thread(() -> {
-            try {
-                if (checkLogin(username, password)) {
-                    javafx.application.Platform.runLater(() -> {
-                        try {
-                            openDashboard();
-                        } catch (IOException e) {
-                            showError("Không thể mở màn hình chính.");
-                            resetLoginButton();
-                        }
-                    });
-                } else {
-                    javafx.application.Platform.runLater(() -> {
-                        showError("Tên đăng nhập hoặc mật khẩu không đúng.");
-                        resetLoginButton();
-                        passwordField.clear();
-                        passwordField.requestFocus();
-                    });
-                }
-            } catch (Exception e) {
-                javafx.application.Platform.runLater(() -> {
-                    showError("Lỗi kết nối cơ sở dữ liệu.");
-                    resetLoginButton();
-                });
-            }
-        }).start();
+        boolean isValid = userDAO.checkLogin(username, password);
+        if (isValid) {
+            openDashboard(); // chuyển sang màn hình chính
+        } else {
+            errorLabel.setText("Email hoặc mật khẩu không đúng!");
+            errorLabel.setVisible(true);
+        }
+
     }
 
 

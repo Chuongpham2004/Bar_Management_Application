@@ -1,0 +1,183 @@
+[1mdiff --git a/src/main/java/com/barmanagement/controller/LoginController.java b/src/main/java/com/barmanagement/controller/LoginController.java[m
+[1mindex 3493f8a..e69de29 100644[m
+[1m--- a/src/main/java/com/barmanagement/controller/LoginController.java[m
+[1m+++ b/src/main/java/com/barmanagement/controller/LoginController.java[m
+[36m@@ -1,178 +0,0 @@[m
+[31m-package com.barmanagement.controller;[m
+[31m-[m
+[31m-import com.barmanagement.dao.JDBCConnect;[m
+[31m-import javafx.event.ActionEvent;[m
+[31m-import javafx.fxml.FXML;[m
+[31m-import javafx.scene.Parent;[m
+[31m-import javafx.scene.control.*;[m
+[31m-import javafx.scene.input.KeyCode;[m
+[31m-import javafx.stage.Stage;[m
+[31m-import javafx.fxml.FXMLLoader;[m
+[31m-import javafx.scene.Scene;[m
+[31m-[m
+[31m-import java.io.IOException;[m
+[31m-import java.net.URL;[m
+[31m-import java.sql.Connection;[m
+[31m-import java.sql.PreparedStatement;[m
+[31m-import java.sql.ResultSet;[m
+[31m-import java.util.ResourceBundle;[m
+[31m-[m
+[31m-public class LoginController {[m
+[31m-[m
+[31m-    @FXML[m
+[31m-    private TextField usernameField;[m
+[31m-[m
+[31m-    @FXML[m
+[31m-    private PasswordField passwordField;[m
+[31m-[m
+[31m-    @FXML[m
+[31m-    private Label errorLabel;[m
+[31m-[m
+[31m-    @FXML[m
+[31m-    private Button loginButton;[m
+[31m-[m
+[31m-    public void initialize(URL location, ResourceBundle resources) {[m
+[31m-        usernameField.requestFocus();[m
+[31m-        setupKeyEvents();[m
+[31m-        setupButtonEffects();[m
+[31m-    }[m
+[31m-[m
+[31m-    @FXML[m
+[31m-    private void handleLogin(ActionEvent event) {[m
+[31m-        String username = usernameField.getText().trim();[m
+[31m-        String password = passwordField.getText().trim();[m
+[31m-[m
+[31m-        if (username.isEmpty() || password.isEmpty()) {[m
+[31m-            showError("Vui lòng nhập đầy đủ thông tin.");[m
+[31m-            return;[m
+[31m-        }[m
+[31m-[m
+[31m-        loginButton.setDisable(true);[m
+[31m-        loginButton.setText("Đang đăng nhập...");[m
+[31m-[m
+[31m-        new Thread(() -> {[m
+[31m-            try {[m
+[31m-                if (checkLogin(username, password)) {[m
+[31m-                    javafx.application.Platform.runLater(() -> {[m
+[31m-                        try {[m
+[31m-                            openDashboard();[m
+[31m-                        } catch (IOException e) {[m
+[31m-                            showError("Không thể mở màn hình chính.");[m
+[31m-                            resetLoginButton();[m
+[31m-                        }[m
+[31m-                    });[m
+[31m-                } else {[m
+[31m-                    javafx.application.Platform.runLater(() -> {[m
+[31m-                        showError("Tên đăng nhập hoặc mật khẩu không đúng.");[m
+[31m-                        resetLoginButton();[m
+[31m-                        passwordField.clear();[m
+[31m-                        passwordField.requestFocus();[m
+[31m-                    });[m
+[31m-                }[m
+[31m-            } catch (Exception e) {[m
+[31m-                javafx.application.Platform.runLater(() -> {[m
+[31m-                    showError("Lỗi kết nối cơ sở dữ liệu.");[m
+[31m-                    resetLoginButton();[m
+[31m-                });[m
+[31m-            }[m
+[31m-        }).start();[m
+[31m-    }[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-    @FXML[m
+[31m-    private void handleForgotPassword(ActionEvent event) {[m
+[31m-        Alert alert = new Alert(Alert.AlertType.INFORMATION);[m
+[31m-        alert.setTitle("Quên mật khẩu");[m
+[31m-        alert.setHeaderText(null);[m
+[31m-        alert.setContentText("Vui lòng liên hệ quản trị viên để lấy lại mật khẩu.");[m
+[31m-        alert.showAndWait();[m
+[31m-    }[m
+[31m-[m
+[31m-    private boolean checkLogin(String username, String password) {[m
+[31m-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";[m
+[31m-        try (Connection conn = JDBCConnect.getJDBCConnection();[m
+[31m-             PreparedStatement stmt = conn.prepareStatement(sql)) {[m
+[31m-[m
+[31m-            stmt.setString(1, username);[m
+[31m-            stmt.setString(2, password);[m
+[31m-[m
+[31m-            ResultSet rs = stmt.executeQuery();[m
+[31m-            return rs.next();[m
+[31m-        } catch (Exception e) {[m
+[31m-            e.printStackTrace();[m
+[31m-            showError("Lỗi kết nối cơ sở dữ liệu.");[m
+[31m-            return false;[m
+[31m-        }[m
+[31m-    }[m
+[31m-[m
+[31m-    private String hashPassword(String password) {[m
+[31m-        try {[m
+[31m-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");[m
+[31m-            byte[] array = md.digest(password.getBytes());[m
+[31m-            StringBuilder sb = new StringBuilder();[m
+[31m-            for (byte b : array) {[m
+[31m-                sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));[m
+[31m-            }[m
+[31m-            return sb.toString();[m
+[31m-        } catch (java.security.NoSuchAlgorithmException e) {[m
+[31m-            return password;[m
+[31m-        }[m
+[31m-    }[m
+[31m-[m
+[31m-    private void openDashboard() throws IOException {[m
+[31m-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));[m
+[31m-        Scene scene = new Scene(loader.load());[m
+[31m-[m
+[31m-        Stage stage = (Stage) loginButton.getScene().getWindow();[m
+[31m-        stage.setScene(scene);[m
+[31m-        stage.setTitle("Bar Management System - Dashboard");[m
+[31m-        stage.centerOnScreen();[m
+[31m-        stage.show();[m
+[31m-    }[m
+[31m-[m
+[31m-    private void showError(String message) {[m
+[31m-        errorLabel.setText(message);[m
+[31m-        errorLabel.setVisible(true);[m
+[31m-    }[m
+[31m-[m
+[31m-    private void resetLoginButton() {[m
+[31m-        loginButton.setDisable(false);[m
+[31m-        loginButton.setText("Đăng nhập");[m
+[31m-    }[m
+[31m-[m
+[31m-    private void setupKeyEvents() {[m
+[31m-        // Enter key trong username field sẽ focus vào password[m
+[31m-        usernameField.setOnKeyPressed(event -> {[m
+[31m-            if (event.getCode() == KeyCode.ENTER) {[m
+[31m-                passwordField.requestFocus();[m
+[31m-            }[m
+[31m-        });[m
+[31m-[m
+[31m-        // Enter key trong password field sẽ thực hiện login[m
+[31m-        passwordField.setOnKeyPressed(event -> {[m
+[31m-            if (event.getCode() == KeyCode.ENTER) {[m
+[31m-                handleLogin(null);[m
+[31m-            }[m
+[31m-        });[m
+[31m-    }[m
+[31m-[m
+[31m-    private void setupButtonEffects() {[m
+[31m-        // Hiệu ứng hover cho login button[m
+[31m-        loginButton.setOnMouseEntered(e -> {[m
+[31m-            if (!loginButton.isDisabled()) {[m
+[31m-                loginButton.setStyle("-fx-background-color: #2980b9; -fx-text-fill: #3620cf; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");[m
+[31m-            }[m
+[31m-        });[m
+[31m-[m
+[31m-        loginButton.setOnMouseExited(e -> {[m
+[31m-            if (!loginButton.isDisabled()) {[m
+[31m-                loginButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: #3620cf ; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");[m
+[31m-            }[m
+[31m-        });[m
+[31m-    }[m
+[31m-[m
+[31m-    public static void main(String[] args) {[m
+[31m-[m
+[31m-    }[m
+[31m-}[m
