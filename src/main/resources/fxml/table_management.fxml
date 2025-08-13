@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/11.0.1"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.barmanagement.TableManagementController"
-      spacing="10" padding="10">
-    stylesheets="@../css/style.css"
+      fx:controller="com.barmanagement.controller.TableManagementController"
+      spacing="15" padding="15"
+      prefWidth="900" prefHeight="600"
+      stylesheets="@/css/style.css">
 
-
-    <Label text="Danh sách bàn" style="-fx-font-size: 18px;"/>
+    <Label text="Danh sách bàn" style="-fx-font-size: 20px;"/>
     <FlowPane fx:id="tableContainer" hgap="10" vgap="10">
         <!-- Bàn sẽ được load động bằng code -->
     </FlowPane>
 
 </VBox>
-

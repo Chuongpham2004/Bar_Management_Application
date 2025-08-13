@@ -7,14 +7,15 @@
 
 <VBox xmlns="http://javafx.com/javafx/11.0.1"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.barmanagement.LoginController"
-      alignment="CENTER" spacing="20" styleClass="login-container"
-      stylesheets="@../css/style.css">
+      fx:controller="com.barmanagement.controller.LoginController"
+      alignment="CENTER" spacing="20"
+      prefWidth="900" prefHeight="600"
+      stylesheets="@/css/style.css">
+
    <padding>
       <Insets top="40" right="40" bottom="40" left="40"/>
    </padding>
 
-   <!-- Logo -->
    <Label text="🍺" styleClass="logo-icon">
       <font><Font size="48"/></font>
    </Label>
@@ -23,8 +24,7 @@
    </Label>
    <Label text="Hệ thống quản lý quầy bar" styleClass="app-subtitle"/>
 
-   <!-- Form -->
-   <VBox spacing="10" styleClass="login-form">
+   <VBox spacing="10" styleClass="login-form" maxWidth="300">
       <Label text="Tên đăng nhập:" styleClass="field-label"/>
       <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập" styleClass="login-field"/>
 
@@ -33,7 +33,8 @@
 
       <Label fx:id="errorLabel" visible="false" styleClass="error-label"/>
 
-      <Button fx:id="loginButton" text="Đăng nhập" styleClass="primary-button" onAction="#handleLogin"/>
-      <Button text="Quên mật khẩu?" styleClass="link-button" onAction="#handleForgotPassword"/>
+      <Button fx:id="loginButton" text="Đăng nhập" styleClass="primary-button" onAction="#handleLogin" maxWidth="Infinity"/>
+      <Button text="Quên mật khẩu?" styleClass="link-button" onAction="#handleForgotPassword" maxWidth="Infinity"/>
    </VBox>
+
 </VBox>
