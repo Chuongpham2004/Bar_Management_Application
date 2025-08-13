@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="fxml.Order"
-            prefHeight="400.0" prefWidth="600.0">
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.barmanagement.OrderController">
+            stylesheets="@../css/style.css">
 
-</AnchorPane>
+    <top>
+        <Label fx:id="tableNameLabel" style="-fx-font-size: 18px; -fx-padding: 10;"/>
+    </top>
+
+    <center>
+        <SplitPane>
+            <TableView fx:id="menuTable">
+                <columns>
+                    <TableColumn fx:id="menuNameCol" text="Tên món"/>
+                    <TableColumn fx:id="menuPriceCol" text="Giá"/>
+                </columns>
+            </TableView>
+
+            <TableView fx:id="orderTable">
+                <columns>
+                    <TableColumn fx:id="orderItemNameCol" text="Tên món"/>
+                    <TableColumn fx:id="orderItemQtyCol" text="SL"/>
+                </columns>
+            </TableView>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <Button text="Thanh toán" onAction="#handlePayment" prefHeight="40" maxWidth="Infinity"/>
+    </bottom>
+
+</BorderPane>

@@ -99,6 +99,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- MySQL JDBC Driver -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+        <!-- JSON Processing -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -134,7 +146,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.example.bar_management_application/com.example.bar_management_application.HelloApplication
+                                com.barmanagement.Main
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

@@ -1,63 +1,41 @@
 package com.barmanagement.controller;
 
-import com.barmanagement.model.Staff;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
-
-import java.io.IOException;
+import javafx.scene.control.Button;
 
 public class DashboardController {
 
     @FXML
-    private Label lblWelcome;
-
-    private Staff currentStaff;
-
-    public void setCurrentStaff(Staff staff) {
-        this.currentStaff = staff;
-        if (staff != null) {
-            lblWelcome.setText("Xin chào, " + staff.getFullName() + " (" + staff.getRole() + ")");
-        }
-    }
+    private Button manageTablesButton;
 
     @FXML
-    private void handleGoToTables(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/barmanagement/view/tablescreen.fxml"));
-            Parent root = loader.load();
+    private Button logoutButton;
 
-            // Truyền staff sang TableScreenController
-            TableScreenController tableController = loader.getController();
-            tableController.setCurrentStaff(currentStaff);
-
-            Stage stage = (Stage) lblWelcome.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Chọn bàn - Quản lý quầy bar");
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @FXML
+    private void handleManageTables(ActionEvent event) {
+        openScene("/fxml/table_management.fxml", "Quản lý bàn");
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
+        openScene("/fxml/login.fxml", "Đăng nhập");
+    }
+
+    private void openScene(String fxmlPath, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/barmanagement/view/login.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) lblWelcome.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Đăng nhập");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Scene scene = new Scene(loader.load());
+            Stage stage = (Stage) manageTablesButton.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle(title);
             stage.show();
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 }
+

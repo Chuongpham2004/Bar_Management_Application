@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.barmanagement.PaymentController"
+      spacing="10" padding="10">
+      stylesheets="@../css/style.css">
+
+   <Label text="Thanh toán" style="-fx-font-size: 18px;"/>
+   <Label fx:id="totalAmountLabel" style="-fx-font-size: 16px;"/>
+   <ComboBox fx:id="paymentMethodCombo" promptText="Chọn phương thức thanh toán"/>
+   <Button text="Xác nhận thanh toán" onAction="#handleConfirmPayment"/>
+
+</VBox>
