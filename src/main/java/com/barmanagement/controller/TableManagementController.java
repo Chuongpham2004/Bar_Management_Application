@@ -1,16 +1,25 @@
 package com.barmanagement.controller;
 
+import com.barmanagement.dao.OrderDAO;
 import com.barmanagement.dao.TableDAO;
+import com.barmanagement.model.Order;
 import com.barmanagement.model.Table;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import com.barmanagement.util.SceneUtil;
-
+import javafx.stage.Stage;
+import javafx.scene.Scene;
 import java.sql.SQLException;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.Button;
 
 public class TableManagementController {
+    @FXML private TableColumn<Table, Void> colPayment;
 
     @FXML private TableView<Table> tableView;
     @FXML private TableColumn<Table, Number> colId;
@@ -33,7 +42,91 @@ public class TableManagementController {
         colStatus.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getStatus()));
         tableView.setItems(data);
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> fillForm(b));
+        colPayment.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Table, Void> call(final TableColumn<Table, Void> param) {
+                final TableCell<Table, Void> cell = new TableCell<>() {
+                    private final Button btn = new Button("Thanh toán");
+
+                    {
+                        btn.setOnAction((ActionEvent event) -> {
+                            Table table = getTableView().getItems().get(getIndex());
+                            handlePayment(table);
+                        });
+                    }
+
+                    @Override
+                    public void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(btn);
+                        }
+                    }
+                };
+                return cell;
+            }
+        });
         refresh();
+    }
+    private void handlePayment(Table table) {
+        if (table == null) return;
+        try {
+            Order pendingOrder = new OrderDAO().findPendingByTable(table.getId());
+            if (pendingOrder == null) {
+                new Alert(Alert.AlertType.INFORMATION, "Bàn này chưa có order cần thanh toán.").showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/payment.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            PaymentController pc = loader.getController();
+            pc.setOrderId(pendingOrder.getId());
+            pc.setTotalLabelText(new OrderDAO().calcTotal(pendingOrder.getId()).toPlainString());
+
+            Stage stage = new Stage();
+            stage.setTitle("Thanh toán - Bàn: " + table.getTableName());
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Không thể mở giao diện thanh toán:\n" + e.getMessage()).showAndWait();
+        }
+    }
+
+
+    @FXML
+    private void handlePayment() {
+        Table selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            new Alert(Alert.AlertType.INFORMATION, "Hãy chọn một bàn để thanh toán.").showAndWait();
+            return;
+        }
+
+        try {
+            Order pendingOrder = new OrderDAO().findPendingByTable(selected.getId());
+            if (pendingOrder == null) {
+                new Alert(Alert.AlertType.INFORMATION, "Bàn này chưa có order cần thanh toán.").showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/payment.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            PaymentController pc = loader.getController();
+            pc.setOrderId(pendingOrder.getId());
+            pc.setTotalLabelText(new OrderDAO().calcTotal(pendingOrder.getId()).toPlainString());
+
+            Stage stage = new Stage();
+            stage.setTitle("Thanh toán - Bàn: " + selected.getTableName());
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Không thể mở giao diện thanh toán:\n" + e.getMessage()).showAndWait();
+        }
     }
 
     private void fillForm(Table t) {

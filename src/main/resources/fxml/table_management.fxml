@@ -16,6 +16,7 @@
             <Button text="Thêm" onAction="#add" fx:id="btnAdd"/>
             <Button text="Cập nhật" onAction="#update" fx:id="btnUpdate"/>
             <Button text="Xoá" onAction="#delete" fx:id="btnDelete"/>
+
             <Button text="← Quay lại" onAction="#goBack"/>
             <Separator/>
         </ToolBar>
@@ -27,9 +28,12 @@
                 <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
                 <TableColumn fx:id="colName" text="Tên bàn" prefWidth="200"/>
                 <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120"/>
+                <TableColumn fx:id="colPayment" text="Thanh toán" prefWidth="120"/>
             </columns>
         </TableView>
     </center>
+
+
 
     <bottom>
         <HBox spacing="8">

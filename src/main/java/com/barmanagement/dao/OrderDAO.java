@@ -118,31 +118,60 @@ public class OrderDAO {
         }
     }
 
-    public void complete(int orderId) throws SQLException {
-        try (Connection c = JDBCConnect.getJDBCConnection()) {
-            c.setAutoCommit(false);
-            try {
-                BigDecimal total = calcTotal(orderId);
+//    public void complete(int orderId) throws SQLException {
+//        try (Connection c = JDBCConnect.getJDBCConnection()) {
+//            c.setAutoCommit(false);
+//            try {
+//                BigDecimal total = calcTotal(orderId);
+//
+//                try (PreparedStatement p1 = c.prepareStatement("UPDATE orders SET status='completed' WHERE id=?")) {
+//                    p1.setInt(1, orderId);
+//                    p1.executeUpdate();
+//                }
+//                try (PreparedStatement p2 = c.prepareStatement(
+//                        "INSERT INTO payments(order_id, total_amount, payment_method) VALUES(?, ?, 'cash')")) {
+//                    p2.setInt(1, orderId);
+//                    p2.setBigDecimal(2, total);
+//                    p2.executeUpdate();
+//                }
+//                // giải phóng bàn
+//                try (PreparedStatement p3 = c.prepareStatement(
+//                        "UPDATE tables t JOIN orders o ON o.table_id=t.id SET t.status='empty' WHERE o.id=?")) {
+//                    p3.setInt(1, orderId);
+//                    p3.executeUpdate();
+//                }
+//                c.commit();
+//            } catch (Exception e) { c.rollback(); throw e; }
+//            finally { c.setAutoCommit(true); }
+//        }
+//    }
+public void complete(int orderId, String paymentMethod) throws SQLException {
+    try (Connection c = JDBCConnect.getJDBCConnection()) {
+        c.setAutoCommit(false);
+        try {
+            BigDecimal total = calcTotal(orderId);
 
-                try (PreparedStatement p1 = c.prepareStatement("UPDATE orders SET status='completed' WHERE id=?")) {
-                    p1.setInt(1, orderId);
-                    p1.executeUpdate();
-                }
-                try (PreparedStatement p2 = c.prepareStatement(
-                        "INSERT INTO payments(order_id, total_amount, payment_method) VALUES(?, ?, 'cash')")) {
-                    p2.setInt(1, orderId);
-                    p2.setBigDecimal(2, total);
-                    p2.executeUpdate();
-                }
-                // giải phóng bàn
-                try (PreparedStatement p3 = c.prepareStatement(
-                        "UPDATE tables t JOIN orders o ON o.table_id=t.id SET t.status='empty' WHERE o.id=?")) {
-                    p3.setInt(1, orderId);
-                    p3.executeUpdate();
-                }
-                c.commit();
-            } catch (Exception e) { c.rollback(); throw e; }
-            finally { c.setAutoCommit(true); }
-        }
+            try (PreparedStatement p1 = c.prepareStatement("UPDATE orders SET status='completed' WHERE id=?")) {
+                p1.setInt(1, orderId);
+                p1.executeUpdate();
+            }
+            try (PreparedStatement p2 = c.prepareStatement(
+                    "INSERT INTO payments(order_id, total_amount, payment_method) VALUES(?, ?, ?)")) {
+                p2.setInt(1, orderId);
+                p2.setBigDecimal(2, total);
+                p2.setString(3, paymentMethod);
+                p2.executeUpdate();
+            }
+            // Giải phóng bàn
+            try (PreparedStatement p3 = c.prepareStatement(
+                    "UPDATE tables t JOIN orders o ON o.table_id=t.id SET t.status='empty' WHERE o.id=?")) {
+                p3.setInt(1, orderId);
+                p3.executeUpdate();
+            }
+            c.commit();
+        } catch (Exception e) { c.rollback(); throw e; }
+        finally { c.setAutoCommit(true); }
     }
+}
+
 }

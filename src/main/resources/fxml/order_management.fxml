@@ -18,9 +18,14 @@
             <Label fx:id="lblTotal" text="0"/>
             <Button text="Hoàn tất &amp; Thanh toán" onAction="#completeOrder" fx:id="btnComplete"/>
             <Button text="Reload" onAction="#reload" fx:id="btnReload"/>
+
+            <!-- ✅ Nút thanh toán bạn cần -->
+            <Button fx:id="paymentButton" text="Thanh toán" onAction="#openPayment"/>
+
             <Button text="← Quay lại" onAction="#goBack"/>
             <Separator/>
         </ToolBar>
+
     </top>
 
     <center>

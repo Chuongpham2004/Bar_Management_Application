@@ -11,7 +11,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import com.barmanagement.util.SceneUtil;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -46,6 +50,7 @@ public class OrderController {
     private Map<Integer, MenuItem> menuMap = new HashMap<>();
 
     private Order current;
+
 
     @FXML
     public void initialize() {
@@ -182,11 +187,14 @@ public class OrderController {
     public void completeOrder() {
         if (current == null) return;
         try {
-            orderDAO.complete(current.getId()); // cập nhật payments + giải phóng bàn
+            orderDAO.complete(current.getId(), "pending"); // Hoặc trạng thái phù hợp
             current = null;
             afterComplete();
-        } catch (SQLException e) { err(e); }
+        } catch (SQLException e) {
+            err(e);
+        }
     }
+
 
     @FXML public void reload() { afterComplete(); }
 
@@ -199,4 +207,31 @@ public class OrderController {
 
     private void info(String m) { new Alert(Alert.AlertType.INFORMATION, m).showAndWait(); }
     private void err(Exception e) { new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait(); e.printStackTrace(); }
+// / Thêm nút thanh toán
+    // Nếu đã có order đang mở thì chuyển sang scene thanh toán
+    @FXML
+    private Button paymentButton; // nút thanh toán
+
+    @FXML
+    public void openPayment() {
+        if (current == null) {
+            info("Chưa có order để thanh toán.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/payment.fxml"));
+            Scene scene = new Scene(loader.load());
+            PaymentController pc = loader.getController();
+            pc.setOrderId(current.getId());
+            pc.setTotalLabelText(lblTotal.getText());  // gọi method thay vì truy cập trực tiếp biến private
+
+
+            Stage stage = (Stage) paymentButton.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("Thanh toán");
+            stage.show();
+        } catch (Exception e) {
+            err(e);
+        }
+    }
 }
