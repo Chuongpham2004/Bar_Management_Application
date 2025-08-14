@@ -3,21 +3,24 @@ package com.barmanagement.controller;
 import com.barmanagement.dao.JDBCConnect;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ResourceBundle;
 
-public class LoginController {
+public class LoginController implements Initializable {
 
     @FXML
     private TextField usernameField;
@@ -31,10 +34,13 @@ public class LoginController {
     @FXML
     private Button loginButton;
 
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
         usernameField.requestFocus();
         setupKeyEvents();
         setupButtonEffects();
+        // Ẩn error label ban đầu
+        errorLabel.setVisible(false);
     }
 
     @FXML
@@ -47,21 +53,29 @@ public class LoginController {
             return;
         }
 
+        // Disable login button và thay đổi text
         loginButton.setDisable(true);
         loginButton.setText("Đang đăng nhập...");
 
+        // Ẩn error label khi bắt đầu đăng nhập
+        errorLabel.setVisible(false);
+
+        // Thực hiện đăng nhập trong background thread
         new Thread(() -> {
             try {
                 if (checkLogin(username, password)) {
+                    // Đăng nhập thành công
                     javafx.application.Platform.runLater(() -> {
                         try {
                             openDashboard();
                         } catch (IOException e) {
                             showError("Không thể mở màn hình chính.");
                             resetLoginButton();
+                            e.printStackTrace();
                         }
                     });
                 } else {
+                    // Đăng nhập thất bại
                     javafx.application.Platform.runLater(() -> {
                         showError("Tên đăng nhập hoặc mật khẩu không đúng.");
                         resetLoginButton();
@@ -70,15 +84,15 @@ public class LoginController {
                     });
                 }
             } catch (Exception e) {
+                // Lỗi kết nối database
                 javafx.application.Platform.runLater(() -> {
                     showError("Lỗi kết nối cơ sở dữ liệu.");
                     resetLoginButton();
+                    e.printStackTrace();
                 });
             }
         }).start();
     }
-
-
 
     @FXML
     private void handleForgotPassword(ActionEvent event) {
@@ -95,40 +109,55 @@ public class LoginController {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
-            stmt.setString(2, password);
+            // Có thể hash password nếu cần
+            stmt.setString(2, password); // hoặc hashPassword(password)
 
             ResultSet rs = stmt.executeQuery();
-            return rs.next();
+            return rs.next(); // Trả về true nếu có kết quả
+
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Lỗi kết nối cơ sở dữ liệu.");
-            return false;
+            throw new RuntimeException("Database connection error", e);
         }
     }
 
     private String hashPassword(String password) {
         try {
-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] array = md.digest(password.getBytes());
             StringBuilder sb = new StringBuilder();
             for (byte b : array) {
                 sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
             }
             return sb.toString();
-        } catch (java.security.NoSuchAlgorithmException e) {
-            return password;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return password; // Trả về password gốc nếu không thể hash
         }
     }
 
     private void openDashboard() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
-        Scene scene = new Scene(loader.load());
+        try {
+            // Load dashboard FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
+            Parent root = loader.load();
 
-        Stage stage = (Stage) loginButton.getScene().getWindow();
-        stage.setScene(scene);
-        stage.setTitle("Bar Management System - Dashboard");
-        stage.centerOnScreen();
-        stage.show();
+            // Tạo scene mới
+            Scene scene = new Scene(root);
+
+            // Lấy stage hiện tại
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+
+            // Set scene mới và cấu hình stage
+            stage.setScene(scene);
+            stage.setTitle("Bar Management System - Dashboard");
+            stage.centerOnScreen();
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e; // Re-throw để handle ở caller
+        }
     }
 
     private void showError(String message) {
@@ -161,18 +190,14 @@ public class LoginController {
         // Hiệu ứng hover cho login button
         loginButton.setOnMouseEntered(e -> {
             if (!loginButton.isDisabled()) {
-                loginButton.setStyle("-fx-background-color: #2980b9; -fx-text-fill: #3620cf; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
+                loginButton.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
             }
         });
 
         loginButton.setOnMouseExited(e -> {
             if (!loginButton.isDisabled()) {
-                loginButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: #3620cf ; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
+                loginButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
             }
         });
-    }
-
-    public static void main(String[] args) {
-
     }
 }
