@@ -21,9 +21,11 @@ public class TableManagementController {
     @FXML private ComboBox<String> cbStatus;
     @FXML private Button btnAdd, btnUpdate, btnDelete, btnEmpty, btnOccupied, btnReserved, btnRefresh;
 
+    // Statistics labels
+    @FXML private Label lblTotalTables, lblEmptyTables, lblOccupiedTables, lblReservedTables;
+
     private final TableDAO dao = new TableDAO();
     private final ObservableList<Table> data = FXCollections.observableArrayList();
-
 
     @FXML
     public void initialize() {
@@ -41,10 +43,33 @@ public class TableManagementController {
         txtName.setText(t.getTableName());
         cbStatus.getSelectionModel().select(t.getStatus());
     }
+
     @FXML
     private void goBack() {
-        // dùng bất kỳ Node trong scene hiện tại; ở đây dùng tableView
         SceneUtil.openScene("/fxml/dashboard.fxml", tableView);
+    }
+
+    // Navigation methods for sidebar
+    @FXML
+    private void showPayment() {
+        SceneUtil.openScene("/fxml/payment.fxml", tableView);
+    }
+
+    @FXML
+    private void showMenu() {
+        SceneUtil.openScene("/fxml/menu_management.fxml", tableView);
+    }
+
+    @FXML
+    private void showOrder() {
+        SceneUtil.openScene("/fxml/order_management.fxml", tableView);
+    }
+
+    // Quick actions methods
+    @FXML
+    private void exportTables() {
+        // TODO: Implement export functionality
+        showInfo("Chức năng xuất danh sách bàn sẽ được phát triển trong phiên bản tới!");
     }
 
     @FXML
@@ -57,6 +82,7 @@ public class TableManagementController {
             t.setId(id);
             data.add(t);
             clearForm();
+            updateStatistics();
         } catch (Exception ex) { showErr(ex); }
     }
 
@@ -69,6 +95,7 @@ public class TableManagementController {
             sel.setStatus(cbStatus.getValue());
             dao.update(sel);
             tableView.refresh();
+            updateStatistics();
         } catch (Exception ex) { showErr(ex); }
     }
 
@@ -76,7 +103,11 @@ public class TableManagementController {
     public void delete(ActionEvent e) {
         Table sel = tableView.getSelectionModel().getSelectedItem();
         if (sel == null) return;
-        try { dao.delete(sel.getId()); data.remove(sel); }
+        try {
+            dao.delete(sel.getId());
+            data.remove(sel);
+            updateStatistics();
+        }
         catch (Exception ex) { showErr(ex); }
     }
 
@@ -87,16 +118,49 @@ public class TableManagementController {
     private void setStatus(String st) {
         Table sel = tableView.getSelectionModel().getSelectedItem();
         if (sel == null) return;
-        try { dao.updateStatus(sel.getId(), st); sel.setStatus(st); tableView.refresh(); }
+        try {
+            dao.updateStatus(sel.getId(), st);
+            sel.setStatus(st);
+            tableView.refresh();
+            updateStatistics();
+        }
         catch (SQLException e) { showErr(e); }
     }
 
     @FXML public void refresh() {
         data.clear();
-        try { data.addAll(dao.findAll()); }
+        try {
+            data.addAll(dao.findAll());
+            updateStatistics();
+        }
         catch (Exception e) { showErr(e); }
     }
 
-    private void clearForm() { txtName.clear(); cbStatus.getSelectionModel().clearSelection(); }
-    private void showErr(Exception e){ new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait(); e.printStackTrace(); }
+    private void updateStatistics() {
+        if (lblTotalTables != null) {
+            int total = data.size();
+            int empty = (int) data.stream().filter(t -> "empty".equals(t.getStatus())).count();
+            int occupied = (int) data.stream().filter(t -> "occupied".equals(t.getStatus())).count();
+            int reserved = (int) data.stream().filter(t -> "reserved".equals(t.getStatus())).count();
+
+            lblTotalTables.setText(String.valueOf(total));
+            lblEmptyTables.setText(String.valueOf(empty));
+            lblOccupiedTables.setText(String.valueOf(occupied));
+            lblReservedTables.setText(String.valueOf(reserved));
+        }
+    }
+
+    private void clearForm() {
+        txtName.clear();
+        cbStatus.getSelectionModel().clearSelection();
+    }
+
+    private void showErr(Exception e) {
+        new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        e.printStackTrace();
+    }
+
+    private void showInfo(String message) {
+        new Alert(Alert.AlertType.INFORMATION, message).showAndWait();
+    }
 }
