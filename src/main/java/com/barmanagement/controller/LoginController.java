@@ -104,16 +104,19 @@ public class LoginController implements Initializable {
     }
 
     private boolean checkLogin(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
-            // Có thể hash password nếu cần
-            stmt.setString(2, password); // hoặc hashPassword(password)
-
             ResultSet rs = stmt.executeQuery();
-            return rs.next(); // Trả về true nếu có kết quả
+
+            if (rs.next()) {
+                String storedHash = rs.getString("password");
+                // Verify password với hash đã lưu
+                return PasswordUtils.verifyPassword(password, storedHash);
+            }
+            return false;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,19 +124,11 @@ public class LoginController implements Initializable {
         }
     }
 
+    // Method này không cần thiết nữa vì đã có PasswordUtils
+    // Giữ lại để tương thích với code cũ nếu cần
+    @Deprecated
     private String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] array = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : array) {
-                sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return password; // Trả về password gốc nếu không thể hash
-        }
+        return PasswordUtils.hashPasswordSimple(password);
     }
 
     private void openDashboard() throws IOException {
