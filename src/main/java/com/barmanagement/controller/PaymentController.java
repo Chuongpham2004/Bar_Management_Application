@@ -39,7 +39,7 @@ public class PaymentController {
 
     @FXML
     private void handleBack(ActionEvent event) {
-        openScene("/fxml/order.fxml", "Order");
+        openScene("/fxml/order_management.fxml", "Order");
     }
 
     private void openScene(String fxmlPath, String title) {

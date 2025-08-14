@@ -55,4 +55,9 @@ public class DashboardController {
             e.printStackTrace();
         }
     }
+    @FXML private Button manageOrderButton;
+    @FXML private void handleManageOrder(ActionEvent e){
+        openScene(e, "/fxml/order_management.fxml", "Quản lý order");
+    }
+
 }
