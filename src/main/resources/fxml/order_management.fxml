@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.barmanagement.controller.OrderController">
+    <top>
+        <ToolBar>
+            <Label text="Bàn:"/>
+            <ComboBox fx:id="cbTable" prefWidth="200"/>
+            <Button text="Tạo order mới" onAction="#newOrder" fx:id="btnNewOrder"/>
+            <Separator/>
+            <Label text="Order:"/>
+            <Label fx:id="lblOrderId" text="(chưa có)"/>
+            <Separator/>
+            <Label text="Tổng:"/>
+            <Label fx:id="lblTotal" text="0"/>
+            <Button text="Hoàn tất &amp; Thanh toán" onAction="#completeOrder" fx:id="btnComplete"/>
+            <Button text="Reload" onAction="#reload" fx:id="btnReload"/>
+            <Button text="← Quay lại" onAction="#goBack"/>
+            <Separator/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.45">
+            <!-- Menu -->
+            <VBox spacing="6">
+                <padding>
+                    <Insets topRightBottomLeft="8.0"/>
+                </padding>
+                <Label text="Thực đơn"/>
+                <TableView fx:id="tblMenu" prefHeight="400">
+                    <columns>
+                        <TableColumn fx:id="colMName" text="Tên món" prefWidth="180"/>
+                        <TableColumn fx:id="colMCat" text="Loại" prefWidth="80"/>
+                        <TableColumn fx:id="colMPrice" text="Giá" prefWidth="80"/>
+                    </columns>
+                </TableView>
+                <HBox spacing="8">
+                    <Label text="SL:"/>
+                    <Spinner fx:id="spQty" prefWidth="90"/>
+                    <Button text="Thêm vào order" onAction="#addItem" fx:id="btnAddItem"/>
+                </HBox>
+            </VBox>
+
+            <!-- Items in order -->
+            <VBox spacing="6">
+                <padding>
+                    <Insets topRightBottomLeft="8.0"/>
+                </padding>
+                <Label text="Chi tiết order"/>
+                <TableView fx:id="tblItems" prefHeight="400">
+                    <columns>
+                        <TableColumn fx:id="colIName" text="Món"/>
+                        <TableColumn fx:id="colIQty" text="SL" prefWidth="70"/>
+                        <TableColumn fx:id="colIPrice" text="Giá" prefWidth="80"/>
+                        <TableColumn fx:id="colISubtotal" text="Thành tiền" prefWidth="100"/>
+                    </columns>
+                </TableView>
+                <Button text="Xoá dòng" onAction="#removeItem" fx:id="btnRemoveItem"/>
+            </VBox>
+        </SplitPane>
+    </center>
+</BorderPane>
