@@ -16,7 +16,8 @@ public class OrderItemDAO {
                    oi.order_id,
                    oi.menu_item_id,
                    oi.quantity,
-                   mi.price AS unit_price
+                   mi.price AS unit_price,
+                   mi.name AS menu_item_name
             FROM order_items oi
             JOIN menu_items mi ON mi.id = oi.menu_item_id
             WHERE oi.order_id = ?
@@ -35,6 +36,7 @@ public class OrderItemDAO {
                     it.setQuantity(rs.getInt("quantity"));
                     // DECIMAL -> double (OrderItem.price là double)
                     it.setPrice(rs.getBigDecimal("unit_price").doubleValue());
+                    it.setMenuItemName(rs.getString("menu_item_name")); // set thêm
                     list.add(it);
                 }
                 return list;

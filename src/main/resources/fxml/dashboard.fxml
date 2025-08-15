@@ -44,7 +44,7 @@
                                 <DropShadow />
                             </effect>
                         </Button>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleRevenueReport" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  💳 Thanh Toán" />
+                        <Button fx:id="managePaymentButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handlePayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text=" 💳 Thanh Toán" />
                         <Button fx:id="manageMenuButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  🍸 Menu" />
                         <Button fx:id="manageOrderButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageOrder" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text=" 🍽️ Order" />
                         <Button fx:id="manageTablesButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageTables" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  ⚙️ Quản Lý Bàn" />

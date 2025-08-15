@@ -1,54 +1,49 @@
 package com.barmanagement.controller;
 
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import com.barmanagement.dao.OrderDAO;
+import com.barmanagement.dao.OrderItemDAO;
+import com.barmanagement.dao.PaymentDAO;
+import com.barmanagement.dao.TableDAO;
+import com.barmanagement.model.MenuItem;
+import com.barmanagement.model.Order;
+import com.barmanagement.model.OrderItem;
+import com.barmanagement.model.Payment;
+import java.sql.Timestamp;
+import java.sql.SQLException;
 import com.barmanagement.util.SceneUtil;
+
+
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.Alert;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class PaymentController {
 
-    @FXML private Label totalLabel;
-    @FXML private ComboBox<String> paymentMethodCombo;
-    @FXML private Button confirmButton;
-    @FXML private Button backButton;
-
-    // New UI elements for enhanced payment interface
-    @FXML private Label orderInfoLabel;
-    @FXML private Label subtotalLabel;
-    @FXML private Label vatLabel;
-    @FXML private Label discountLabel;
-    @FXML private TextField customerNameField;
-    @FXML private TextField customerPhoneField;
-    @FXML private TextField discountField;
-    @FXML private TextField taxField;
-    @FXML private TextArea notesArea;
-    @FXML private RadioButton cashRadio;
-    @FXML private RadioButton cardRadio;
-    @FXML private RadioButton transferRadio;
-
     @FXML
-    private void initialize() {
-        paymentMethodCombo.getItems().addAll("Tiền mặt", "Thẻ", "Chuyển khoản");
-
-        // Setup radio button group
-        ToggleGroup paymentGroup = new ToggleGroup();
-        if (cashRadio != null) cashRadio.setToggleGroup(paymentGroup);
-        if (cardRadio != null) cardRadio.setToggleGroup(paymentGroup);
-        if (transferRadio != null) transferRadio.setToggleGroup(paymentGroup);
-
-        // Set default selection
-        if (cashRadio != null) cashRadio.setSelected(true);
-
-        // Initialize sample data
-        updatePaymentSummary();
-    }
-
-    // Navigation methods for sidebar
+    private ComboBox<String> tableComboBox; // Danh sách bàn
+    @FXML private TableView<OrderItem> orderTable;
+    @FXML private TableColumn<OrderItem, String> itemNameCol;
+    @FXML private TableColumn<OrderItem, Integer> quantityCol;
+    @FXML private TableColumn<OrderItem, Double> priceCol;
+    @FXML private TableColumn<OrderItem, Double> totalCol;
+    @FXML private Label totalLabel;
+    @FXML private ComboBox<String> paymentMethodComboBox;
+    //
     @FXML
     private void showHome() {
+        SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel);
+    }
+    @FXML
+    private void goBack() {
         SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel);
     }
 
@@ -77,95 +72,142 @@ public class PaymentController {
         SceneUtil.openScene("/fxml/login.fxml", totalLabel);
     }
 
-    // Payment method selection
-    @FXML
-    private void selectCashPayment() {
-        if (cashRadio != null) cashRadio.setSelected(true);
-        paymentMethodCombo.getSelectionModel().select("Tiền mặt");
-    }
+
+
+    private OrderDAO orderDAO = new OrderDAO();
+    private OrderItemDAO orderItemDAO = new OrderItemDAO();
+    private PaymentDAO paymentDAO = new PaymentDAO();
+    private TableDAO tableDAO = new TableDAO();
+
+    private Order currentOrder;
 
     @FXML
-    private void selectCardPayment() {
-        if (cardRadio != null) cardRadio.setSelected(true);
-        paymentMethodCombo.getSelectionModel().select("Thẻ");
-    }
+    private void initialize() {
+        tableComboBox.setItems(FXCollections.observableArrayList("Bàn 1", "Bàn 2", "Bàn 3"));
+        tableComboBox.setOnAction(e -> loadOrderBySelectedTable());
 
-    @FXML
-    private void selectTransferPayment() {
-        if (transferRadio != null) transferRadio.setSelected(true);
-        paymentMethodCombo.getSelectionModel().select("Chuyển khoản");
-    }
+        paymentMethodComboBox.setItems(FXCollections.observableArrayList("Tiền mặt", "Chuyển khoản", "MOMO"));
+        paymentMethodComboBox.getSelectionModel().selectFirst(); // chọn mặc định
 
-    @FXML
-    private void handleConfirmPayment(ActionEvent event) {
-        String paymentMethod = getSelectedPaymentMethod();
+        itemNameCol.setCellValueFactory(new PropertyValueFactory<>("menuItemName"));
+        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+        totalCol.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
+                cellData.getValue().getPrice() * cellData.getValue().getQuantity()
+        ));
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thanh toán");
-        alert.setHeaderText(null);
-        alert.setContentText("Thanh toán thành công bằng " + paymentMethod + "!");
-        alert.showAndWait();
-
-        // Return to dashboard after successful payment
-        showDashboard();
-    }
-
-    @FXML
-    private void handleBack(ActionEvent event) {
-        SceneUtil.openScene("/fxml/order_management.fxml", backButton);
-    }
-
-    @FXML
-    private void printReceipt() {
-        // TODO: Implement print receipt functionality
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("In hóa đơn");
-        alert.setHeaderText(null);
-        alert.setContentText("Chức năng in hóa đơn sẽ được phát triển trong phiên bản tới!");
-        alert.showAndWait();
-    }
-
-    private String getSelectedPaymentMethod() {
-        if (cashRadio != null && cashRadio.isSelected()) return "Tiền mặt";
-        if (cardRadio != null && cardRadio.isSelected()) return "Thẻ";
-        if (transferRadio != null && transferRadio.isSelected()) return "Chuyển khoản";
-        return paymentMethodCombo.getValue() != null ? paymentMethodCombo.getValue() : "Tiền mặt";
-    }
-
-    private void updatePaymentSummary() {
-        // Sample calculation - replace with actual order data
-        double subtotal = 227273.0;
-        double vatRate = 0.10;
-        double discount = 0.0;
-
-        if (discountField != null && !discountField.getText().isEmpty()) {
-            try {
-                double discountPercent = Double.parseDouble(discountField.getText()) / 100.0;
-                discount = subtotal * discountPercent;
-            } catch (NumberFormatException e) {
-                discount = 0.0;
-            }
+        if (!tableComboBox.getItems().isEmpty()) {
+            tableComboBox.getSelectionModel().select(0);
+            loadOrderBySelectedTable();
         }
-
-        double vat = (subtotal - discount) * vatRate;
-        double total = subtotal - discount + vat;
-
-        if (subtotalLabel != null) subtotalLabel.setText(String.format("%.0f VNĐ", subtotal));
-        if (vatLabel != null) vatLabel.setText(String.format("%.0f VNĐ", vat));
-        if (discountLabel != null) discountLabel.setText(String.format("%.0f VNĐ", discount));
-        if (totalLabel != null) totalLabel.setText(String.format("%.0f VNĐ", total));
     }
+    private void loadOrderBySelectedTable() {
+        String selectedTableName = tableComboBox.getValue();
+        int tableId = parseTableIdFromName(selectedTableName);
 
-    private void openScene(String fxmlPath, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Scene scene = new Scene(loader.load());
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(title);
-            stage.show();
+            currentOrder = orderDAO.findPendingByTable(tableId);
         } catch (Exception e) {
             e.printStackTrace();
+            currentOrder = null;
+        }
+
+        if (currentOrder == null) {
+            orderTable.setItems(FXCollections.observableArrayList());
+            totalLabel.setText("0 VND");
+            return;
+        }
+
+        try {
+            ObservableList<OrderItem> orderItems = FXCollections.observableArrayList(
+                    orderItemDAO.findByOrderId(currentOrder.getId())
+            );
+            orderTable.setItems(orderItems);
+
+            // Tính tổng tiền
+            double total = orderItems.stream().mapToDouble(OrderItem::getSubtotal).sum();
+            totalLabel.setText(String.format("%.0f VND", total));
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Lỗi khi tải danh sách món!");
         }
     }
+
+    private int parseTableIdFromName(String tableName) {
+        // Ví dụ bàn "Bàn 3" => return 3
+        return Integer.parseInt(tableName.replaceAll("[^0-9]", ""));
+    }
+
+    @FXML
+    private void onConfirmPayment() {
+        if (currentOrder == null) {
+            showAlert("Chưa chọn bàn hoặc không có hóa đơn tạm.");
+            return;
+        }
+
+        String method = getSelectedPaymentMethod();
+        double totalAmount = parseTotalAmount();
+
+        Payment payment = new Payment();
+        payment.setOrderId(currentOrder.getId());
+        payment.setTotalAmount(totalAmount);
+        payment.setPaymentMethod(method);
+        payment.setPaymentTime(new Timestamp(System.currentTimeMillis()));
+
+        boolean success = paymentDAO.insertPayment(payment);
+        if (success) {
+            try {
+                tableDAO.updateStatus(currentOrder.getTableId(), "free"); // cập nhật bàn trống
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert("Lỗi khi cập nhật trạng thái bàn.");
+                return;
+            }
+            showAlert("Thanh toán thành công!");
+            loadOrderBySelectedTable(); // reload dữ liệu
+        } else {
+            showAlert("Thanh toán thất bại. Vui lòng thử lại.");
+        }
+    }
+
+    private double parseTotalAmount() {
+        String totalText = totalLabel.getText().replaceAll("[^0-9]", "");
+        if (totalText.isEmpty()) return 0;
+        return Double.parseDouble(totalText);
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Thông báo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    private String getSelectedPaymentMethod() {
+        String method = paymentMethodComboBox.getValue();
+        return (method != null && !method.isEmpty()) ? method : "Tiền mặt"; // fallback nếu người dùng chưa chọn
+    }
+    @FXML
+    private void onCancel() {
+        // ví dụ: reset giao diện, đóng form, hoặc làm gì đó
+        tableComboBox.getSelectionModel().clearSelection();
+        orderTable.setItems(FXCollections.observableArrayList());
+        totalLabel.setText("0 VND");
+        paymentMethodComboBox.getSelectionModel().selectFirst();
+    }
+    @FXML
+    private void exportMenu() {
+        // TODO: Implement export functionality
+        showInfo("Chức năng xuất menu sẽ được phát triển trong phiên bản tới!");
+    }
+
+    @FXML
+    private void importMenu() {
+        // TODO: Implement import functionality
+        showInfo("Chức năng nhập menu sẽ được phát triển trong phiên bản tới!");
+    }
+    private void showInfo(String message) {
+        new Alert(Alert.AlertType.INFORMATION, message).showAndWait();
+    }
+
 }

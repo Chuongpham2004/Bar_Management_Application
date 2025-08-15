@@ -25,6 +25,7 @@ public class DashboardController {
 
     @FXML private Button manageTablesButton;
     @FXML private Button manageMenuButton;
+    @FXML private Button managePaymentButton;
     @FXML private Button revenueReportButton;
     @FXML private Button logoutButton;
     @FXML private Button manageOrderButton;
@@ -127,6 +128,11 @@ public class DashboardController {
     @FXML
     private void handleRevenueReport(ActionEvent event) {
         openScene(event, "/fxml/revenue_report.fxml", "Báo cáo doanh thu");
+    }
+
+    @FXML
+    private void handlePayment(ActionEvent event) {
+        openScene(event, "/fxml/payment.fxml", "Thanh toán");
     }
 
     @FXML
