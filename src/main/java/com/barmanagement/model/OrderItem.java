@@ -7,6 +7,7 @@ public class OrderItem {
     private int quantity;
     // đơn giá lấy từ menu_items khi JOIN:
     private double price;
+    private String menuItemName;  // thêm
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -24,4 +25,11 @@ public class OrderItem {
     public void setPrice(double price) { this.price = price; }
 
     public double getSubtotal() { return price * quantity; }
+    public String getMenuItemName() {
+        return menuItemName;
+    }
+    public void setMenuItemName(String menuItemName) {
+        this.menuItemName = menuItemName;
+    }
+
 }

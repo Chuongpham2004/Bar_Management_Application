@@ -36,16 +36,16 @@
                 <!-- Navigation Buttons -->
                 <VBox prefHeight="720.0" prefWidth="250.0" spacing="5.0">
                     <children>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  🏠 Trang chủ" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  📊 Dashboard" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showPayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  💳 Thanh Toán" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  🍸 Menu" />
-                        <Button fx:id="inventoryBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text=" 🍽️ Order">
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🏠 Trang chủ" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="📊 Dashboard" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showPayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="💳 Thanh Toán" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍸 Menu" />
+                        <Button fx:id="inventoryBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="🍽 Order">
                             <effect>
                                 <DropShadow />
                             </effect>
                         </Button>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showTableManagement" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  ⚙️ Cài đặt" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showTableManagement" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="⚙ Cài đặt" />
                     </children>
                     <VBox.margin>
                         <Insets top="20.0" />
