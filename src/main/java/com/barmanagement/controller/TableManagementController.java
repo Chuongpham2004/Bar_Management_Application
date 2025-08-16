@@ -7,29 +7,38 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import com.barmanagement.util.SceneUtil;
+import com.barmanagement.util.LogoutUtil;
 
 import java.sql.SQLException;
 
 public class TableManagementController {
 
-    @FXML private TableView<Table> tableView;
-    @FXML private TableColumn<Table, Number> colId;
-    @FXML private TableColumn<Table, String> colName;
-    @FXML private TableColumn<Table, String> colStatus;
+    @FXML
+    private TableView<Table> tableView;
+    @FXML
+    private TableColumn<Table, Number> colId;
+    @FXML
+    private TableColumn<Table, String> colName;
+    @FXML
+    private TableColumn<Table, String> colStatus;
 
-    @FXML private TextField txtName;
-    @FXML private ComboBox<String> cbStatus;
-    @FXML private Button btnAdd, btnUpdate, btnDelete, btnEmpty, btnOccupied, btnReserved, btnRefresh;
+    @FXML
+    private TextField txtName;
+    @FXML
+    private ComboBox<String> cbStatus;
+    @FXML
+    private Button btnAdd, btnUpdate, btnDelete, btnEmpty, btnOccupied, btnReserved, btnRefresh;
 
     // Statistics labels
-    @FXML private Label lblTotalTables, lblEmptyTables, lblOccupiedTables, lblReservedTables;
+    @FXML
+    private Label lblTotalTables, lblEmptyTables, lblOccupiedTables, lblReservedTables;
 
     private final TableDAO dao = new TableDAO();
     private final ObservableList<Table> data = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        cbStatus.getItems().addAll("empty","occupied","reserved");
+        cbStatus.getItems().addAll("empty", "occupied", "reserved");
         colId.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getId()));
         colName.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getTableName()));
         colStatus.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getStatus()));
@@ -65,6 +74,12 @@ public class TableManagementController {
         SceneUtil.openScene("/fxml/order_management.fxml", tableView);
     }
 
+    // Thêm method xử lý đăng xuất
+    @FXML
+    private void handleLogout() {
+        LogoutUtil.confirmLogout(tableView);
+    }
+
     // Quick actions methods
     @FXML
     private void exportTables() {
@@ -83,7 +98,9 @@ public class TableManagementController {
             data.add(t);
             clearForm();
             updateStatistics();
-        } catch (Exception ex) { showErr(ex); }
+        } catch (Exception ex) {
+            showErr(ex);
+        }
     }
 
     @FXML
@@ -96,7 +113,9 @@ public class TableManagementController {
             dao.update(sel);
             tableView.refresh();
             updateStatistics();
-        } catch (Exception ex) { showErr(ex); }
+        } catch (Exception ex) {
+            showErr(ex);
+        }
     }
 
     @FXML
@@ -107,13 +126,25 @@ public class TableManagementController {
             dao.delete(sel.getId());
             data.remove(sel);
             updateStatistics();
+        } catch (Exception ex) {
+            showErr(ex);
         }
-        catch (Exception ex) { showErr(ex); }
     }
 
-    @FXML public void setEmpty()    { setStatus("empty"); }
-    @FXML public void setOccupied() { setStatus("occupied"); }
-    @FXML public void setReserved() { setStatus("reserved"); }
+    @FXML
+    public void setEmpty() {
+        setStatus("empty");
+    }
+
+    @FXML
+    public void setOccupied() {
+        setStatus("occupied");
+    }
+
+    @FXML
+    public void setReserved() {
+        setStatus("reserved");
+    }
 
     private void setStatus(String st) {
         Table sel = tableView.getSelectionModel().getSelectedItem();
@@ -123,17 +154,20 @@ public class TableManagementController {
             sel.setStatus(st);
             tableView.refresh();
             updateStatistics();
+        } catch (SQLException e) {
+            showErr(e);
         }
-        catch (SQLException e) { showErr(e); }
     }
 
-    @FXML public void refresh() {
+    @FXML
+    public void refresh() {
         data.clear();
         try {
             data.addAll(dao.findAll());
             updateStatistics();
+        } catch (Exception e) {
+            showErr(e);
         }
-        catch (Exception e) { showErr(e); }
     }
 
     private void updateStatistics() {

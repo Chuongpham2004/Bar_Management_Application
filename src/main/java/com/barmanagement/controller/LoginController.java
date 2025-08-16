@@ -1,6 +1,7 @@
 package com.barmanagement.controller;
 
 import com.barmanagement.dao.JDBCConnect;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,6 +34,9 @@ public class LoginController implements Initializable {
 
     @FXML
     private Button loginButton;
+
+    @FXML
+    private Button closeButton;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -103,6 +107,28 @@ public class LoginController implements Initializable {
         alert.showAndWait();
     }
 
+    @FXML
+    private void handleCloseApp(ActionEvent event) {
+        // Hiển thị dialog xác nhận trước khi thoát
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Xác nhận thoát");
+        alert.setHeaderText(null);
+        alert.setContentText("Bạn có chắc chắn muốn thoát ứng dụng?");
+
+        // Tùy chỉnh các button
+        ButtonType exitButton = new ButtonType("Thoát", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Hủy", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(exitButton, cancelButton);
+
+        // Hiển thị dialog và xử lý response
+        alert.showAndWait().ifPresent(response -> {
+            if (response == exitButton) {
+                Platform.exit();
+                System.exit(0);
+            }
+        });
+    }
+
     private boolean checkLogin(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = JDBCConnect.getJDBCConnection();
@@ -166,17 +192,21 @@ public class LoginController implements Initializable {
     }
 
     private void setupKeyEvents() {
-        // Enter key trong username field sẽ focus vào password
+        // Enter key và ESC key cho username field
         usernameField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 passwordField.requestFocus();
+            } else if (event.getCode() == KeyCode.ESCAPE) {
+                handleCloseApp(null);
             }
         });
 
-        // Enter key trong password field sẽ thực hiện login
+        // Enter key và ESC key cho password field
         passwordField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 handleLogin(null);
+            } else if (event.getCode() == KeyCode.ESCAPE) {
+                handleCloseApp(null);
             }
         });
     }
@@ -185,14 +215,23 @@ public class LoginController implements Initializable {
         // Hiệu ứng hover cho login button
         loginButton.setOnMouseEntered(e -> {
             if (!loginButton.isDisabled()) {
-                loginButton.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
+                loginButton.setStyle("-fx-background-color: #2ea043; -fx-text-fill: #f0f6fc; -fx-padding: 12; -fx-background-radius: 12; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-color: transparent;");
             }
         });
 
         loginButton.setOnMouseExited(e -> {
             if (!loginButton.isDisabled()) {
-                loginButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 12; -fx-background-radius: 5; -fx-font-weight: bold; -fx-font-size: 14px;");
+                loginButton.setStyle("-fx-background-color: #238636; -fx-text-fill: #f0f6fc; -fx-padding: 12; -fx-background-radius: 12; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-color: transparent;");
             }
+        });
+
+        // Hiệu ứng hover cho close button
+        closeButton.setOnMouseEntered(e -> {
+            closeButton.setStyle("-fx-background-color: #da3633; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 18px; -fx-cursor: hand; -fx-border-color: transparent;");
+        });
+
+        closeButton.setOnMouseExited(e -> {
+            closeButton.setStyle("-fx-background-color: #f85149; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 18px; -fx-cursor: hand; -fx-border-color: transparent;");
         });
     }
 }

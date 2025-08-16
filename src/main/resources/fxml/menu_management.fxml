@@ -15,7 +15,7 @@
         <VBox layoutX="0.0" layoutY="0.0" prefHeight="800.0" prefWidth="250.0" style="-fx-background-color: #16213e;" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
                 <!-- Logo Section -->
-                <HBox alignment="CENTER" prefHeight="80.0" prefWidth="250.0" style="-fx-background-color: #0f3460;">
+                <HBox alignment="CENTER" prefHeight="60.0" prefWidth="250.0" style="-fx-background-color: #0f3460;">
                     <children>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                             <image>
@@ -57,41 +57,54 @@
             </children>
         </VBox>
 
-        <!-- Top Header Bar -->
+        <!-- Top Header Bar - FIXED LAYOUT -->
         <HBox layoutX="250.0" layoutY="0.0" prefHeight="60.0" prefWidth="950.0" style="-fx-background-color: #0f3460;" AnchorPane.leftAnchor="250.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-                <!-- Title Section -->
-                <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="400.0">
+                <!-- Left: Title Section - Balanced -->
+                <HBox alignment="CENTER_LEFT" prefWidth="475.0" HBox.hgrow="ALWAYS" spacing="20.0">
                     <children>
                         <Label text="🍸 Quản Lý Menu" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="20.0" />
                             </font>
-                            <HBox.margin>
-                                <Insets left="30.0" />
-                            </HBox.margin>
+                        </Label>
+                        <Label text="|" textFill="#4CAF50">
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                        </Label>
+                        <Label text="Thêm, sửa, xóa món ăn" textFill="#B0B0B0">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                     </children>
+                    <padding>
+                        <Insets left="30.0" />
+                    </padding>
                 </HBox>
 
-                <!-- User Info -->
-                <HBox alignment="CENTER_RIGHT" prefHeight="60.0" prefWidth="550.0" spacing="15.0">
+                <!-- Right: User Info - Balanced -->
+                <HBox alignment="CENTER_RIGHT" prefWidth="475.0" spacing="15.0" HBox.hgrow="ALWAYS">
                     <children>
                         <Label text="12:30 PM" textFill="WHITE">
                             <font>
                                 <Font size="14.0" />
                             </font>
                         </Label>
-                        <Circle fill="#e16428" radius="20.0" />
-                        <Label text="Admin User" textFill="WHITE">
+                        <Circle fill="#e16428" radius="18.0" />
+                        <Label text="Admin" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="14.0" />
                             </font>
                         </Label>
-                        <Button mnemonicParsing="false" onAction="#goBack" style="-fx-background-color: #e16428; -fx-text-fill: white;" text="Đăng xuất" />
+                        <Button mnemonicParsing="false" onAction="#handleLogout"
+                                prefHeight="32.0" prefWidth="85.0"
+                                style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 12px;"
+                                text="Đăng xuất" />
                     </children>
                     <padding>
-                        <Insets right="20.0" />
+                        <Insets right="30.0" />
                     </padding>
                 </HBox>
             </children>
