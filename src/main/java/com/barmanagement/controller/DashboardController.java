@@ -1,9 +1,11 @@
 package com.barmanagement.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,6 +18,7 @@ import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.util.Duration;
 import com.barmanagement.util.SceneUtil;
+import com.barmanagement.util.LogoutUtil;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -137,7 +140,8 @@ public class DashboardController {
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        openScene(event, "/fxml/login.fxml", "Đăng nhập");
+        // Sử dụng LogoutUtil thay vì phương thức confirmLogout riêng
+        LogoutUtil.confirmLogout(logoutButton);
     }
 
     @FXML

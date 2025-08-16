@@ -83,12 +83,12 @@
                             </font>
                         </Label>
                         <Circle fill="#e16428" radius="20.0" />
-                        <Label text="Admin User" textFill="WHITE">
+                        <Label text="Admin" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="14.0" />
                             </font>
                         </Label>
-                        <Button mnemonicParsing="false" onAction="#goBack" style="-fx-background-color: #e16428; -fx-text-fill: white;" text="Đăng xuất" />
+                        <Button mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: #e16428; -fx-text-fill: white;" text="Đăng xuất" />
                     </children>
                     <padding>
                         <Insets right="20.0" />

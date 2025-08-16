@@ -11,8 +11,7 @@ import com.barmanagement.model.Payment;
 import java.sql.Timestamp;
 import java.sql.SQLException;
 import com.barmanagement.util.SceneUtil;
-
-
+import com.barmanagement.util.LogoutUtil;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,11 +36,12 @@ public class PaymentController {
     @FXML private TableColumn<OrderItem, Double> totalCol;
     @FXML private Label totalLabel;
     @FXML private ComboBox<String> paymentMethodComboBox;
-    //
+
     @FXML
     private void showHome() {
         SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel);
     }
+
     @FXML
     private void goBack() {
         SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel);
@@ -69,10 +69,9 @@ public class PaymentController {
 
     @FXML
     private void handleLogout() {
-        SceneUtil.openScene("/fxml/login.fxml", totalLabel);
+        // Sử dụng LogoutUtil để xử lý đăng xuất với xác nhận
+        LogoutUtil.confirmLogout(totalLabel);
     }
-
-
 
     private OrderDAO orderDAO = new OrderDAO();
     private OrderItemDAO orderItemDAO = new OrderItemDAO();
@@ -101,6 +100,7 @@ public class PaymentController {
             loadOrderBySelectedTable();
         }
     }
+
     private void loadOrderBySelectedTable() {
         String selectedTableName = tableComboBox.getValue();
         int tableId = parseTableIdFromName(selectedTableName);
@@ -183,10 +183,12 @@ public class PaymentController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     private String getSelectedPaymentMethod() {
         String method = paymentMethodComboBox.getValue();
         return (method != null && !method.isEmpty()) ? method : "Tiền mặt"; // fallback nếu người dùng chưa chọn
     }
+
     @FXML
     private void onCancel() {
         // ví dụ: reset giao diện, đóng form, hoặc làm gì đó
@@ -195,6 +197,7 @@ public class PaymentController {
         totalLabel.setText("0 VND");
         paymentMethodComboBox.getSelectionModel().selectFirst();
     }
+
     @FXML
     private void exportMenu() {
         // TODO: Implement export functionality
@@ -206,8 +209,8 @@ public class PaymentController {
         // TODO: Implement import functionality
         showInfo("Chức năng nhập menu sẽ được phát triển trong phiên bản tới!");
     }
+
     private void showInfo(String message) {
         new Alert(Alert.AlertType.INFORMATION, message).showAndWait();
     }
-
 }

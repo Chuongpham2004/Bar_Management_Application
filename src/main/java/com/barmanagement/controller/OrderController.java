@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import com.barmanagement.util.SceneUtil;
+import com.barmanagement.util.LogoutUtil;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.GridPane;
@@ -259,6 +260,12 @@ public class OrderController {
     @FXML
     private void showMenu() {
         SceneUtil.openScene("/fxml/menu_management.fxml", tblItems);
+    }
+
+    // Thêm method xử lý đăng xuất
+    @FXML
+    private void handleLogout() {
+        LogoutUtil.confirmLogout(tblItems);
     }
 
     @FXML
