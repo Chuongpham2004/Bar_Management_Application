@@ -2,432 +2,400 @@ package com.barmanagement.dao;
 
 import com.barmanagement.model.Order;
 import com.barmanagement.model.OrderItem;
-
-import java.sql.*;
 import java.math.BigDecimal;
-import java.util.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrderDAO {
 
-    /**
-     * Tạo order trống mới
-     */
+    // Tạo order mới rỗng
     public Integer createEmptyOrder(int tableId) throws SQLException {
-        String sql = "INSERT INTO orders(table_id, status, order_time) VALUES(?, 'pending', CURRENT_TIMESTAMP)";
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        String sql = "INSERT INTO orders (table_id, status, created_by) VALUES (?, 'pending', 1)";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             ps.setInt(1, tableId);
-            ps.executeUpdate();
-            try (ResultSet k = ps.getGeneratedKeys()) {
-                return k.next() ? k.getInt(1) : null;
-            }
-        }
-    }
 
-    /**
-     * Tìm order đang pending theo table
-     */
-    public Order findPendingByTable(int tableId) throws SQLException {
-        String sql = """
-            SELECT id, table_id, status, order_time 
-            FROM orders 
-            WHERE table_id=? AND status='pending' 
-            ORDER BY id DESC LIMIT 1
-        """;
-
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, tableId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
-                Order o = new Order();
-                o.setId(rs.getInt("id"));
-                o.setTableId(rs.getInt("table_id"));
-                o.setStatus(rs.getString("status"));
-                o.setOrderTime(rs.getTimestamp("order_time"));
-                return o;
-            }
-        }
-    }
-
-    /**
-     * Lấy danh sách items của order với thông tin menu đầy đủ
-     */
-    public List<OrderItem> findItems(int orderId) throws SQLException {
-        String sql = """
-            SELECT oi.id, oi.order_id, oi.menu_item_id, oi.quantity,
-                   mi.price AS unit_price, mi.name AS menu_item_name,
-                   mi.image_path, mi.category, mi.description
-            FROM order_items oi
-            JOIN menu_items mi ON mi.id = oi.menu_item_id
-            WHERE oi.order_id = ?
-            ORDER BY oi.id
-        """;
-
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
-            try (ResultSet rs = ps.executeQuery()) {
-                List<OrderItem> list = new ArrayList<>();
-                while (rs.next()) {
-                    OrderItem it = new OrderItem();
-                    it.setId(rs.getInt("id"));
-                    it.setOrderId(rs.getInt("order_id"));
-                    it.setMenuItemId(rs.getInt("menu_item_id"));
-                    it.setQuantity(rs.getInt("quantity"));
-
-                    // DECIMAL -> double
-                    BigDecimal price = rs.getBigDecimal("unit_price");
-                    it.setPrice(price != null ? price.doubleValue() : 0.0);
-
-                    // Thông tin menu item
-                    it.setMenuItemName(rs.getString("menu_item_name"));
-
-                    list.add(it);
-                }
-                return list;
-            }
-        }
-    }
-
-    /**
-     * Lấy order items với thông tin chi tiết (cho báo cáo)
-     */
-    public List<OrderItemDetail> findItemsWithDetails(int orderId) throws SQLException {
-        String sql = """
-            SELECT oi.id, oi.order_id, oi.menu_item_id, oi.quantity,
-                   mi.price AS unit_price, mi.name AS menu_item_name,
-                   mi.image_path, mi.category, mi.description,
-                   (oi.quantity * mi.price) AS subtotal
-            FROM order_items oi
-            JOIN menu_items mi ON mi.id = oi.menu_item_id
-            WHERE oi.order_id = ?
-            ORDER BY oi.id
-        """;
-
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
-            try (ResultSet rs = ps.executeQuery()) {
-                List<OrderItemDetail> list = new ArrayList<>();
-                while (rs.next()) {
-                    OrderItemDetail detail = new OrderItemDetail();
-                    detail.setId(rs.getInt("id"));
-                    detail.setOrderId(rs.getInt("order_id"));
-                    detail.setMenuItemId(rs.getInt("menu_item_id"));
-                    detail.setQuantity(rs.getInt("quantity"));
-
-                    BigDecimal price = rs.getBigDecimal("unit_price");
-                    detail.setUnitPrice(price != null ? price.doubleValue() : 0.0);
-
-                    detail.setMenuItemName(rs.getString("menu_item_name"));
-                    detail.setImagePath(rs.getString("image_path"));
-                    detail.setCategory(rs.getString("category"));
-                    detail.setDescription(rs.getString("description"));
-
-                    BigDecimal subtotal = rs.getBigDecimal("subtotal");
-                    detail.setSubtotal(subtotal != null ? subtotal.doubleValue() : 0.0);
-
-                    list.add(detail);
-                }
-                return list;
-            }
-        }
-    }
-
-    /**
-     * Thêm item vào order (hoặc tăng quantity nếu đã có)
-     */
-    public void addItem(int orderId, int menuItemId, int qty) throws SQLException {
-        String checkSql = "SELECT id, quantity FROM order_items WHERE order_id=? AND menu_item_id=?";
-        String updateSql = "UPDATE order_items SET quantity = quantity + ? WHERE id=?";
-        String insertSql = "INSERT INTO order_items(order_id, menu_item_id, quantity) VALUES(?,?,?)";
-
-        try (Connection c = JDBCConnect.getJDBCConnection()) {
-            c.setAutoCommit(false);
-            try {
-                // Kiểm tra item đã tồn tại chưa
-                try (PreparedStatement checkPs = c.prepareStatement(checkSql)) {
-                    checkPs.setInt(1, orderId);
-                    checkPs.setInt(2, menuItemId);
-                    try (ResultSet rs = checkPs.executeQuery()) {
-                        if (rs.next()) {
-                            // Item đã tồn tại, cập nhật quantity
-                            int existingId = rs.getInt("id");
-                            try (PreparedStatement updatePs = c.prepareStatement(updateSql)) {
-                                updatePs.setInt(1, qty);
-                                updatePs.setInt(2, existingId);
-                                updatePs.executeUpdate();
-                            }
-                        } else {
-                            // Item chưa tồn tại, insert mới
-                            try (PreparedStatement insertPs = c.prepareStatement(insertSql)) {
-                                insertPs.setInt(1, orderId);
-                                insertPs.setInt(2, menuItemId);
-                                insertPs.setInt(3, qty);
-                                insertPs.executeUpdate();
-                            }
-                        }
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        Integer orderId = generatedKeys.getInt(1);
+                        System.out.println("Created new order with ID: " + orderId);
+                        return orderId;
                     }
                 }
-                c.commit();
-            } catch (Exception e) {
-                c.rollback();
-                throw e;
-            } finally {
-                c.setAutoCommit(true);
             }
         }
+        return null;
     }
 
-    /**
-     * Cập nhật quantity của order item
-     */
-    public void updateItemQty(int orderItemId, int qty) throws SQLException {
-        if (qty <= 0) {
-            removeItem(orderItemId);
-            return;
-        }
+    // Tìm order pending của bàn
+    public Order findPendingByTable(int tableId) throws SQLException {
+        String sql = "SELECT id, table_id, order_time, status, total_amount FROM orders WHERE table_id = ? AND status = 'pending' ORDER BY order_time DESC LIMIT 1";
 
-        String sql = "UPDATE order_items SET quantity=? WHERE id=?";
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, qty);
-            ps.setInt(2, orderItemId);
-            ps.executeUpdate();
-        }
-    }
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-    /**
-     * Xóa item khỏi order
-     */
-    public void removeItem(int orderItemId) throws SQLException {
-        String sql = "DELETE FROM order_items WHERE id=?";
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, orderItemId);
-            ps.executeUpdate();
-        }
-    }
-
-    /**
-     * Xóa tất cả items của order
-     */
-    public void clearAllItems(int orderId) throws SQLException {
-        String sql = "DELETE FROM order_items WHERE order_id=?";
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
-            ps.executeUpdate();
-        }
-    }
-
-    /**
-     * Tính tổng tiền order
-     */
-    public BigDecimal calcTotal(int orderId) throws SQLException {
-        String sql = """
-            SELECT COALESCE(SUM(oi.quantity * mi.price), 0) AS total
-            FROM order_items oi 
-            JOIN menu_items mi ON mi.id = oi.menu_item_id
-            WHERE oi.order_id = ?
-        """;
-
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
+            ps.setInt(1, tableId);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                BigDecimal total = rs.getBigDecimal("total");
-                return total != null ? total : BigDecimal.ZERO;
-            }
-        }
-    }
-
-    /**
-     * Hoàn thành order
-     */
-    public void complete(int orderId) throws SQLException {
-        try (Connection c = JDBCConnect.getJDBCConnection()) {
-            c.setAutoCommit(false);
-            try {
-                BigDecimal total = calcTotal(orderId);
-
-                // Cập nhật status order
-                try (PreparedStatement p1 = c.prepareStatement(
-                        "UPDATE orders SET status='completed', completed_time=CURRENT_TIMESTAMP WHERE id=?")) {
-                    p1.setInt(1, orderId);
-                    p1.executeUpdate();
-                }
-
-                // Tạo payment record
-                try (PreparedStatement p2 = c.prepareStatement(
-                        "INSERT INTO payments(order_id, total_amount, payment_method, payment_time) VALUES(?, ?, 'cash', CURRENT_TIMESTAMP)")) {
-                    p2.setInt(1, orderId);
-                    p2.setBigDecimal(2, total);
-                    p2.executeUpdate();
-                }
-
-                // Giải phóng bàn
-                try (PreparedStatement p3 = c.prepareStatement(
-                        "UPDATE tables t JOIN orders o ON o.table_id=t.id SET t.status='empty' WHERE o.id=?")) {
-                    p3.setInt(1, orderId);
-                    p3.executeUpdate();
-                }
-
-                c.commit();
-            } catch (Exception e) {
-                c.rollback();
-                throw e;
-            } finally {
-                c.setAutoCommit(true);
-            }
-        }
-    }
-
-    /**
-     * Hủy order
-     */
-    public void cancel(int orderId) throws SQLException {
-        try (Connection c = JDBCConnect.getJDBCConnection()) {
-            c.setAutoCommit(false);
-            try {
-                // Cập nhật status order
-                try (PreparedStatement p1 = c.prepareStatement(
-                        "UPDATE orders SET status='cancelled' WHERE id=?")) {
-                    p1.setInt(1, orderId);
-                    p1.executeUpdate();
-                }
-
-                // Giải phóng bàn
-                try (PreparedStatement p2 = c.prepareStatement(
-                        "UPDATE tables t JOIN orders o ON o.table_id=t.id SET t.status='empty' WHERE o.id=?")) {
-                    p2.setInt(1, orderId);
-                    p2.executeUpdate();
-                }
-
-                c.commit();
-            } catch (Exception e) {
-                c.rollback();
-                throw e;
-            } finally {
-                c.setAutoCommit(true);
-            }
-        }
-    }
-
-    /**
-     * Lấy tất cả orders theo status
-     */
-    public List<Order> findByStatus(String status) throws SQLException {
-        String sql = """
-            SELECT o.id, o.table_id, o.status, o.order_time,
-                   t.table_name, COALESCE(SUM(oi.quantity * mi.price), 0) AS total
-            FROM orders o
-            JOIN tables t ON t.id = o.table_id
-            LEFT JOIN order_items oi ON oi.order_id = o.id
-            LEFT JOIN menu_items mi ON mi.id = oi.menu_item_id
-            WHERE o.status = ?
-            GROUP BY o.id, o.table_id, o.status, o.order_time, t.table_name
-            ORDER BY o.order_time DESC
-        """;
-
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, status);
-            try (ResultSet rs = ps.executeQuery()) {
-                List<Order> orders = new ArrayList<>();
-                while (rs.next()) {
+                if (rs.next()) {
                     Order order = new Order();
                     order.setId(rs.getInt("id"));
                     order.setTableId(rs.getInt("table_id"));
-                    order.setStatus(rs.getString("status"));
                     order.setOrderTime(rs.getTimestamp("order_time"));
-                    // Có thể thêm total và table_name vào Order model nếu cần
-                    orders.add(order);
+                    order.setStatus(rs.getString("status"));
+                    order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                    System.out.println("Found pending order: " + order.getId() + " for table " + tableId);
+                    return order;
                 }
-                return orders;
+            }
+        }
+        System.out.println("No pending order found for table " + tableId);
+        return null;
+    }
+
+    // Thêm item vào order
+    public void addItem(int orderId, int menuItemId, int quantity) throws SQLException {
+        System.out.println("Adding item to order: OrderID=" + orderId + ", MenuItemID=" + menuItemId + ", Qty=" + quantity);
+
+        // Lấy giá hiện tại của món
+        String getPrice = "SELECT price FROM menu_items WHERE id = ?";
+        double price = 0;
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(getPrice)) {
+
+            ps.setInt(1, menuItemId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    price = rs.getDouble("price");
+                    System.out.println("Found price for menu item " + menuItemId + ": " + price);
+                } else {
+                    throw new SQLException("Menu item not found: " + menuItemId);
+                }
+            }
+        }
+
+        // Kiểm tra xem item đã có trong order chưa
+        String checkExist = "SELECT id, quantity FROM order_items WHERE order_id = ? AND menu_item_id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(checkExist)) {
+
+            ps.setInt(1, orderId);
+            ps.setInt(2, menuItemId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Item đã tồn tại - cập nhật quantity
+                    int existingId = rs.getInt("id");
+                    int existingQty = rs.getInt("quantity");
+
+                    System.out.println("Item exists, updating quantity from " + existingQty + " to " + (existingQty + quantity));
+
+                    String updateSql = "UPDATE order_items SET quantity = ? WHERE id = ?";
+                    try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
+                        updatePs.setInt(1, existingQty + quantity);
+                        updatePs.setInt(2, existingId);
+                        updatePs.executeUpdate();
+                    }
+                } else {
+                    // Item chưa tồn tại - thêm mới
+                    System.out.println("Adding new item to order_items");
+
+                    String insertSql = "INSERT INTO order_items (order_id, menu_item_id, quantity, price) VALUES (?, ?, ?, ?)";
+                    try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+                        insertPs.setInt(1, orderId);
+                        insertPs.setInt(2, menuItemId);
+                        insertPs.setInt(3, quantity);
+                        insertPs.setDouble(4, price);
+                        int result = insertPs.executeUpdate();
+                        System.out.println("Insert result: " + result + " rows affected");
+                    }
+                }
+            }
+        }
+
+        System.out.println("Successfully added item to order");
+    }
+
+    // Lấy danh sách items của order
+    public List<OrderItem> findItems(int orderId) throws SQLException {
+        List<OrderItem> items = new ArrayList<>();
+
+        String sql = "SELECT oi.id, oi.order_id, oi.menu_item_id, oi.quantity, oi.price, " +
+                "mi.name as menu_item_name, mi.image_path, mi.description, mi.category " +
+                "FROM order_items oi " +
+                "JOIN menu_items mi ON oi.menu_item_id = mi.id " +
+                "WHERE oi.order_id = ? " +
+                "ORDER BY oi.created_at, oi.id";
+
+        System.out.println("Finding items for order: " + orderId);
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    OrderItem item = new OrderItem();
+                    item.setId(rs.getInt("id"));
+                    item.setOrderId(rs.getInt("order_id"));
+                    item.setMenuItemId(rs.getInt("menu_item_id"));
+                    item.setQuantity(rs.getInt("quantity"));
+                    item.setPrice(rs.getDouble("price"));
+                    item.setMenuItemName(rs.getString("menu_item_name"));
+
+                    // Log để debug
+                    System.out.println("Found OrderItem: " + rs.getString("menu_item_name") +
+                            " x" + rs.getInt("quantity") +
+                            " (MenuItemID: " + rs.getInt("menu_item_id") + ")");
+
+                    items.add(item);
+                }
+            }
+        }
+
+        System.out.println("Total items found: " + items.size());
+        return items;
+    }
+
+    // Tính tổng tiền order
+    public BigDecimal calcTotal(int orderId) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(quantity * price), 0) as total FROM order_items WHERE order_id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    BigDecimal total = rs.getBigDecimal("total");
+                    System.out.println("Calculated total for order " + orderId + ": " + total);
+                    return total;
+                }
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+
+    // Xóa item khỏi order
+    public void removeItem(int orderItemId) throws SQLException {
+        System.out.println("Removing order item: " + orderItemId);
+
+        String sql = "DELETE FROM order_items WHERE id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderItemId);
+            int result = ps.executeUpdate();
+            System.out.println("Remove result: " + result + " rows affected");
+        }
+    }
+
+    // Hoàn thành order - sử dụng stored procedure hoặc manual SQL
+    public void complete(int orderId) throws SQLException {
+        System.out.println("Completing order: " + orderId);
+
+        try {
+            // Thử dùng stored procedure trước
+            String sql = "CALL CompleteOrder(?, ?)";
+
+            try (Connection conn = JDBCConnect.getJDBCConnection();
+                 CallableStatement cs = conn.prepareCall(sql)) {
+
+                cs.setInt(1, orderId);
+                cs.setInt(2, 1); // user_id mặc định là 1
+                cs.execute();
+                System.out.println("Order completed successfully using stored procedure");
+            }
+        } catch (SQLException e) {
+            // Nếu stored procedure không có, dùng manual SQL
+            System.out.println("Stored procedure not available, using manual completion");
+            completeOrderManual(orderId);
+        }
+    }
+
+    // Manual completion nếu stored procedure không có
+    private void completeOrderManual(int orderId) throws SQLException {
+        try (Connection conn = JDBCConnect.getJDBCConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                // Tính tổng tiền
+                BigDecimal total = calcTotal(orderId);
+
+                // Lấy table_id
+                String getTableSql = "SELECT table_id FROM orders WHERE id = ?";
+                int tableId = 0;
+                try (PreparedStatement ps = conn.prepareStatement(getTableSql)) {
+                    ps.setInt(1, orderId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            tableId = rs.getInt("table_id");
+                        }
+                    }
+                }
+
+                // Cập nhật order
+                String updateOrderSql = "UPDATE orders SET status = 'completed', completed_time = CURRENT_TIMESTAMP, total_amount = ? WHERE id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(updateOrderSql)) {
+                    ps.setBigDecimal(1, total);
+                    ps.setInt(2, orderId);
+                    ps.executeUpdate();
+                }
+
+                // Tạo payment
+                String insertPaymentSql = "INSERT INTO payments(order_id, total_amount, payment_method, processed_by) VALUES(?, ?, 'cash', 1)";
+                try (PreparedStatement ps = conn.prepareStatement(insertPaymentSql)) {
+                    ps.setInt(1, orderId);
+                    ps.setBigDecimal(2, total);
+                    ps.executeUpdate();
+                }
+
+                // Giải phóng bàn
+                String updateTableSql = "UPDATE tables SET status = 'empty' WHERE id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(updateTableSql)) {
+                    ps.setInt(1, tableId);
+                    ps.executeUpdate();
+                }
+
+                conn.commit();
+                System.out.println("Order completed manually");
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
         }
     }
 
-    /**
-     * Lấy order theo ID
-     */
-    public Order findById(int orderId) throws SQLException {
-        String sql = "SELECT id, table_id, status, order_time FROM orders WHERE id=?";
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+    // Hủy order
+    public void cancel(int orderId) throws SQLException {
+        System.out.println("Cancelling order: " + orderId);
+
+        try {
+            String sql = "CALL CancelOrder(?)";
+
+            try (Connection conn = JDBCConnect.getJDBCConnection();
+                 CallableStatement cs = conn.prepareCall(sql)) {
+
+                cs.setInt(1, orderId);
+                cs.execute();
+                System.out.println("Order cancelled successfully");
+            }
+        } catch (SQLException e) {
+            // Manual cancel nếu stored procedure không có
+            cancelOrderManual(orderId);
+        }
+    }
+
+    private void cancelOrderManual(int orderId) throws SQLException {
+        try (Connection conn = JDBCConnect.getJDBCConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                // Lấy table_id
+                String getTableSql = "SELECT table_id FROM orders WHERE id = ?";
+                int tableId = 0;
+                try (PreparedStatement ps = conn.prepareStatement(getTableSql)) {
+                    ps.setInt(1, orderId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            tableId = rs.getInt("table_id");
+                        }
+                    }
+                }
+
+                // Cập nhật order status
+                String updateSql = "UPDATE orders SET status = 'cancelled' WHERE id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                    ps.setInt(1, orderId);
+                    ps.executeUpdate();
+                }
+
+                // Giải phóng bàn
+                String updateTableSql = "UPDATE tables SET status = 'empty' WHERE id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(updateTableSql)) {
+                    ps.setInt(1, tableId);
+                    ps.executeUpdate();
+                }
+
+                conn.commit();
+                System.out.println("Order cancelled manually");
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
+    // Lấy tất cả orders
+    public List<Order> findAll() throws SQLException {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT id, table_id, order_time, completed_time, status, total_amount FROM orders ORDER BY order_time DESC";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
                 Order order = new Order();
                 order.setId(rs.getInt("id"));
                 order.setTableId(rs.getInt("table_id"));
-                order.setStatus(rs.getString("status"));
                 order.setOrderTime(rs.getTimestamp("order_time"));
-                return order;
+                order.setCompletedTime(rs.getTimestamp("completed_time"));
+                order.setStatus(rs.getString("status"));
+                order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                orders.add(order);
             }
         }
+        return orders;
     }
 
-    /**
-     * Đếm số items trong order
-     */
-    public int countItems(int orderId) throws SQLException {
-        String sql = "SELECT COALESCE(SUM(quantity), 0) as total_items FROM order_items WHERE order_id=?";
-        try (Connection c = JDBCConnect.getJDBCConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
+    // Tìm order theo ID
+    public Order findById(int id) throws SQLException {
+        String sql = "SELECT id, table_id, order_time, completed_time, status, total_amount FROM orders WHERE id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt("total_items");
+                if (rs.next()) {
+                    Order order = new Order();
+                    order.setId(rs.getInt("id"));
+                    order.setTableId(rs.getInt("table_id"));
+                    order.setOrderTime(rs.getTimestamp("order_time"));
+                    order.setCompletedTime(rs.getTimestamp("completed_time"));
+                    order.setStatus(rs.getString("status"));
+                    order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                    return order;
+                }
             }
         }
+        return null;
     }
 
-    // Inner class để chứa thông tin chi tiết order item
-    public static class OrderItemDetail {
-        private int id;
-        private int orderId;
-        private int menuItemId;
-        private int quantity;
-        private double unitPrice;
-        private double subtotal;
-        private String menuItemName;
-        private String imagePath;
-        private String category;
-        private String description;
+    // Cập nhật quantity của order item
+    public void updateItemQuantity(int orderItemId, int newQuantity) throws SQLException {
+        String sql = "UPDATE order_items SET quantity = ? WHERE id = ?";
 
-        // Getters and setters
-        public int getId() { return id; }
-        public void setId(int id) { this.id = id; }
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        public int getOrderId() { return orderId; }
-        public void setOrderId(int orderId) { this.orderId = orderId; }
-
-        public int getMenuItemId() { return menuItemId; }
-        public void setMenuItemId(int menuItemId) { this.menuItemId = menuItemId; }
-
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
-
-        public double getUnitPrice() { return unitPrice; }
-        public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
-
-        public double getSubtotal() { return subtotal; }
-        public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
-
-        public String getMenuItemName() { return menuItemName; }
-        public void setMenuItemName(String menuItemName) { this.menuItemName = menuItemName; }
-
-        public String getImagePath() { return imagePath; }
-        public void setImagePath(String imagePath) { this.imagePath = imagePath; }
-
-        public String getCategory() { return category; }
-        public void setCategory(String category) { this.category = category; }
-
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
+            ps.setInt(1, newQuantity);
+            ps.setInt(2, orderItemId);
+            ps.executeUpdate();
+        }
     }
 }

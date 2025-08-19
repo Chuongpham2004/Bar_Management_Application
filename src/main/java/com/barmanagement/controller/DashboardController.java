@@ -7,8 +7,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -19,10 +17,18 @@ import javafx.animation.KeyFrame;
 import javafx.util.Duration;
 import com.barmanagement.util.SceneUtil;
 import com.barmanagement.util.LogoutUtil;
+import com.barmanagement.dao.RevenueDAO;
+import com.barmanagement.dao.TableDAO;
+import com.barmanagement.dao.MenuItemDAO;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.Map;
 
 public class DashboardController {
 
@@ -49,19 +55,40 @@ public class DashboardController {
     @FXML private CategoryAxis ordersXAxis;
     @FXML private NumberAxis ordersYAxis;
 
+    // DAOs
+    private RevenueDAO revenueDAO;
+    private TableDAO tableDAO;
+    private MenuItemDAO menuItemDAO;
+
+    // Formatter
+    private final NumberFormat currencyFormatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+
     @FXML
     public void initialize() {
+        // Initialize DAOs
+        revenueDAO = new RevenueDAO();
+        tableDAO = new TableDAO();
+        menuItemDAO = new MenuItemDAO();
+
+        // Setup formatter
+        currencyFormatter.setMaximumFractionDigits(0);
+
         // Initialize time display
         updateTimeDisplay();
 
-        // Start clock update timer
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateTimeDisplay()));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+        // Start clock update timer (every second)
+        Timeline clockTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateTimeDisplay()));
+        clockTimeline.setCycleCount(Timeline.INDEFINITE);
+        clockTimeline.play();
 
         // Initialize dashboard data
         loadDashboardData();
         initializeCharts();
+
+        // Start data refresh timer (every 30 seconds)
+        Timeline dataTimeline = new Timeline(new KeyFrame(Duration.seconds(30), e -> refreshDashboardData()));
+        dataTimeline.setCycleCount(Timeline.INDEFINITE);
+        dataTimeline.play();
     }
 
     private void updateTimeDisplay() {
@@ -79,44 +106,146 @@ public class DashboardController {
     }
 
     private void loadDashboardData() {
-        // Sample data - replace with actual database queries
-        if (lblTodayRevenue != null) lblTodayRevenue.setText("2,500,000 VNĐ");
-        if (lblTodayOrders != null) lblTodayOrders.setText("45");
-        if (lblActiveTables != null) lblActiveTables.setText("8/15");
-        if (lblMenuItems != null) lblMenuItems.setText("32");
+        Platform.runLater(() -> {
+            try {
+                // Load today's revenue
+                BigDecimal todayRevenue = revenueDAO.getTodayRevenue();
+                if (lblTodayRevenue != null) {
+                    lblTodayRevenue.setText(formatCurrency(todayRevenue.doubleValue()));
+                }
+
+                // Load today's orders count
+                int todayOrders = revenueDAO.getTodayOrders();
+                if (lblTodayOrders != null) {
+                    lblTodayOrders.setText(String.valueOf(todayOrders));
+                }
+
+                // Load table status
+                loadTableStatus();
+
+                // Load menu items count
+                loadMenuItemsCount();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showErrorMessage("Không thể tải dữ liệu dashboard: " + e.getMessage());
+            }
+        });
+    }
+
+    private void loadTableStatus() throws SQLException {
+        var tables = tableDAO.findAll();
+        long activeTables = tables.stream()
+                .filter(t -> "occupied".equals(t.getStatus()) || "ordering".equals(t.getStatus()))
+                .count();
+
+        if (lblActiveTables != null) {
+            lblActiveTables.setText(activeTables + "/" + tables.size());
+        }
+    }
+
+    private void loadMenuItemsCount() throws SQLException {
+        var menuItems = menuItemDAO.findAll();
+        if (lblMenuItems != null) {
+            lblMenuItems.setText(String.valueOf(menuItems.size()));
+        }
+    }
+
+    private void refreshDashboardData() {
+        loadDashboardData();
+        updateCharts();
     }
 
     private void initializeCharts() {
-        if (revenueChart != null) {
-            XYChart.Series<String, Number> revenueSeries = new XYChart.Series<>();
-            revenueSeries.setName("Doanh thu (triệu VNĐ)");
-
-            revenueSeries.getData().add(new XYChart.Data<>("T2", 1.5));
-            revenueSeries.getData().add(new XYChart.Data<>("T3", 2.1));
-            revenueSeries.getData().add(new XYChart.Data<>("T4", 1.8));
-            revenueSeries.getData().add(new XYChart.Data<>("T5", 2.5));
-            revenueSeries.getData().add(new XYChart.Data<>("T6", 3.2));
-            revenueSeries.getData().add(new XYChart.Data<>("T7", 4.1));
-            revenueSeries.getData().add(new XYChart.Data<>("CN", 3.8));
-
-            revenueChart.getData().add(revenueSeries);
-        }
-
-        if (ordersChart != null) {
-            XYChart.Series<String, Number> ordersSeries = new XYChart.Series<>();
-            ordersSeries.setName("Số đơn hàng");
-
-            ordersSeries.getData().add(new XYChart.Data<>("T2", 25));
-            ordersSeries.getData().add(new XYChart.Data<>("T3", 32));
-            ordersSeries.getData().add(new XYChart.Data<>("T4", 28));
-            ordersSeries.getData().add(new XYChart.Data<>("T5", 38));
-            ordersSeries.getData().add(new XYChart.Data<>("T6", 45));
-            ordersSeries.getData().add(new XYChart.Data<>("T7", 52));
-            ordersSeries.getData().add(new XYChart.Data<>("CN", 48));
-
-            ordersChart.getData().add(ordersSeries);
-        }
+        updateCharts();
     }
+
+    private void updateCharts() {
+        Platform.runLater(() -> {
+            try {
+                updateRevenueChart();
+                updateOrdersChart();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void updateRevenueChart() throws SQLException {
+        if (revenueChart == null) return;
+
+        revenueChart.getData().clear();
+
+        Map<String, BigDecimal> weeklyRevenue = revenueDAO.getWeeklyRevenue();
+
+        XYChart.Series<String, Number> revenueSeries = new XYChart.Series<>();
+        revenueSeries.setName("Doanh thu (VNĐ)");
+
+        // Convert dates to day names and add data
+        String[] dayNames = {"T2", "T3", "T4", "T5", "T6", "T7", "CN"};
+        int dayIndex = 0;
+
+        for (Map.Entry<String, BigDecimal> entry : weeklyRevenue.entrySet()) {
+            String dayName = dayIndex < dayNames.length ? dayNames[dayIndex] : entry.getKey();
+            double amount = entry.getValue().doubleValue() / 1000000; // Convert to millions
+            revenueSeries.getData().add(new XYChart.Data<>(dayName, amount));
+            dayIndex++;
+        }
+
+        // Fill missing days with zero if needed
+        while (dayIndex < 7) {
+            revenueSeries.getData().add(new XYChart.Data<>(dayNames[dayIndex], 0));
+            dayIndex++;
+        }
+
+        revenueChart.getData().add(revenueSeries);
+    }
+
+    private void updateOrdersChart() throws SQLException {
+        if (ordersChart == null) return;
+
+        ordersChart.getData().clear();
+
+        Map<String, Integer> weeklyOrders = revenueDAO.getWeeklyOrders();
+
+        XYChart.Series<String, Number> ordersSeries = new XYChart.Series<>();
+        ordersSeries.setName("Số đơn hàng");
+
+        // Convert dates to day names and add data
+        String[] dayNames = {"T2", "T3", "T4", "T5", "T6", "T7", "CN"};
+        int dayIndex = 0;
+
+        for (Map.Entry<String, Integer> entry : weeklyOrders.entrySet()) {
+            String dayName = dayIndex < dayNames.length ? dayNames[dayIndex] : entry.getKey();
+            int orders = entry.getValue();
+            ordersSeries.getData().add(new XYChart.Data<>(dayName, orders));
+            dayIndex++;
+        }
+
+        // Fill missing days with zero if needed
+        while (dayIndex < 7) {
+            ordersSeries.getData().add(new XYChart.Data<>(dayNames[dayIndex], 0));
+            dayIndex++;
+        }
+
+        ordersChart.getData().add(ordersSeries);
+    }
+
+    private String formatCurrency(double amount) {
+        return currencyFormatter.format(amount) + " VNĐ";
+    }
+
+    private void showErrorMessage(String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Lỗi");
+            alert.setHeaderText("Lỗi tải dữ liệu");
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
+
+    // ===== EVENT HANDLERS =====
 
     @FXML
     private void handleManageTables(ActionEvent event) {
@@ -140,7 +269,6 @@ public class DashboardController {
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        // Sử dụng LogoutUtil thay vì phương thức confirmLogout riêng
         LogoutUtil.confirmLogout(logoutButton);
     }
 
@@ -152,7 +280,8 @@ public class DashboardController {
     // Navigation methods for dashboard
     @FXML
     private void showHome() {
-        // Already on dashboard
+        // Already on dashboard - refresh data
+        refreshDashboardData();
     }
 
     private void openScene(ActionEvent event, String fxmlPath, String title) {
@@ -165,6 +294,7 @@ public class DashboardController {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
+            showErrorMessage("Không thể mở " + title + ": " + e.getMessage());
         }
     }
 }

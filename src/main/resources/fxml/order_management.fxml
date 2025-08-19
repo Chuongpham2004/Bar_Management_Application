@@ -111,575 +111,671 @@
             </children>
         </HBox>
 
-        <!-- Main Content Area -->
-        <ScrollPane layoutX="250.0" layoutY="60.0" prefHeight="740.0" prefWidth="950.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="250.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
-            <content>
-                <VBox prefHeight="1400.0" prefWidth="930.0" spacing="20.0" style="-fx-background-color: #1a1a2e;">
-                    <children>
-                        <!-- Table Layout Section -->
-                        <VBox prefWidth="930.0" spacing="15.0">
+        <!-- Main Content Area với Popup Overlay -->
+        <StackPane layoutX="250.0" layoutY="60.0" prefHeight="740.0" prefWidth="950.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="250.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
+            <children>
+                <!-- Main Content -->
+                <ScrollPane style="-fx-background-color: transparent;">
+                    <content>
+                        <VBox prefHeight="1400.0" prefWidth="930.0" spacing="20.0" style="-fx-background-color: #1a1a2e;">
                             <children>
-                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                <!-- Table Layout Section -->
+                                <VBox prefWidth="930.0" spacing="15.0">
                                     <children>
-                                        <Label text="Chọn Bàn" textFill="WHITE">
+                                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                            <children>
+                                                <Label text="Chọn Bàn" textFill="WHITE">
+                                                    <font>
+                                                        <Font name="System Bold" size="18.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="selectedTableLabel" text="(Chưa chọn bàn)" textFill="#e16428">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Instruction Label -->
+                                        <Label text="💡 CÁCH SỬ DỤNG: 1️⃣ Click TRÁI để chọn bàn → 2️⃣ Tạo Order → 3️⃣ Click món để thêm vào order • Click PHẢI bàn để đổi trạng thái" textFill="#B0B0B0">
+                                            <font>
+                                                <Font size="11.0" />
+                                            </font>
+                                            <padding>
+                                                <Insets left="20.0" />
+                                            </padding>
+                                        </Label>
+
+                                        <!-- Table Grid -->
+                                        <VBox style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 25;">
+                                            <children>
+                                                <!-- Legend -->
+                                                <HBox alignment="CENTER" spacing="30.0" style="-fx-padding: 0 0 15 0;">
+                                                    <children>
+                                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                            <children>
+                                                                <Circle fill="#4CAF50" radius="8.0" />
+                                                                <Label text="Trống" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                            <children>
+                                                                <Circle fill="#f44336" radius="8.0" />
+                                                                <Label text="Đang sử dụng" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                            <children>
+                                                                <Circle fill="#FF9800" radius="8.0" />
+                                                                <Label text="Đặt trước" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                            <children>
+                                                                <Circle fill="#9C27B0" radius="8.0" />
+                                                                <Label text="Đang chọn" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                </HBox>
+
+                                                <!-- Separator -->
+                                                <Pane prefHeight="1.0" style="-fx-background-color: #2a3d5c;">
+                                                    <VBox.margin>
+                                                        <Insets top="15.0" bottom="25.0" />
+                                                    </VBox.margin>
+                                                </Pane>
+
+                                                <!-- Tables Grid -->
+                                                <GridPane fx:id="tableGrid" alignment="CENTER" hgap="50.0" vgap="40.0">
+                                                    <children>
+                                                        <!-- Row 1 -->
+                                                        <!-- Bàn 1 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="1" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <!-- Main table -->
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <!-- Top chair -->
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <!-- Bottom chair -->
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
+                                                                <!-- Left chair -->
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <!-- Right chair -->
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
+                                                                <!-- Table label -->
+                                                                <Label text="Bàn 1" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#4CAF50" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 2 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="2" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 2" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#4CAF50" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 3 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="3" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#f44336" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 3" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#f44336" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 4 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="4" GridPane.columnIndex="3" GridPane.rowIndex="0" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 4" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#4CAF50" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 5 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="5" GridPane.columnIndex="4" GridPane.rowIndex="0" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#FF9800" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 5" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#FF9800" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- VIP 1 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="6" GridPane.columnIndex="5" GridPane.rowIndex="0" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#9C27B0" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="VIP 1" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#9C27B0" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Row 2 -->
+                                                        <!-- Bàn 7 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="7" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 7" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#4CAF50" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 8 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="8" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#f44336" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 8" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#f44336" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 9 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="9" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 9" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#4CAF50" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 10 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="10" GridPane.columnIndex="3" GridPane.rowIndex="1" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 10" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#4CAF50" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- Bàn 11 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="11" GridPane.columnIndex="4" GridPane.rowIndex="1" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#FF9800" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="Bàn 11" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#FF9800" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+
+                                                        <!-- VIP 2 -->
+                                                        <StackPane onMouseClicked="#selectTable" userData="12" GridPane.columnIndex="5" GridPane.rowIndex="1" style="-fx-cursor: hand;">
+                                                            <children>
+                                                                <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#9C27B0" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="-37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="37.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="-47.5" />
+                                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="47.5" />
+                                                                <Label text="VIP 2" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                            <effect>
+                                                                <DropShadow color="#9C27B0" radius="5.0" />
+                                                            </effect>
+                                                        </StackPane>
+                                                    </children>
+                                                    <columnConstraints>
+                                                        <ColumnConstraints />
+                                                        <ColumnConstraints />
+                                                        <ColumnConstraints />
+                                                        <ColumnConstraints />
+                                                        <ColumnConstraints />
+                                                        <ColumnConstraints />
+                                                    </columnConstraints>
+                                                    <rowConstraints>
+                                                        <RowConstraints />
+                                                        <RowConstraints />
+                                                    </rowConstraints>
+                                                </GridPane>
+                                            </children>
+                                            <effect>
+                                                <DropShadow color="#16213e" radius="10.0" />
+                                            </effect>
+                                        </VBox>
+                                    </children>
+                                    <padding>
+                                        <Insets left="20.0" right="20.0" />
+                                    </padding>
+                                </VBox>
+
+                                <!-- Order Information Section -->
+                                <VBox prefWidth="930.0" spacing="15.0">
+                                    <children>
+                                        <Label text="📋 Thông Tin Order" textFill="WHITE">
                                             <font>
                                                 <Font name="System Bold" size="18.0" />
                                             </font>
                                         </Label>
-                                        <Label fx:id="selectedTableLabel" text="(Chưa chọn bàn)" textFill="#e16428">
-                                            <font>
-                                                <Font name="System Bold" size="14.0" />
-                                            </font>
-                                        </Label>
-                                    </children>
-                                </HBox>
 
-                                <!-- Table Grid -->
-                                <VBox style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 25;">
-                                    <children>
-                                        <!-- Legend -->
-                                        <HBox alignment="CENTER" spacing="30.0" style="-fx-padding: 0 0 15 0;">
+                                        <HBox spacing="20.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 20;">
                                             <children>
-                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                <!-- Order ID -->
+                                                <VBox spacing="8.0">
                                                     <children>
-                                                        <Circle fill="#4CAF50" radius="8.0" />
-                                                        <Label text="Trống" textFill="WHITE">
+                                                        <Label text="📄 Mã Order" textFill="WHITE">
                                                             <font>
-                                                                <Font size="12.0" />
+                                                                <Font name="System Bold" size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblOrderId" prefHeight="35.0" text="(chưa có)" textFill="#e16428" style="-fx-background-color: #0f3460; -fx-background-radius: 5; -fx-padding: 8;">
+                                                            <font>
+                                                                <Font name="System Bold" size="14.0" />
                                                             </font>
                                                         </Label>
                                                     </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                </VBox>
+
+                                                <!-- Total -->
+                                                <VBox spacing="8.0">
                                                     <children>
-                                                        <Circle fill="#f44336" radius="8.0" />
-                                                        <Label text="Đang sử dụng" textFill="WHITE">
+                                                        <Label text="💰 Tổng Tiền" textFill="WHITE">
                                                             <font>
-                                                                <Font size="12.0" />
+                                                                <Font name="System Bold" size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblTotal" prefHeight="35.0" text="0 VNĐ" textFill="#4CAF50" style="-fx-background-color: #0f3460; -fx-background-radius: 5; -fx-padding: 8;">
+                                                            <font>
+                                                                <Font name="System Bold" size="16.0" />
                                                             </font>
                                                         </Label>
                                                     </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                </VBox>
+
+                                                <!-- Action Buttons -->
+                                                <VBox spacing="10.0" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
                                                     <children>
-                                                        <Circle fill="#FF9800" radius="8.0" />
-                                                        <Label text="Đặt trước" textFill="WHITE">
+                                                        <Button onAction="#newOrder" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8;" text="➕ Tạo Order">
                                                             <font>
-                                                                <Font size="12.0" />
+                                                                <Font name="System Bold" size="12.0" />
                                                             </font>
-                                                        </Label>
-                                                    </children>
-                                                </HBox>
-                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                                    <children>
-                                                        <Circle fill="#e16428" radius="8.0" />
-                                                        <Label text="Đang chọn" textFill="WHITE">
+                                                        </Button>
+                                                        <Button onAction="#reload" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8;" text="🔄 Làm Mới">
                                                             <font>
-                                                                <Font size="12.0" />
+                                                                <Font name="System Bold" size="12.0" />
                                                             </font>
-                                                        </Label>
+                                                        </Button>
                                                     </children>
-                                                </HBox>
+                                                </VBox>
                                             </children>
+                                            <effect>
+                                                <DropShadow color="#16213e" radius="10.0" />
+                                            </effect>
                                         </HBox>
-
-                                        <!-- Separator -->
-                                        <Pane prefHeight="1.0" style="-fx-background-color: #2a3d5c;">
-                                            <VBox.margin>
-                                                <Insets top="15.0" bottom="25.0" />
-                                            </VBox.margin>
-                                        </Pane>
-
-                                        <!-- Tables Grid -->
-                                        <GridPane fx:id="tableGrid" alignment="CENTER" hgap="50.0" vgap="40.0">
-                                            <children>
-                                                <!-- Row 1 -->
-                                                <!-- Bàn 1 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="1" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <!-- Main table -->
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <!-- Top chair -->
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <!-- Bottom chair -->
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
-                                                        <!-- Left chair -->
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <!-- Right chair -->
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
-                                                        <!-- Table label -->
-                                                        <Label text="Bàn 1" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#4CAF50" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 2 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="2" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 2" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#4CAF50" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 3 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="3" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#f44336" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 3" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#f44336" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 4 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="4" GridPane.columnIndex="3" GridPane.rowIndex="0" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 4" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#4CAF50" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 5 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="5" GridPane.columnIndex="4" GridPane.rowIndex="0" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#FF9800" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 5" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#FF9800" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- VIP 1 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="6" GridPane.columnIndex="5" GridPane.rowIndex="0" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#9C27B0" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="VIP 1" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#9C27B0" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Row 2 -->
-                                                <!-- Bàn 7 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="7" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 7" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#4CAF50" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 8 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="8" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#f44336" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#B71C1C" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 8" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#f44336" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 9 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="9" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 9" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#4CAF50" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 10 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="10" GridPane.columnIndex="3" GridPane.rowIndex="1" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#4CAF50" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#2E7D32" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 10" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#4CAF50" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- Bàn 11 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="11" GridPane.columnIndex="4" GridPane.rowIndex="1" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#FF9800" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#E65100" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="Bàn 11" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#FF9800" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-
-                                                <!-- VIP 2 -->
-                                                <StackPane onMouseClicked="#selectTable" userData="12" GridPane.columnIndex="5" GridPane.rowIndex="1" style="-fx-cursor: hand;">
-                                                    <children>
-                                                        <Rectangle arcHeight="10.0" arcWidth="10.0" fill="#9C27B0" height="60.0" width="80.0" stroke="#ffffff" strokeWidth="2.0" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="-37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="15.0" width="25.0" translateY="37.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="-47.5" />
-                                                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#4A148C" height="25.0" width="15.0" translateX="47.5" />
-                                                        <Label text="VIP 2" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                    </children>
-                                                    <effect>
-                                                        <DropShadow color="#9C27B0" radius="5.0" />
-                                                    </effect>
-                                                </StackPane>
-                                            </children>
-                                            <columnConstraints>
-                                                <ColumnConstraints />
-                                                <ColumnConstraints />
-                                                <ColumnConstraints />
-                                                <ColumnConstraints />
-                                                <ColumnConstraints />
-                                                <ColumnConstraints />
-                                            </columnConstraints>
-                                            <rowConstraints>
-                                                <RowConstraints />
-                                                <RowConstraints />
-                                            </rowConstraints>
-                                        </GridPane>
                                     </children>
-                                    <effect>
-                                        <DropShadow color="#16213e" radius="10.0" />
-                                    </effect>
+                                    <padding>
+                                        <Insets left="20.0" right="20.0" />
+                                    </padding>
                                 </VBox>
-                            </children>
-                            <padding>
-                                <Insets left="20.0" right="20.0" />
-                            </padding>
-                        </VBox>
 
-                        <!-- Order Information Section -->
-                        <VBox prefWidth="930.0" spacing="15.0">
-                            <children>
-                                <Label text="📋 Thông Tin Order" textFill="WHITE">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                </Label>
-
-                                <HBox spacing="20.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 20;">
+                                <!-- Main Content - Two Columns -->
+                                <HBox prefWidth="930.0" spacing="20.0">
                                     <children>
-                                        <!-- Order ID -->
-                                        <VBox spacing="8.0">
+                                        <!-- Left Column - Menu -->
+                                        <VBox prefWidth="455.0" spacing="15.0">
                                             <children>
-                                                <Label text="📄 Mã Order" textFill="WHITE">
-                                                    <font>
-                                                        <Font name="System Bold" size="14.0" />
-                                                    </font>
-                                                </Label>
-                                                <Label fx:id="lblOrderId" prefHeight="35.0" text="(chưa có)" textFill="#e16428" style="-fx-background-color: #0f3460; -fx-background-radius: 5; -fx-padding: 8;">
-                                                    <font>
-                                                        <Font name="System Bold" size="14.0" />
-                                                    </font>
-                                                </Label>
-                                            </children>
-                                        </VBox>
-
-                                        <!-- Total -->
-                                        <VBox spacing="8.0">
-                                            <children>
-                                                <Label text="💰 Tổng Tiền" textFill="WHITE">
-                                                    <font>
-                                                        <Font name="System Bold" size="14.0" />
-                                                    </font>
-                                                </Label>
-                                                <Label fx:id="lblTotal" prefHeight="35.0" text="0 VNĐ" textFill="#4CAF50" style="-fx-background-color: #0f3460; -fx-background-radius: 5; -fx-padding: 8;">
+                                                <Label text="🍸 Menu" textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="16.0" />
                                                     </font>
                                                 </Label>
+
+                                                <!-- Menu Items with Images -->
+                                                <VBox style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 15;">
+                                                    <children>
+                                                        <!-- Menu Category Filter -->
+                                                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 0 0 15 0;">
+                                                            <children>
+                                                                <Label text="Loại:" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                                <ComboBox fx:id="cbCategory" prefWidth="120.0" style="-fx-background-color: #0f3460; -fx-text-fill: white; -fx-prompt-text-fill: white; -fx-selection-bar-text: white; -fx-focused-text-base-color: white; -fx-text-base-color: white;">
+                                                                </ComboBox>
+                                                            </children>
+                                                        </HBox>
+
+                                                        <!-- Menu Container - Chỉ cuộn dọc -->
+                                                        <ScrollPane prefHeight="280.0" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0 10 0 0;">
+                                                            <content>
+                                                                <VBox fx:id="menuContainer" spacing="10.0" style="-fx-background-color: transparent; -fx-padding: 0 10 0 0;">
+                                                                </VBox>
+                                                            </content>
+                                                        </ScrollPane>
+
+                                                        <!-- Add Item Controls -->
+                                                        <HBox alignment="CENTER" spacing="15.0" style="-fx-padding: 15 0 0 0;">
+                                                            <children>
+                                                                <Label text="Số lượng:" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                                <Spinner fx:id="spQty" prefHeight="30.0" prefWidth="80.0" />
+                                                                <Button onAction="#addItem" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-background-radius: 8;" text="➕ Thêm">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Button>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                    <effect>
+                                                        <DropShadow color="#16213e" radius="10.0" />
+                                                    </effect>
+                                                </VBox>
                                             </children>
                                         </VBox>
 
-                                        <!-- Action Buttons -->
-                                        <VBox spacing="10.0" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                                        <!-- Right Column - Order Items -->
+                                        <VBox prefWidth="470.0" spacing="15.0">
                                             <children>
-                                                <Button onAction="#newOrder" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8;" text="➕ Tạo Order">
+                                                <Label text="🧾 Chi Tiết Order" textFill="WHITE">
                                                     <font>
-                                                        <Font name="System Bold" size="12.0" />
+                                                        <Font name="System Bold" size="16.0" />
                                                     </font>
-                                                </Button>
-                                                <Button onAction="#reload" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8;" text="🔄 Làm Mới">
-                                                    <font>
-                                                        <Font name="System Bold" size="12.0" />
-                                                    </font>
-                                                </Button>
+                                                </Label>
+
+                                                <!-- Order Items with Images -->
+                                                <VBox style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 15;">
+                                                    <children>
+                                                        <!-- Order Items Container - Chỉ cuộn dọc -->
+                                                        <ScrollPane prefHeight="320" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0 10 0 0;">
+                                                            <content>
+                                                                <VBox fx:id="orderContainer" spacing="8.0" style="-fx-background-color: transparent; -fx-padding: 0 10 0 0;">
+                                                                </VBox>
+                                                            </content>
+                                                        </ScrollPane>
+
+                                                        <!-- Order Actions -->
+                                                        <HBox alignment="CENTER" spacing="15.0" style="-fx-padding: 15 0 0 0;">
+                                                            <children>
+                                                                <Button onAction="#clearOrder" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 8;" text="🗑️ Xóa Tất Cả">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="11.0" />
+                                                                    </font>
+                                                                </Button>
+                                                                <Button onAction="#completeOrder" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8;" text="✅ Hoàn Thành">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Button>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                    <effect>
+                                                        <DropShadow color="#16213e" radius="10.0" />
+                                                    </effect>
+                                                </VBox>
                                             </children>
                                         </VBox>
                                     </children>
-                                    <effect>
-                                        <DropShadow color="#16213e" radius="10.0" />
-                                    </effect>
+                                    <padding>
+                                        <Insets left="20.0" right="20.0" />
+                                    </padding>
                                 </HBox>
-                            </children>
-                            <padding>
-                                <Insets left="20.0" right="20.0" />
-                            </padding>
-                        </VBox>
 
-                        <!-- Main Content - Two Columns -->
-                        <HBox prefWidth="930.0" spacing="20.0">
-                            <children>
-                                <!-- Left Column - Menu -->
-                                <VBox prefWidth="455.0" spacing="15.0">
+                                <!-- Quick Actions Section -->
+                                <VBox prefWidth="930.0" spacing="15.0">
                                     <children>
-                                        <Label text="🍸 Menu" textFill="WHITE">
+                                        <Label text="⚡ Thao Tác Nhanh" textFill="WHITE">
                                             <font>
                                                 <Font name="System Bold" size="16.0" />
                                             </font>
                                         </Label>
 
-                                        <!-- Menu Items with Images -->
-                                        <VBox style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 15;">
+                                        <HBox spacing="15.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 20;">
                                             <children>
-                                                <!-- Menu Category Filter -->
-                                                <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 0 0 15 0;">
-                                                    <children>
-                                                        <Label text="Loại:" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                        <ComboBox fx:id="cbCategory" prefWidth="120.0" style="-fx-background-color: #0f3460; -fx-text-fill: white; -fx-prompt-text-fill: white; -fx-selection-bar-text: white; -fx-focused-text-base-color: white; -fx-text-base-color: white;">
-                                                        </ComboBox>
-                                                    </children>
-                                                </HBox>
-
-                                                <!-- Menu Container - Chỉ cuộn dọc -->
-                                                <ScrollPane prefHeight="280.0" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0 10 0 0;">
-                                                    <content>
-                                                        <VBox fx:id="menuContainer" spacing="10.0" style="-fx-background-color: transparent; -fx-padding: 0 10 0 0;">
-                                                        </VBox>
-                                                    </content>
-                                                </ScrollPane>
-
-                                                <!-- Add Item Controls -->
-                                                <HBox alignment="CENTER" spacing="15.0" style="-fx-padding: 15 0 0 0;">
-                                                    <children>
-                                                        <Label text="Số lượng:" textFill="WHITE">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Label>
-                                                        <Spinner fx:id="spQty" prefHeight="30.0" prefWidth="80.0" />
-                                                        <Button onAction="#addItem" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-background-radius: 8;" text="➕ Thêm">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Button>
-                                                    </children>
-                                                </HBox>
+                                                <Button onAction="#showAllOrders" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 10;" text="📋 Xem Tất Cả Orders">
+                                                    <font>
+                                                        <Font name="System Bold" size="12.0" />
+                                                    </font>
+                                                </Button>
+                                                <Button onAction="#showReports" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-background-radius: 10;" text="📊 Báo Cáo Doanh Thu">
+                                                    <font>
+                                                        <Font name="System Bold" size="12.0" />
+                                                    </font>
+                                                </Button>
+                                                <Button onAction="#showTableManagement" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #607D8B; -fx-text-fill: white; -fx-background-radius: 10;" text="⚙️ Cài Đặt Bàn">
+                                                    <font>
+                                                        <Font name="System Bold" size="12.0" />
+                                                    </font>
+                                                </Button>
+                                                <Button onAction="#goBack" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-background-radius: 10;" text="🏠 Về Trang Chủ">
+                                                    <font>
+                                                        <Font name="System Bold" size="12.0" />
+                                                    </font>
+                                                </Button>
                                             </children>
                                             <effect>
                                                 <DropShadow color="#16213e" radius="10.0" />
                                             </effect>
-                                        </VBox>
+                                        </HBox>
                                     </children>
+                                    <padding>
+                                        <Insets left="20.0" right="20.0" />
+                                    </padding>
                                 </VBox>
 
-                                <!-- Right Column - Order Items -->
-                                <VBox prefWidth="470.0" spacing="15.0">
-                                    <children>
-                                        <Label text="🧾 Chi Tiết Order" textFill="WHITE">
-                                            <font>
-                                                <Font name="System Bold" size="16.0" />
-                                            </font>
-                                        </Label>
-
-                                        <!-- Order Items with Images -->
-                                        <VBox style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 15;">
-                                            <children>
-                                                <!-- Order Items Container - Chỉ cuộn dọc -->
-                                                <ScrollPane prefHeight="320" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0 10 0 0;">
-                                                    <content>
-                                                        <VBox fx:id="orderContainer" spacing="8.0" style="-fx-background-color: transparent; -fx-padding: 0 10 0 0;">
-                                                        </VBox>
-                                                    </content>
-                                                </ScrollPane>
-
-                                                <!-- Order Actions -->
-                                                <HBox alignment="CENTER" spacing="15.0" style="-fx-padding: 15 0 0 0;">
-                                                    <children>
-                                                        <Button onAction="#clearOrder" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 8;" text="🗑️ Xóa Tất Cả">
-                                                            <font>
-                                                                <Font name="System Bold" size="11.0" />
-                                                            </font>
-                                                        </Button>
-                                                        <Button onAction="#completeOrder" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8;" text="✅ Hoàn Thành">
-                                                            <font>
-                                                                <Font name="System Bold" size="12.0" />
-                                                            </font>
-                                                        </Button>
-                                                    </children>
-                                                </HBox>
-                                            </children>
-                                            <effect>
-                                                <DropShadow color="#16213e" radius="10.0" />
-                                            </effect>
-                                        </VBox>
-                                    </children>
-                                </VBox>
+                                <!-- Hidden ComboBox for compatibility -->
+                                <ComboBox fx:id="cbTable" visible="false" />
                             </children>
                             <padding>
-                                <Insets left="20.0" right="20.0" />
-                            </padding>
-                        </HBox>
-
-                        <!-- Quick Actions Section -->
-                        <VBox prefWidth="930.0" spacing="15.0">
-                            <children>
-                                <Label text="⚡ Thao Tác Nhanh" textFill="WHITE">
-                                    <font>
-                                        <Font name="System Bold" size="16.0" />
-                                    </font>
-                                </Label>
-
-                                <HBox spacing="15.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 20;">
-                                    <children>
-                                        <Button onAction="#showAllOrders" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 10;" text="📋 Xem Tất Cả Orders">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Button>
-                                        <Button onAction="#showReports" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-background-radius: 10;" text="📊 Báo Cáo Doanh Thu">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Button>
-                                        <Button onAction="#showTableManagement" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #607D8B; -fx-text-fill: white; -fx-background-radius: 10;" text="⚙️ Cài Đặt Bàn">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Button>
-                                        <Button onAction="#goBack" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #795548; -fx-text-fill: white; -fx-background-radius: 10;" text="🏠 Về Trang Chủ">
-                                            <font>
-                                                <Font name="System Bold" size="12.0" />
-                                            </font>
-                                        </Button>
-                                    </children>
-                                    <effect>
-                                        <DropShadow color="#16213e" radius="10.0" />
-                                    </effect>
-                                </HBox>
-                            </children>
-                            <padding>
-                                <Insets left="20.0" right="20.0" />
+                                <Insets bottom="20.0" top="20.0" />
                             </padding>
                         </VBox>
+                    </content>
+                </ScrollPane>
 
-                        <!-- Hidden ComboBox for compatibility -->
-                        <ComboBox fx:id="cbTable" visible="false" />
+                <!-- TABLE STATUS POPUP OVERLAY -->
+                <VBox fx:id="tableStatusPopup" alignment="CENTER" style="-fx-background-color: rgba(0,0,0,0.7);" visible="false" onMouseClicked="#hideTableStatusPopup">
+                    <children>
+                        <!-- Popup Content -->
+                        <VBox fx:id="popupContent" spacing="12" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);" onMouseClicked="#preventPopupClose" maxWidth="300">
+                            <children>
+                                <!-- Header -->
+                                <HBox alignment="CENTER" spacing="10">
+                                    <children>
+                                        <Label text="🔄" style="-fx-font-size: 20px;" />
+                                        <Label fx:id="popupTableTitle" text="Chọn trạng thái cho Bàn X" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #333;" />
+                                    </children>
+                                </HBox>
+
+                                <!-- Separator -->
+                                <Pane prefHeight="1" style="-fx-background-color: #e0e0e0;" />
+
+                                <!-- Status Options -->
+                                <VBox spacing="8">
+                                    <children>
+                                        <!-- Empty Status -->
+                                        <Button fx:id="btnStatusEmpty" onAction="#setTableStatusEmpty" prefWidth="260" prefHeight="40"
+                                                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                                            <graphic>
+                                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <Circle fill="#FFFFFF" radius="6" />
+                                                        <Label text="Trống" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                                    </children>
+                                                </HBox>
+                                            </graphic>
+                                        </Button>
+
+                                        <!-- Occupied Status -->
+                                        <Button fx:id="btnStatusOccupied" onAction="#setTableStatusOccupied" prefWidth="260" prefHeight="40"
+                                                style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                                            <graphic>
+                                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <Circle fill="#FFFFFF" radius="6" />
+                                                        <Label text="Đang sử dụng" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                                    </children>
+                                                </HBox>
+                                            </graphic>
+                                        </Button>
+
+                                        <!-- Reserved Status -->
+                                        <Button fx:id="btnStatusReserved" onAction="#setTableStatusReserved" prefWidth="260" prefHeight="40"
+                                                style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                                            <graphic>
+                                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <Circle fill="#FFFFFF" radius="6" />
+                                                        <Label text="Đặt trước" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                                    </children>
+                                                </HBox>
+                                            </graphic>
+                                        </Button>
+
+                                        <!-- Ordering Status -->
+                                        <Button fx:id="btnStatusOrdering" onAction="#setTableStatusOrdering" prefWidth="260" prefHeight="40"
+                                                style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;">
+                                            <graphic>
+                                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <Circle fill="#FFFFFF" radius="6" />
+                                                        <Label text="Đang chọn" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                                    </children>
+                                                </HBox>
+                                            </graphic>
+                                        </Button>
+                                    </children>
+                                </VBox>
+
+                                <!-- Footer -->
+                                <Label text="👆 Chọn trạng thái hoặc click bên ngoài để đóng" style="-fx-font-size: 11px; -fx-text-fill: #666; -fx-text-alignment: center;" />
+                            </children>
+                        </VBox>
                     </children>
-                    <padding>
-                        <Insets bottom="20.0" top="20.0" />
-                    </padding>
                 </VBox>
-            </content>
-        </ScrollPane>
+            </children>
+        </StackPane>
     </children>
 </AnchorPane>

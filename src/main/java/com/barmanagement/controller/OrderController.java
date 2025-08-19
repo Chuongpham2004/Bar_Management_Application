@@ -3,6 +3,7 @@ package com.barmanagement.controller;
 import com.barmanagement.dao.MenuItemDAO;
 import com.barmanagement.dao.OrderDAO;
 import com.barmanagement.dao.TableDAO;
+import com.barmanagement.dao.RevenueDAO;
 import com.barmanagement.dao.JDBCConnect;
 import com.barmanagement.model.MenuItem;
 import com.barmanagement.model.Order;
@@ -20,38 +21,49 @@ import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.application.Platform;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class OrderController {
 
-    // ===== FXML Elements từ thiết kế mới =====
+    // ===== FXML Elements =====
     @FXML private ComboBox<Table> cbTable;
     @FXML private ComboBox<String> cbCategory;
     @FXML private Label selectedTableLabel;
     @FXML private GridPane tableGrid;
-
-    // Menu và Order containers (VBox thay vì TableView)
     @FXML private VBox menuContainer;
     @FXML private VBox orderContainer;
-
     @FXML private Spinner<Integer> spQty;
     @FXML private Label lblOrderId, lblTotal;
+
+    // ===== Popup Elements =====
+    @FXML private VBox tableStatusPopup;
+    @FXML private VBox popupContent;
+    @FXML private Label popupTableTitle;
+    @FXML private Button btnStatusEmpty;
+    @FXML private Button btnStatusOccupied;
+    @FXML private Button btnStatusReserved;
+    @FXML private Button btnStatusOrdering;
 
     // ===== Data và Services =====
     private final TableDAO tableDAO = new TableDAO();
     private final MenuItemDAO menuDAO = new MenuItemDAO();
     private final OrderDAO orderDAO = new OrderDAO();
+    private final RevenueDAO revenueDAO = new RevenueDAO();
 
     private final ObservableList<MenuItem> menuData = FXCollections.observableArrayList();
     private final ObservableList<OrderItem> itemData = FXCollections.observableArrayList();
@@ -59,6 +71,7 @@ public class OrderController {
 
     private Order current;
     private int selectedTableId = -1;
+    private int popupTableId = -1; // Bàn đang hiển thị popup
     private MenuItem selectedMenuItem;
 
     // Formatter cho tiền tệ
@@ -69,22 +82,40 @@ public class OrderController {
         setupComponents();
         loadData();
         setupEventHandlers();
+        setupPopupEvents();
     }
 
     private void setupComponents() {
         // Setup Spinner
         spQty.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1));
 
-        // Setup Category ComboBox
-        cbCategory.getItems().addAll("Tất cả", "Đồ uống", "Món chính", "Tráng miệng", "Khai vị");
+        // Setup Category ComboBox - FIX: dùng đúng tên category từ database
+        cbCategory.getItems().clear();
+        cbCategory.getItems().addAll("Tất cả", "Đồ uống", "Khai vị", "Món chính", "Tráng miệng");
         cbCategory.setValue("Tất cả");
 
         currencyFormatter.setMaximumFractionDigits(0);
     }
 
+    private void setupPopupEvents() {
+        // Đảm bảo popup không bị đóng khi click vào nội dung
+        if (popupContent != null) {
+            popupContent.setOnMouseClicked(this::preventPopupClose);
+        }
+    }
+
     private void loadData() {
         loadTables();
         loadMenu();
+        initializeRevenue();
+    }
+
+    private void initializeRevenue() {
+        try {
+            revenueDAO.initTodayRevenue();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupEventHandlers() {
@@ -99,51 +130,126 @@ public class OrderController {
     private void loadTables() {
         try {
             cbTable.setItems(FXCollections.observableArrayList(tableDAO.findAll()));
+            refreshTableGrid();
         } catch (SQLException e) {
             showError(e);
         }
     }
 
+    private void refreshTables() {
+        Platform.runLater(() -> {
+            loadTables();
+        });
+    }
+
+    private void refreshTableGrid() {
+        if (tableGrid == null) return;
+
+        try {
+            List<Table> tables = tableDAO.findAll();
+            // Cập nhật trạng thái visual cho các bàn trong grid
+            for (javafx.scene.Node node : tableGrid.getChildren()) {
+                if (node.getUserData() != null) {
+                    String tableIdStr = (String) node.getUserData();
+                    try {
+                        int tableId = Integer.parseInt(tableIdStr);
+                        Table table = tables.stream()
+                                .filter(t -> t.getId() == tableId)
+                                .findFirst()
+                                .orElse(null);
+
+                        if (table != null) {
+                            updateTableVisualStyle(node, getTableColorByStatus(table.getStatus()));
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore invalid table IDs
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getTableColorByStatus(String status) {
+        switch (status) {
+            case "empty": return "#4CAF50";
+            case "occupied": return "#f44336";
+            case "reserved": return "#FF9800";
+            case "ordering": return "#9C27B0";
+            default: return "#4CAF50";
+        }
+    }
+
+    // Fix method loadMenu() để đảm bảo menuMap được populate
     private void loadMenu() {
         try {
+            System.out.println("Loading menu items...");
             menuData.setAll(menuDAO.findAll());
-            menuMap = menuData.stream().collect(Collectors.toMap(MenuItem::getId, m -> m));
+
+            // Populate menuMap - QUAN TRỌNG cho việc hiển thị order items
+            menuMap.clear();
+            for (MenuItem item : menuData) {
+                menuMap.put(item.getId(), item);
+                System.out.println("Added to menuMap: ID=" + item.getId() + ", Name=" + item.getName() + ", ImagePath=" + item.getImagePath());
+            }
+
+            System.out.println("Menu loaded: " + menuData.size() + " items, menuMap size: " + menuMap.size());
             displayMenuItems();
         } catch (Exception e) {
+            System.err.println("Error loading menu: " + e.getMessage());
+            e.printStackTrace();
             showError(e);
         }
     }
 
-    /**
-     * Hiển thị menu items dưới dạng custom UI với ảnh
-     */
+    // Thay thế method displayMenuItems()
     private void displayMenuItems() {
         if (menuContainer == null) return;
 
         menuContainer.getChildren().clear();
 
         String selectedCategory = cbCategory.getValue();
-        List<MenuItem> filteredItems = menuData.stream()
-                .filter(item -> selectedCategory.equals("Tất cả") ||
-                        item.getCategory().equals(selectedCategory))
-                .collect(Collectors.toList());
+        System.out.println("Selected category: " + selectedCategory); // Debug log
+
+        List<MenuItem> filteredItems;
+
+        if ("Tất cả".equals(selectedCategory)) {
+            filteredItems = new ArrayList<>(menuData);
+        } else {
+            filteredItems = menuData.stream()
+                    .filter(item -> {
+                        boolean matches = item.getCategory().equals(selectedCategory);
+                        System.out.println("Item: " + item.getName() + ", Category: " + item.getCategory() + ", Matches: " + matches);
+                        return matches;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        System.out.println("Filtered items count: " + filteredItems.size()); // Debug log
 
         for (MenuItem item : filteredItems) {
             HBox menuItemBox = createMenuItemUI(item);
             menuContainer.getChildren().add(menuItemBox);
         }
+
+        if (filteredItems.isEmpty() && !"Tất cả".equals(selectedCategory)) {
+            Label noItemsLabel = new Label("Không có món nào trong danh mục này");
+            noItemsLabel.setTextFill(Color.WHITE);
+            noItemsLabel.setFont(Font.font("System", 14));
+            noItemsLabel.setStyle("-fx-padding: 20; -fx-alignment: center;");
+            menuContainer.getChildren().add(noItemsLabel);
+        }
     }
 
-    /**
-     * Tạo UI cho một menu item với ảnh
-     */
+    // Thay thế method createMenuItemUI() - fix image loading
     private HBox createMenuItemUI(MenuItem item) {
         HBox itemBox = new HBox(15);
         itemBox.setAlignment(Pos.CENTER_LEFT);
         itemBox.setStyle("-fx-background-color: #0f3460; -fx-background-radius: 10; -fx-padding: 10; -fx-cursor: hand;");
         itemBox.setUserData(item);
 
-        // Thêm hover effect
+        // Hover effects
         itemBox.setOnMouseEntered(e ->
                 itemBox.setStyle("-fx-background-color: #1a5490; -fx-background-radius: 10; -fx-padding: 10; -fx-cursor: hand;"));
         itemBox.setOnMouseExited(e ->
@@ -163,13 +269,20 @@ public class OrderController {
         imageView.setFitWidth(60);
         imageView.setPreserveRatio(true);
 
-        // Load image (với fallback nếu không tìm thấy)
+        // Load image - FIX: xử lý path chính xác
         try {
-            String imagePath = getImagePath(item);
+            String imagePath = "/images/menu/" + item.getImagePath();
+            System.out.println("Loading image: " + imagePath); // Debug log
+
             Image image = new Image(getClass().getResourceAsStream(imagePath));
-            imageView.setImage(image);
+            if (image.isError()) {
+                System.out.println("Image error for: " + imagePath);
+                imageView.setImage(createPlaceholderImage());
+            } else {
+                imageView.setImage(image);
+            }
         } catch (Exception e) {
-            // Fallback: tạo placeholder
+            System.out.println("Exception loading image for: " + item.getName() + " - " + e.getMessage());
             imageView.setImage(createPlaceholderImage());
         }
 
@@ -188,7 +301,11 @@ public class OrderController {
         categoryLabel.setTextFill(Color.web("#B0B0B0"));
         categoryLabel.setFont(Font.font("System", 11));
 
-        Label descLabel = new Label(getItemDescription(item));
+        String description = item.getDescription();
+        if (description == null || description.trim().isEmpty()) {
+            description = "Món ngon từ " + item.getCategory();
+        }
+        Label descLabel = new Label(description);
         descLabel.setTextFill(Color.web("#B0B0B0"));
         descLabel.setFont(Font.font("System", 10));
         descLabel.setWrapText(true);
@@ -200,7 +317,6 @@ public class OrderController {
         priceLabel.setTextFill(Color.web("#4CAF50"));
         priceLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
 
-        // Add components to main container
         itemBox.getChildren().addAll(imageContainer, infoContainer, priceLabel);
 
         // Add drop shadow effect
@@ -212,43 +328,44 @@ public class OrderController {
         return itemBox;
     }
 
-    /**
-     * Lấy đường dẫn ảnh cho menu item
-     */
-    private String getImagePath(MenuItem item) {
-        // Sử dụng imagePath từ model hoặc fallback
-        return item.getFullImagePath();
-    }
-
-    /**
-     * Tạo ảnh placeholder khi không tìm thấy ảnh
-     */
+    // Fix method createPlaceholderImage()
     private Image createPlaceholderImage() {
-        // Trả về ảnh mặc định hoặc tạo ảnh đơn giản
         try {
-            return new Image(getClass().getResourceAsStream("/images/menu/default.jpg"));
+            // Thử các ảnh có sẵn
+            String[] fallbackImages = {
+                    "/images/menu/default.png",
+                    "/images/menu/Snack.png",
+                    "/images/menu/CocaCola.png",
+                    "/images/bar-logo.png"
+            };
+
+            for (String path : fallbackImages) {
+                try {
+                    Image img = new Image(getClass().getResourceAsStream(path));
+                    if (!img.isError()) {
+                        return img;
+                    }
+                } catch (Exception e) {
+                    // Continue to next fallback
+                }
+            }
+
+            // Tạo ảnh đơn giản bằng code nếu không có ảnh nào
+            return null;
         } catch (Exception e) {
-            // Nếu không có ảnh default, có thể return null và hiển thị text thay thế
             return null;
         }
     }
 
-    /**
-     * Lấy mô tả món ăn
-     */
-    private String getItemDescription(MenuItem item) {
-        // Sử dụng description từ model hoặc fallback
-        return item.getShortDescription();
-    }
-
-    /**
-     * Handler khi click chọn menu item
-     */
+    // Fix method selectMenuItem() để đảm bảo order item hiển thị ngay
     @FXML
     public void selectMenuItem(MenuItem item) {
+        System.out.println("=== SELECT MENU ITEM ===");
+        System.out.println("Selected item: " + item.getName() + " (ID: " + item.getId() + ")");
+
         selectedMenuItem = item;
 
-        // Visual feedback - highlight selected item
+        // Visual feedback
         for (javafx.scene.Node node : menuContainer.getChildren()) {
             if (node instanceof HBox) {
                 HBox hbox = (HBox) node;
@@ -260,33 +377,71 @@ public class OrderController {
             }
         }
 
-        showInfo("Đã chọn: " + item.getName());
+        // Auto-add nếu có order
+        if (current != null) {
+            try {
+                int quantity = spQty.getValue();
+                System.out.println("Adding to order: " + item.getName() + " x" + quantity);
+
+                orderDAO.addItem(current.getId(), selectedMenuItem.getId(), quantity);
+
+                // Reload items NGAY LẬP TỨC
+                reloadItems();
+
+                showInfo("✅ Đã thêm " + item.getName() + " x" + quantity + " vào order");
+
+                // Reset UI
+                spQty.getValueFactory().setValue(1);
+                Platform.runLater(() -> {
+                    for (javafx.scene.Node node : menuContainer.getChildren()) {
+                        if (node instanceof HBox) {
+                            HBox hbox = (HBox) node;
+                            hbox.setStyle("-fx-background-color: #0f3460; -fx-background-radius: 10; -fx-padding: 10; -fx-cursor: hand;");
+                        }
+                    }
+                });
+
+            } catch (SQLException e) {
+                System.err.println("Error adding item: " + e.getMessage());
+                e.printStackTrace();
+                showError(e);
+            }
+        } else {
+            showInfo("🔸 Đã chọn: " + item.getName() + "\n💡 Tạo order trước để thêm món!");
+        }
     }
 
-    /**
-     * Hiển thị order items với ảnh
-     */
     private void displayOrderItems() {
-        if (orderContainer == null) return;
+        System.out.println("=== DISPLAY ORDER ITEMS ===");
+        System.out.println("Number of items to display: " + itemData.size());
+
+        if (orderContainer == null) {
+            System.out.println("orderContainer is null!");
+            return;
+        }
 
         orderContainer.getChildren().clear();
 
         for (OrderItem item : itemData) {
+            System.out.println("Creating UI for item: " + item.getDisplayName() + " x" + item.getQuantity());
             HBox orderItemBox = createOrderItemUI(item);
             orderContainer.getChildren().add(orderItemBox);
         }
+
+        System.out.println("Order items displayed successfully!");
+        System.out.println("=== END DISPLAY ORDER ITEMS ===");
     }
 
-    /**
-     * Tạo UI cho order item
-     */
+    // Thay thế method createOrderItemUI() trong OrderController.java
     private HBox createOrderItemUI(OrderItem orderItem) {
+        System.out.println("Creating UI for OrderItem: " + orderItem.getDisplayName());
+
         HBox itemBox = new HBox(10);
         itemBox.setAlignment(Pos.CENTER_LEFT);
         itemBox.setStyle("-fx-background-color: #0f3460; -fx-background-radius: 8; -fx-padding: 8;");
         itemBox.setUserData(orderItem);
 
-        // Item Image
+        // Item Image Container
         VBox imageContainer = new VBox();
         imageContainer.setAlignment(Pos.CENTER);
         imageContainer.setStyle("-fx-background-color: #1a1a2e; -fx-background-radius: 5;");
@@ -297,41 +452,64 @@ public class OrderController {
         imageView.setFitWidth(45);
         imageView.setPreserveRatio(true);
 
+        // FIX: Lấy MenuItem từ menuMap để có thông tin ảnh
         MenuItem menuItem = menuMap.get(orderItem.getMenuItemId());
+        System.out.println("Found MenuItem for OrderItem: " + (menuItem != null ? menuItem.getName() : "null"));
+
         if (menuItem != null) {
             try {
-                String imagePath = menuItem.getFullImagePath();
+                // Sử dụng imagePath từ MenuItem
+                String imagePath = "/images/menu/" + menuItem.getImagePath();
+                System.out.println("Loading order item image: " + imagePath);
+
                 Image image = new Image(getClass().getResourceAsStream(imagePath));
-                imageView.setImage(image);
+                if (image.isError()) {
+                    System.out.println("Image error, using placeholder");
+                    imageView.setImage(createPlaceholderImage());
+                } else {
+                    imageView.setImage(image);
+                    System.out.println("Image loaded successfully");
+                }
             } catch (Exception e) {
+                System.out.println("Exception loading order item image: " + e.getMessage());
                 imageView.setImage(createPlaceholderImage());
             }
+        } else {
+            System.out.println("MenuItem not found in menuMap for ID: " + orderItem.getMenuItemId());
+            imageView.setImage(createPlaceholderImage());
         }
 
         imageContainer.getChildren().add(imageView);
 
-        // Item Info
+        // Item Info Container
         VBox infoContainer = new VBox(2);
         infoContainer.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(infoContainer, javafx.scene.layout.Priority.ALWAYS);
 
-        Label nameLabel = new Label(orderItem.getDisplayName());
+        // Tên món - sử dụng tên từ OrderItem hoặc MenuItem
+        String itemName = orderItem.getDisplayName();
+        if (menuItem != null && (itemName == null || itemName.startsWith("Món #"))) {
+            itemName = menuItem.getName();
+        }
+
+        Label nameLabel = new Label(itemName);
         nameLabel.setTextFill(Color.WHITE);
         nameLabel.setFont(Font.font("System", FontWeight.BOLD, 12));
 
+        // Chi tiết món (số lượng và giá đơn vị)
         HBox detailBox = new HBox(10);
         Label qtyLabel = new Label("SL: " + orderItem.getQuantity());
         qtyLabel.setTextFill(Color.web("#B0B0B0"));
         qtyLabel.setFont(Font.font("System", 10));
 
-        Label priceLabel = new Label(orderItem.getFormattedPrice());
+        Label priceLabel = new Label("Đơn giá: " + orderItem.getFormattedPrice());
         priceLabel.setTextFill(Color.web("#B0B0B0"));
         priceLabel.setFont(Font.font("System", 10));
 
         detailBox.getChildren().addAll(qtyLabel, priceLabel);
         infoContainer.getChildren().addAll(nameLabel, detailBox);
 
-        // Subtotal and Remove Button
+        // Subtotal and Remove Button Container
         VBox actionContainer = new VBox(5);
         actionContainer.setAlignment(Pos.CENTER_RIGHT);
 
@@ -358,64 +536,170 @@ public class OrderController {
         return itemBox;
     }
 
-    // ===== Event Handlers =====
+    // ===== Event Handlers cho Bàn =====
 
     @FXML
-    public void selectTable(javafx.scene.input.MouseEvent event) {
+    public void selectTable(MouseEvent event) {
         javafx.scene.Node source = (javafx.scene.Node) event.getSource();
         String tableIdStr = (String) source.getUserData();
 
         if (tableIdStr != null) {
             try {
                 int tableId = Integer.parseInt(tableIdStr);
-                selectTableById(tableId);
+
+                if (event.getButton() == MouseButton.PRIMARY) {
+                    // Click trái - chọn bàn để order
+                    selectTableForOrder(tableId);
+                } else if (event.getButton() == MouseButton.SECONDARY) {
+                    // Click phải - hiển thị popup trạng thái
+                    showTableStatusPopup(tableId);
+                }
+
             } catch (NumberFormatException e) {
                 showInfo("Lỗi chọn bàn: " + tableIdStr);
             }
         }
     }
 
-    private void selectTableById(int tableId) {
-        selectedTableId = tableId;
+    // ===== Popup Management =====
 
-        // Update label
-        if (selectedTableLabel != null) {
-            selectedTableLabel.setText("Đã chọn bàn " + tableId);
-        }
+    private void showTableStatusPopup(int tableId) {
+        popupTableId = tableId;
+        popupTableTitle.setText("Chọn trạng thái cho Bàn " + tableId);
+        tableStatusPopup.setVisible(true);
 
-        // Find and select in ComboBox
-        for (Table table : cbTable.getItems()) {
-            if (table.getId() == tableId) {
-                cbTable.getSelectionModel().select(table);
-                break;
-            }
-        }
-
-        updateTableSelection(tableId);
-        showInfo("Đã chọn bàn " + tableId);
+        // Đưa popup lên trên cùng
+        tableStatusPopup.toFront();
     }
 
-    private void updateTableSelection(int tableId) {
-        if (tableGrid != null) {
-            for (javafx.scene.Node node : tableGrid.getChildren()) {
-                if (node.getUserData() != null) {
-                    String userData = (String) node.getUserData();
-                    if (userData.equals(String.valueOf(tableId))) {
-                        // Selected table style
-                        updateTableVisualStyle(node, "#e16428");
-                    } else {
-                        // Reset to default
-                        resetTableStyle(node, userData);
-                    }
+    @FXML
+    public void hideTableStatusPopup() {
+        tableStatusPopup.setVisible(false);
+        popupTableId = -1;
+    }
+
+    @FXML
+    public void preventPopupClose(MouseEvent event) {
+        // Ngăn việc đóng popup khi click vào nội dung
+        event.consume();
+    }
+
+    // ===== Popup Status Button Handlers =====
+
+    @FXML
+    public void setTableStatusEmpty() {
+        updateTableStatus("empty");
+    }
+
+    @FXML
+    public void setTableStatusOccupied() {
+        updateTableStatus("occupied");
+    }
+
+    @FXML
+    public void setTableStatusReserved() {
+        updateTableStatus("reserved");
+    }
+
+    @FXML
+    public void setTableStatusOrdering() {
+        updateTableStatus("ordering");
+    }
+
+    private void updateTableStatus(String newStatus) {
+        if (popupTableId == -1) return;
+
+        try {
+            tableDAO.updateStatus(popupTableId, newStatus);
+            showInfo("✅ Đã cập nhật bàn " + popupTableId + " thành: " + getStatusDisplayName(newStatus));
+
+            // Refresh table grid
+            refreshTableGrid();
+
+            // Đóng popup
+            hideTableStatusPopup();
+
+        } catch (SQLException e) {
+            showError(e);
+        }
+    }
+
+    private String getStatusDisplayName(String status) {
+        switch (status) {
+            case "empty": return "Trống";
+            case "occupied": return "Đang sử dụng";
+            case "reserved": return "Đặt trước";
+            case "ordering": return "Đang chọn";
+            default: return status;
+        }
+    }
+
+    private void selectTableForOrder(int tableId) {
+        try {
+            // Kiểm tra trạng thái bàn từ database
+            List<Table> tables = tableDAO.findAll();
+            Table table = tables.stream()
+                    .filter(t -> t.getId() == tableId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (table == null) {
+                showInfo("Không tìm thấy thông tin bàn!");
+                return;
+            }
+
+            // Kiểm tra trạng thái bàn
+            if ("occupied".equals(table.getStatus())) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Cảnh báo");
+                alert.setHeaderText("Bàn đang được sử dụng");
+                alert.setContentText("Bàn này đã có khách. Vui lòng chọn bàn khác hoặc thay đổi trạng thái bàn!");
+                alert.showAndWait();
+                return;
+            }
+
+            // Reset bàn cũ nếu có
+            if (selectedTableId != -1 && selectedTableId != tableId && current == null) {
+                tableDAO.updateStatus(selectedTableId, "empty");
+            }
+
+            // Cập nhật bàn mới
+            selectedTableId = tableId;
+            tableDAO.updateStatus(tableId, "ordering");
+
+            // Update UI
+            if (selectedTableLabel != null) {
+                selectedTableLabel.setText("Đã chọn bàn " + tableId);
+            }
+
+            // Find and select in ComboBox
+            for (Table t : cbTable.getItems()) {
+                if (t.getId() == tableId) {
+                    cbTable.getSelectionModel().select(t);
+                    break;
                 }
             }
+
+            refreshTableGrid();
+            loadMenuByCategory();
+            showInfo("✅ Đã chọn bàn " + tableId + " để tạo order");
+
+        } catch (SQLException e) {
+            showError(e);
         }
+    }
+
+    private void loadMenuByCategory() {
+        if (selectedTableId == -1) {
+            menuContainer.getChildren().clear();
+            return;
+        }
+        displayMenuItems();
     }
 
     private void updateTableVisualStyle(javafx.scene.Node node, String color) {
         if (node instanceof javafx.scene.layout.StackPane) {
             javafx.scene.layout.StackPane stackPane = (javafx.scene.layout.StackPane) node;
-            // Update all rectangles in the StackPane
             for (javafx.scene.Node child : stackPane.getChildren()) {
                 if (child instanceof javafx.scene.shape.Rectangle) {
                     javafx.scene.shape.Rectangle rect = (javafx.scene.shape.Rectangle) child;
@@ -425,35 +709,7 @@ public class OrderController {
         }
     }
 
-    private void resetTableStyle(javafx.scene.Node node, String tableIdStr) {
-        if (tableIdStr != null) {
-            try {
-                int tableId = Integer.parseInt(tableIdStr);
-                String color;
-
-                // VIP tables (6, 12) - purple
-                if (tableId == 6 || tableId == 12) {
-                    color = "#9C27B0";
-                }
-                // Occupied tables (3, 8) - red
-                else if (tableId == 3 || tableId == 8) {
-                    color = "#f44336";
-                }
-                // Reserved tables (5, 11) - orange
-                else if (tableId == 5 || tableId == 11) {
-                    color = "#FF9800";
-                }
-                // Available tables - green
-                else {
-                    color = "#4CAF50";
-                }
-
-                updateTableVisualStyle(node, color);
-            } catch (NumberFormatException e) {
-                updateTableVisualStyle(node, "#4CAF50");
-            }
-        }
-    }
+    // ===== Order Management Methods =====
 
     @FXML
     public void addItem() {
@@ -468,7 +724,10 @@ public class OrderController {
         try {
             orderDAO.addItem(current.getId(), selectedMenuItem.getId(), spQty.getValue());
             reloadItems();
-            showInfo("Đã thêm " + selectedMenuItem.getName() + " x" + spQty.getValue());
+            showInfo("✅ Đã thêm " + selectedMenuItem.getName() + " x" + spQty.getValue());
+
+            // Reset quantity về 1 sau khi thêm
+            spQty.getValueFactory().setValue(1);
         } catch (SQLException e) {
             showError(e);
         }
@@ -479,7 +738,7 @@ public class OrderController {
         try {
             orderDAO.removeItem(orderItem.getId());
             reloadItems();
-            showInfo("Đã xóa món khỏi order!");
+            showInfo("✅ Đã xóa món khỏi order!");
         } catch (SQLException e) {
             showError(e);
         }
@@ -501,7 +760,7 @@ public class OrderController {
                         orderDAO.removeItem(item.getId());
                     }
                     reloadItems();
-                    showInfo("Đã xóa tất cả món!");
+                    showInfo("✅ Đã xóa tất cả món!");
                 } catch (SQLException e) {
                     showError(e);
                 }
@@ -511,23 +770,37 @@ public class OrderController {
 
     @FXML
     public void newOrder() {
-        Table t = cbTable.getSelectionModel().getSelectedItem();
-        if (t == null) {
+        if (selectedTableId == -1) {
             showInfo("Vui lòng chọn bàn trước!");
             return;
         }
+
         try {
-            Integer id = orderDAO.createEmptyOrder(t.getId());
+            Table table = tableDAO.findAll().stream()
+                    .filter(t -> t.getId() == selectedTableId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (table == null) {
+                showInfo("Không tìm thấy thông tin bàn!");
+                return;
+            }
+
+            Integer id = orderDAO.createEmptyOrder(table.getId());
             if (id != null) {
-                new TableDAO().updateStatus(t.getId(), "occupied");
-                t.setStatus("occupied");
+                tableDAO.updateStatus(table.getId(), "occupied");
+
                 current = new Order();
                 current.setId(id);
-                current.setTableId(t.getId());
+                current.setTableId(table.getId());
                 current.setStatus("pending");
+
                 lblOrderId.setText("#" + id);
                 reloadItems();
-                showInfo("Đã tạo order mới #" + id);
+                refreshTableGrid();
+
+                showInfo("✅ Đã tạo order mới #" + id + " cho bàn " + table.getTableName() +
+                        "\n🍽️ Bây giờ bạn có thể chọn món từ menu!");
             }
         } catch (SQLException e) {
             showError(e);
@@ -540,21 +813,43 @@ public class OrderController {
             showInfo("Không có order nào để hoàn thành!");
             return;
         }
-        try {
-            orderDAO.complete(current.getId());
-            current = null;
-            afterComplete();
-            showInfo("Đã hoàn thành order và giải phóng bàn!");
-        } catch (SQLException e) {
-            showError(e);
-        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận thanh toán");
+        confirm.setHeaderText("Hoàn thành order #" + current.getId());
+        confirm.setContentText("Bạn có chắc chắn muốn hoàn thành order này và thanh toán?");
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    // Tính tổng tiền trước khi complete
+                    BigDecimal total = orderDAO.calcTotal(current.getId());
+
+                    // Complete order (sẽ tự động tạo payment và giải phóng bàn)
+                    orderDAO.complete(current.getId());
+
+                    // Cập nhật revenue
+                    revenueDAO.updateDailyRevenue(LocalDate.now(), total);
+
+                    // Reset UI
+                    current = null;
+                    afterComplete();
+
+                    showInfo("✅ Đã hoàn thành order và thanh toán thành công!\n💰 Tổng tiền: " +
+                            formatCurrency(total.doubleValue()));
+
+                } catch (SQLException e) {
+                    showError(e);
+                }
+            }
+        });
     }
 
     @FXML
     public void reload() {
         afterComplete();
         loadData();
-        showInfo("Đã làm mới dữ liệu!");
+        showInfo("🔄 Đã làm mới dữ liệu!");
     }
 
     // ===== Navigation Methods =====
@@ -613,22 +908,47 @@ public class OrderController {
         }
     }
 
+    // Fix method reloadItems() với force refresh
     private void reloadItems() {
+        System.out.println("=== RELOAD ORDER ITEMS ===");
+
         try {
-            itemData.setAll(orderDAO.findItems(current.getId()));
+            if (current == null) {
+                System.out.println("No current order");
+                itemData.clear();
+                displayOrderItems();
+                return;
+            }
+
+            // Force reload từ database
+            List<OrderItem> freshItems = orderDAO.findItems(current.getId());
+            System.out.println("Loaded " + freshItems.size() + " items from database");
+
+            // Debug: in ra thông tin từng item
+            for (OrderItem item : freshItems) {
+                System.out.println("OrderItem: ID=" + item.getId() +
+                        ", MenuItemID=" + item.getMenuItemId() +
+                        ", Name=" + item.getDisplayName() +
+                        ", Qty=" + item.getQuantity());
+            }
+
+            itemData.setAll(freshItems);
+
             BigDecimal total = orderDAO.calcTotal(current.getId());
             lblTotal.setText(formatCurrency(total.doubleValue()));
-            displayOrderItems();
+
+            // Force refresh UI
+            Platform.runLater(() -> {
+                displayOrderItems();
+            });
+
+            System.out.println("Order items reloaded successfully, total: " + total);
+
         } catch (SQLException e) {
+            System.err.println("Error reloading items: " + e.getMessage());
+            e.printStackTrace();
             showError(e);
         }
-    }
-
-    private double getUnitPrice(OrderItem it) {
-        double p = it.getPrice();
-        if (p > 0) return p;
-        MenuItem m = menuMap.get(it.getMenuItemId());
-        return (m != null) ? m.getPrice() : 0.0;
     }
 
     private void afterComplete() {
@@ -649,11 +969,19 @@ public class OrderController {
     }
 
     private void showInfo(String message) {
-        new Alert(Alert.AlertType.INFORMATION, message).showAndWait();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Thông báo");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void showError(Exception e) {
-        new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Lỗi");
+        alert.setHeaderText("Có lỗi xảy ra");
+        alert.setContentText(e.getMessage());
+        alert.showAndWait();
         e.printStackTrace();
     }
 }
