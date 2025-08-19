@@ -9,14 +9,14 @@ import java.util.List;
 
 public class OrderItemDAO {
 
-    /** Lấy danh sách item của một order + kèm đơn giá từ menu_items */
+    /** Lấy danh sách item của một order + dùng đơn giá đã chốt (oi.price) */
     public List<OrderItem> findByOrderId(int orderId) throws SQLException {
         String sql = """
             SELECT oi.id,
                    oi.order_id,
                    oi.menu_item_id,
                    oi.quantity,
-                   mi.price AS unit_price,
+                   oi.price AS unit_price,     -- dùng giá đã chốt trong order_items
                    mi.name AS menu_item_name
             FROM order_items oi
             JOIN menu_items mi ON mi.id = oi.menu_item_id
@@ -35,8 +35,9 @@ public class OrderItemDAO {
                     it.setMenuItemId(rs.getInt("menu_item_id"));
                     it.setQuantity(rs.getInt("quantity"));
                     // DECIMAL -> double (OrderItem.price là double)
-                    it.setPrice(rs.getBigDecimal("unit_price").doubleValue());
-                    it.setMenuItemName(rs.getString("menu_item_name")); // set thêm
+                    BigDecimal unitPrice = rs.getBigDecimal("unit_price");
+                    it.setPrice(unitPrice != null ? unitPrice.doubleValue() : 0d);
+                    it.setMenuItemName(rs.getString("menu_item_name"));
                     list.add(it);
                 }
                 return list;
@@ -44,10 +45,16 @@ public class OrderItemDAO {
         }
     }
 
-    /** Thêm mới; nếu đã có (orderId, menuItemId) thì tăng số lượng */
+    /** Thêm mới; nếu đã có (orderId, menuItemId) thì tăng số lượng
+     *  Lưu ý: INSERT kèm price (chụp từ menu_items tại thời điểm thêm) */
     public void addOrIncrement(int orderId, int menuItemId, int qty) throws SQLException {
         String up  = "UPDATE order_items SET quantity = quantity + ? WHERE order_id=? AND menu_item_id=?";
-        String ins = "INSERT INTO order_items(order_id, menu_item_id, quantity) VALUES(?,?,?)";
+        String ins = """
+            INSERT INTO order_items(order_id, menu_item_id, quantity, price)
+            SELECT ?, ?, ?, mi.price
+              FROM menu_items mi
+             WHERE mi.id = ?
+        """;
         try (Connection c = JDBCConnect.getJDBCConnection()) {
             c.setAutoCommit(false);
             try (PreparedStatement psUp = c.prepareStatement(up)) {
@@ -60,6 +67,7 @@ public class OrderItemDAO {
                         psIns.setInt(1, orderId);
                         psIns.setInt(2, menuItemId);
                         psIns.setInt(3, qty);
+                        psIns.setInt(4, menuItemId);
                         psIns.executeUpdate();
                     }
                 }
@@ -94,12 +102,11 @@ public class OrderItemDAO {
         }
     }
 
-    /** Tính tổng tiền (SL * đơn giá menu) của order */
+    /** Tính tổng tiền (SL * giá chốt trong order_items) của order */
     public BigDecimal calculateTotal(int orderId) throws SQLException {
         String sql = """
-            SELECT COALESCE(SUM(oi.quantity * mi.price), 0) AS total
+            SELECT COALESCE(SUM(oi.quantity * oi.price), 0) AS total
             FROM order_items oi
-            JOIN menu_items mi ON mi.id = oi.menu_item_id
             WHERE oi.order_id = ?
         """;
         try (Connection c = JDBCConnect.getJDBCConnection();

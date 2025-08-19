@@ -3,6 +3,7 @@ package com.barmanagement.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import com.barmanagement.util.LogoutUtil;
 
 public class RevenueController {
 
@@ -18,6 +19,12 @@ public class RevenueController {
     @FXML
     public void initialize() {
         System.out.println("Load báo cáo doanh thu...");
+    }
+
+    // Thêm method xử lý đăng xuất
+    @FXML
+    private void handleLogout() {
+        LogoutUtil.confirmLogout(revenueTable);
     }
 }
 

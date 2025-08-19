@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import com.barmanagement.util.SceneUtil;
+import com.barmanagement.util.LogoutUtil;
 
 /**
  * Quản lý thực đơn (menu_items)
@@ -87,6 +88,12 @@ public class MenuManagementController {
     @FXML
     private void showSettings() {
         SceneUtil.openScene("/fxml/table_management.fxml", tableView);
+    }
+
+    // Thêm method xử lý đăng xuất
+    @FXML
+    private void handleLogout() {
+        LogoutUtil.confirmLogout(tableView);
     }
 
     // Quick actions methods
