@@ -4,12 +4,8 @@ import com.barmanagement.dao.OrderDAO;
 import com.barmanagement.dao.OrderItemDAO;
 import com.barmanagement.dao.PaymentDAO;
 import com.barmanagement.dao.TableDAO;
-import com.barmanagement.model.MenuItem;
 import com.barmanagement.model.Order;
 import com.barmanagement.model.OrderItem;
-import com.barmanagement.model.Payment;
-import java.sql.Timestamp;
-import java.sql.SQLException;
 import com.barmanagement.util.SceneUtil;
 import com.barmanagement.util.LogoutUtil;
 
@@ -21,14 +17,16 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.Alert;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.util.regex.Pattern;
+
 public class PaymentController {
 
-    @FXML
-    private ComboBox<String> tableComboBox; // Danh sách bàn
+    @FXML private ComboBox<String> tableComboBox; // Danh sách bàn đang sử dụng (occupied)
     @FXML private TableView<OrderItem> orderTable;
     @FXML private TableColumn<OrderItem, String> itemNameCol;
     @FXML private TableColumn<OrderItem, Integer> quantityCol;
@@ -37,76 +35,95 @@ public class PaymentController {
     @FXML private Label totalLabel;
     @FXML private ComboBox<String> paymentMethodComboBox;
 
-    @FXML
-    private void showHome() {
-        SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel);
-    }
-
-    @FXML
-    private void goBack() {
-        SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel);
-    }
-
-    @FXML
-    private void showDashboard() {
-        SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel);
-    }
-
-    @FXML
-    private void showMenu() {
-        SceneUtil.openScene("/fxml/menu_management.fxml", totalLabel);
-    }
-
-    @FXML
-    private void showOrder() {
-        SceneUtil.openScene("/fxml/order_management.fxml", totalLabel);
-    }
-
-    @FXML
-    private void showTableManagement() {
-        SceneUtil.openScene("/fxml/table_management.fxml", totalLabel);
-    }
-
-    @FXML
-    private void handleLogout() {
-        // Sử dụng LogoutUtil để xử lý đăng xuất với xác nhận
-        LogoutUtil.confirmLogout(totalLabel);
-    }
-
-    private OrderDAO orderDAO = new OrderDAO();
-    private OrderItemDAO orderItemDAO = new OrderItemDAO();
-    private PaymentDAO paymentDAO = new PaymentDAO();
-    private TableDAO tableDAO = new TableDAO();
+    private final OrderDAO orderDAO = new OrderDAO();
+    private final OrderItemDAO orderItemDAO = new OrderItemDAO();
+    private final PaymentDAO paymentDAO = new PaymentDAO();
+    private final TableDAO tableDAO = new TableDAO();
 
     private Order currentOrder;
 
+    // ==== Điều hướng UI ====
+    @FXML private void showHome() { SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel); }
+    @FXML private void goBack() { SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel); }
+    @FXML private void showDashboard() { SceneUtil.openScene("/fxml/dashboard.fxml", totalLabel); }
+    @FXML private void showMenu() { SceneUtil.openScene("/fxml/menu_management.fxml", totalLabel); }
+    @FXML private void showOrder() { SceneUtil.openScene("/fxml/order_management.fxml", totalLabel); }
+    @FXML private void showTableManagement() { SceneUtil.openScene("/fxml/table_management.fxml", totalLabel); }
+    @FXML private void handleLogout() { LogoutUtil.confirmLogout(totalLabel); }
+
     @FXML
     private void initialize() {
-        tableComboBox.setItems(FXCollections.observableArrayList("Bàn 1", "Bàn 2", "Bàn 3"));
-        tableComboBox.setOnAction(e -> loadOrderBySelectedTable());
-
-        paymentMethodComboBox.setItems(FXCollections.observableArrayList("Tiền mặt", "Chuyển khoản", "MOMO"));
-        paymentMethodComboBox.getSelectionModel().selectFirst(); // chọn mặc định
-
+        // Cột bảng
         itemNameCol.setCellValueFactory(new PropertyValueFactory<>("menuItemName"));
         quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-        totalCol.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(
-                cellData.getValue().getPrice() * cellData.getValue().getQuantity()
-        ));
+        totalCol.setCellValueFactory(cd ->
+                new ReadOnlyObjectWrapper<>(cd.getValue().getPrice() * cd.getValue().getQuantity()));
 
+        // Phương thức thanh toán (hiển thị VN, map sang mã DB khi lưu)
+        paymentMethodComboBox.setItems(FXCollections.observableArrayList("Tiền mặt", "Chuyển khoản", "MOMO"));
+        paymentMethodComboBox.getSelectionModel().selectFirst();
+
+        // Load danh sách bàn đang sử dụng từ DB
+        loadOccupiedTables();
+
+        tableComboBox.setOnAction(e -> loadOrderBySelectedTable());
+
+        // Tự chọn bàn đầu tiên nếu có
         if (!tableComboBox.getItems().isEmpty()) {
             tableComboBox.getSelectionModel().select(0);
             loadOrderBySelectedTable();
         }
     }
 
+    /** Lấy danh sách bàn có status='occupied' */
+    private void loadOccupiedTables() {
+        try {
+            var all = tableDAO.findAll();
+            var occupied = all.stream()
+                    .filter(t -> "occupied".equalsIgnoreCase(t.getStatus()))
+                    .map(t -> t.getTableName() + " (#" + t.getId() + ")")
+                    .toList();
+            tableComboBox.setItems(FXCollections.observableArrayList(occupied));
+            currentOrder = null;
+            orderTable.setItems(FXCollections.observableArrayList());
+            totalLabel.setText("0 VND");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Không tải được danh sách bàn đang sử dụng.\n" + e.getMessage());
+        }
+    }
+
+    /** Parse "Bàn 3 (#3)" -> 3 ; fallback mọi ký tự số */
+    private int parseTableIdFromDisplay(String display) {
+        var m = Pattern.compile("#(\\d+)").matcher(display);
+        if (m.find()) return Integer.parseInt(m.group(1));
+        return Integer.parseInt(display.replaceAll("\\D", ""));
+    }
+
+    /** Khi chọn bàn, load đơn pending mới nhất + items + tổng (có fallback) */
     private void loadOrderBySelectedTable() {
-        String selectedTableName = tableComboBox.getValue();
-        int tableId = parseTableIdFromName(selectedTableName);
+        String selected = tableComboBox.getValue();
+        if (selected == null || selected.isBlank()) {
+            orderTable.setItems(FXCollections.observableArrayList());
+            totalLabel.setText("0 VND");
+            currentOrder = null;
+            return;
+        }
+        int tableId = parseTableIdFromDisplay(selected);
 
         try {
+            // 1) Ưu tiên đơn 'pending'
             currentOrder = orderDAO.findPendingByTable(tableId);
+
+            // 2) Fallback: không có 'pending' -> lấy order mới nhất có item
+            if (currentOrder == null) {
+                currentOrder = orderDAO.findLatestOrderWithItemsByTable(tableId);
+                if (currentOrder != null) {
+                    showInfo("Không thấy đơn 'pending'. Đang hiển thị đơn gần nhất của bàn này (trạng thái: "
+                            + currentOrder.getStatus() + ").");
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             currentOrder = null;
@@ -115,27 +132,45 @@ public class PaymentController {
         if (currentOrder == null) {
             orderTable.setItems(FXCollections.observableArrayList());
             totalLabel.setText("0 VND");
+            showInfo("Bàn này hiện chưa có đơn nào có món.");
             return;
         }
 
         try {
-            ObservableList<OrderItem> orderItems = FXCollections.observableArrayList(
-                    orderItemDAO.findByOrderId(currentOrder.getId())
-            );
+            ObservableList<OrderItem> orderItems =
+                    FXCollections.observableArrayList(orderItemDAO.findByOrderId(currentOrder.getId()));
             orderTable.setItems(orderItems);
 
-            // Tính tổng tiền
             double total = orderItems.stream().mapToDouble(OrderItem::getSubtotal).sum();
-            totalLabel.setText(String.format("%.0f VND", total));
+            totalLabel.setText(String.format("%,.0f VND", total));
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Lỗi khi tải danh sách món!");
         }
     }
 
-    private int parseTableIdFromName(String tableName) {
-        // Ví dụ bàn "Bàn 3" => return 3
-        return Integer.parseInt(tableName.replaceAll("[^0-9]", ""));
+    /** Map tên hiển thị -> mã lưu DB */
+    private String mapPaymentMethodToCode(String uiValue) {
+        if (uiValue == null) return "cash";
+        uiValue = uiValue.trim().toLowerCase();
+        return switch (uiValue) {
+            case "tiền mặt" -> "cash";
+            case "chuyển khoản" -> "transfer";
+            case "momo" -> "momo";
+            default -> "cash";
+        };
+    }
+    
+
+
+    private String getSelectedPaymentMethod() {
+        return paymentMethodComboBox.getValue();
+    }
+
+    private double parseTotalAmount() {
+        String totalText = totalLabel.getText().replaceAll("[^0-9]", "");
+        if (totalText.isEmpty()) return 0;
+        return Double.parseDouble(totalText);
     }
 
     @FXML
@@ -145,53 +180,26 @@ public class PaymentController {
             return;
         }
 
-        String method = getSelectedPaymentMethod();
-        double totalAmount = parseTotalAmount();
+        double totalAmountDouble = parseTotalAmount();
+        BigDecimal totalAmount = BigDecimal.valueOf(totalAmountDouble);
+        String methodCode = mapPaymentMethodToCode(getSelectedPaymentMethod());
 
-        Payment payment = new Payment();
-        payment.setOrderId(currentOrder.getId());
-        payment.setTotalAmount(totalAmount);
-        payment.setPaymentMethod(method);
-        payment.setPaymentTime(new Timestamp(System.currentTimeMillis()));
-
-        boolean success = paymentDAO.insertPayment(payment);
-        if (success) {
-            try {
-                tableDAO.updateStatus(currentOrder.getTableId(), "free"); // cập nhật bàn trống
-            } catch (SQLException e) {
-                e.printStackTrace();
-                showAlert("Lỗi khi cập nhật trạng thái bàn.");
-                return;
-            }
-            showAlert("Thanh toán thành công!");
-            loadOrderBySelectedTable(); // reload dữ liệu
-        } else {
+        // ✅ Gọi DAO: nó sẽ ưu tiên SP CompleteOrder, nếu không có thì chạy manual (đồng bộ với schema).
+        try {
+            orderDAO.complete(currentOrder.getId());
+        } catch (SQLException ex) {
+            ex.printStackTrace();
             showAlert("Thanh toán thất bại. Vui lòng thử lại.");
+            return;
         }
-    }
 
-    private double parseTotalAmount() {
-        String totalText = totalLabel.getText().replaceAll("[^0-9]", "");
-        if (totalText.isEmpty()) return 0;
-        return Double.parseDouble(totalText);
-    }
 
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thông báo");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private String getSelectedPaymentMethod() {
-        String method = paymentMethodComboBox.getValue();
-        return (method != null && !method.isEmpty()) ? method : "Tiền mặt"; // fallback nếu người dùng chưa chọn
+        showInfo("Thanh toán thành công. Bàn đã được giải phóng!");
+        loadOccupiedTables(); // refresh list (bàn vừa thanh toán biến mất)
     }
 
     @FXML
     private void onCancel() {
-        // ví dụ: reset giao diện, đóng form, hoặc làm gì đó
         tableComboBox.getSelectionModel().clearSelection();
         orderTable.setItems(FXCollections.observableArrayList());
         totalLabel.setText("0 VND");
@@ -200,14 +208,21 @@ public class PaymentController {
 
     @FXML
     private void exportMenu() {
-        // TODO: Implement export functionality
         showInfo("Chức năng xuất menu sẽ được phát triển trong phiên bản tới!");
     }
 
     @FXML
     private void importMenu() {
-        // TODO: Implement import functionality
         showInfo("Chức năng nhập menu sẽ được phát triển trong phiên bản tới!");
+    }
+
+    // ==== Helpers UI ====
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Lỗi");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void showInfo(String message) {
