@@ -1,0 +1,107 @@
+/* Navigation Button Base Styles */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-alignment: baseline-left;
+    -fx-graphic-text-gap: 15.0;
+    -fx-padding: 15 20 15 20;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+/* Navigation Button Hover Effects */
+.nav-button:hover {
+    -fx-background-color: linear-gradient(to right, #e16428, #ff7b47);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.6), 15, 0.3, 0, 5);
+}
+
+/* Active Navigation Button */
+.nav-button-active {
+    -fx-background-color: linear-gradient(to right, #e16428, #ff7b47);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: baseline-left;
+    -fx-graphic-text-gap: 15.0;
+    -fx-padding: 15 20 15 20;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.8), 20, 0.4, 0, 8);
+}
+
+/* Active Button Hover (slightly different effect) */
+.nav-button-active:hover {
+    -fx-background-color: linear-gradient(to right, #ff7b47, #e16428);
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+    -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.9), 25, 0.5, 0, 10);
+}
+
+/* Home Button Specific Hover */
+.nav-home:hover {
+    -fx-background-color: linear-gradient(to right, #4CAF50, #66BB6A);
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.6), 15, 0.3, 0, 5);
+}
+
+/* Payment Button Specific Hover */
+.nav-payment:hover {
+    -fx-background-color: linear-gradient(to right, #2196F3, #42A5F5);
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.6), 15, 0.3, 0, 5);
+}
+
+/* Menu Button Specific Hover */
+.nav-menu:hover {
+    -fx-background-color: linear-gradient(to right, #9C27B0, #BA68C8);
+    -fx-effect: dropshadow(gaussian, rgba(156, 39, 176, 0.6), 15, 0.3, 0, 5);
+}
+
+/* Order Button Specific Hover */
+.nav-order:hover {
+    -fx-background-color: linear-gradient(to right, #FF9800, #FFB74D);
+    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.6), 15, 0.3, 0, 5);
+}
+
+/* Tables Button Specific Hover */
+.nav-tables:hover {
+    -fx-background-color: linear-gradient(to right, #607D8B, #78909C);
+    -fx-effect: dropshadow(gaussian, rgba(96, 125, 139, 0.6), 15, 0.3, 0, 5);
+}
+
+/* Sidebar Hover Effects */
+.sidebar-container:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 20, 0.2, 5, 0);
+}
+
+/* Logo Section Hover */
+.logo-section:hover {
+    -fx-background-color: linear-gradient(to right, #0f3460, #1565C0);
+    -fx-effect: dropshadow(gaussian, rgba(21, 101, 192, 0.4), 10, 0.3, 0, 3);
+}
+
+/* Navigation Container Animation */
+.nav-container {
+    -fx-padding: 10 10 10 10;
+    -fx-spacing: 8;
+}
+
+/* Button Press Effect */
+.nav-button:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+    -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.8), 10, 0.2, 0, 2);
+}
+
+/* Smooth Transition for all buttons */
+.nav-button, .nav-button-active {
+    -fx-transition: -fx-background-color 0.3s ease,
+    -fx-scale-x 0.2s ease,
+    -fx-scale-y 0.2s ease,
+    -fx-effect 0.3s ease;
+}
