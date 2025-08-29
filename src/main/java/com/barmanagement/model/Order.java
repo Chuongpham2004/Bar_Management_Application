@@ -44,6 +44,12 @@ public class Order {
         this.tableId = tableId;
     }
 
+    public Order(int tableId, String status) {
+        this.tableId = tableId;
+        this.status = status;
+        this.totalAmount = BigDecimal.ZERO;
+    }
+
     // Getters and Setters
     public int getId() {
         return id;
@@ -124,11 +130,17 @@ public class Order {
     }
 
     public String getStatusDisplayName() {
-        switch (status) {
-            case "pending": return "Đang chờ";
-            case "completed": return "Hoàn thành";
-            case "cancelled": return "Đã hủy";
-            default: return status;
+        switch (status != null ? status.toLowerCase() : "") {
+            case "pending":
+                return "Đang chờ";
+            case "completed":
+                return "Hoàn thành";
+            case "cancelled":
+                return "Đã hủy";
+            case "processing":
+                return "Đang xử lý";
+            default:
+                return status != null ? status : "Không xác định";
         }
     }
 
@@ -142,6 +154,83 @@ public class Order {
 
     public boolean isCancelled() {
         return "cancelled".equals(status);
+    }
+
+    // Additional utility methods for controllers
+    public double getTotalAmountAsDouble() {
+        return totalAmount != null ? totalAmount.doubleValue() : 0.0;
+    }
+
+    public String getTableDisplayName() {
+        return "Bàn " + tableId;
+    }
+
+    public boolean hasItems() {
+        return totalAmount != null && totalAmount.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    public String getOrderSummary() {
+        return String.format("Đơn hàng #%d - %s - %s",
+                id, getTableDisplayName(), getFormattedTotal());
+    }
+
+    // For duration calculation
+    public long getOrderDurationMinutes() {
+        if (orderTime != null && completedTime != null) {
+            long diffInMillis = completedTime.getTime() - orderTime.getTime();
+            return diffInMillis / (60 * 1000); // Convert to minutes
+        }
+        return 0;
+    }
+
+    public String getFormattedDuration() {
+        long minutes = getOrderDurationMinutes();
+        if (minutes > 0) {
+            long hours = minutes / 60;
+            long remainingMinutes = minutes % 60;
+
+            if (hours > 0) {
+                return String.format("%d giờ %d phút", hours, remainingMinutes);
+            } else {
+                return String.format("%d phút", remainingMinutes);
+            }
+        }
+        return "";
+    }
+
+    // Priority and urgency methods
+    public boolean isUrgent() {
+        if (orderTime != null && "pending".equals(status)) {
+            long diffInMillis = System.currentTimeMillis() - orderTime.getTime();
+            long diffInMinutes = diffInMillis / (60 * 1000);
+            return diffInMinutes > 30; // Orders older than 30 minutes are urgent
+        }
+        return false;
+    }
+
+    public String getUrgencyLevel() {
+        if (!isPending()) {
+            return "normal";
+        }
+
+        if (orderTime != null) {
+            long diffInMillis = System.currentTimeMillis() - orderTime.getTime();
+            long diffInMinutes = diffInMillis / (60 * 1000);
+
+            if (diffInMinutes > 45) {
+                return "critical";
+            } else if (diffInMinutes > 30) {
+                return "high";
+            } else if (diffInMinutes > 15) {
+                return "medium";
+            }
+        }
+        return "normal";
+    }
+
+    // Validation methods
+    public boolean isValid() {
+        return tableId > 0 && status != null && !status.isEmpty();
     }
 
     // For display in lists/tables

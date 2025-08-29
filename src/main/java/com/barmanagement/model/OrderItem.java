@@ -9,6 +9,7 @@ public class OrderItem {
     private int menuItemId;
     private int quantity;
     private double price;                // Đơn giá lấy từ menu_items khi JOIN
+    private double subtotal;             // THÊM MỚI - để cache calculation hoặc set từ DAO
 
     // Thông tin mở rộng từ MenuItem (không lưu DB, chỉ để hiển thị)
     private String menuItemName;
@@ -38,6 +39,7 @@ public class OrderItem {
         this.menuItemId = menuItemId;
         this.quantity = quantity;
         this.price = price;
+        this.subtotal = price * quantity; // Auto calculate
     }
 
     // Constructor đầy đủ với thông tin MenuItem
@@ -52,6 +54,7 @@ public class OrderItem {
         this.imagePath = imagePath;
         this.category = category;
         this.description = description;
+        this.subtotal = price * quantity; // Auto calculate
     }
 
     // Basic getters and setters
@@ -85,6 +88,10 @@ public class OrderItem {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+        // Tự động update subtotal nếu đã có price
+        if (this.price > 0) {
+            this.subtotal = this.price * quantity;
+        }
     }
 
     public double getPrice() {
@@ -93,6 +100,10 @@ public class OrderItem {
 
     public void setPrice(double price) {
         this.price = price;
+        // Tự động update subtotal nếu đã có quantity
+        if (this.quantity > 0) {
+            this.subtotal = price * this.quantity;
+        }
     }
 
     // Extended properties getters and setters
@@ -102,6 +113,14 @@ public class OrderItem {
 
     public void setMenuItemName(String menuItemName) {
         this.menuItemName = menuItemName;
+    }
+
+    public String getMenuItemCategory() {
+        return category;
+    }
+
+    public void setMenuItemCategory(String category) {
+        this.category = category;
     }
 
     public String getImagePath() {
@@ -132,9 +151,23 @@ public class OrderItem {
 
     /**
      * Tính thành tiền (quantity * price)
+     * Ưu tiên subtotal đã được set, nếu không thì tính toán
      */
     public double getSubtotal() {
+        // Nếu subtotal đã được set (từ DAO hoặc manual), dùng nó
+        if (subtotal > 0) {
+            return subtotal;
+        }
+        // Nếu không, tính toán từ price * quantity
         return price * quantity;
+    }
+
+    /**
+     * Set subtotal trực tiếp (dùng bởi DAO hoặc manual calculation)
+     * THÊM MỚI - Method này cần thiết cho PaymentController và DAO
+     */
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
     }
 
     /**
@@ -239,6 +272,8 @@ public class OrderItem {
         this.imagePath = menuItem.getImagePath();
         this.category = menuItem.getCategory();
         this.description = menuItem.getDescription();
+        // Update subtotal với giá mới
+        this.subtotal = this.price * this.quantity;
     }
 
     /**
@@ -246,6 +281,8 @@ public class OrderItem {
      */
     public void increaseQuantity(int amount) {
         this.quantity += amount;
+        // Update subtotal
+        this.subtotal = this.price * this.quantity;
     }
 
     /**
@@ -253,6 +290,8 @@ public class OrderItem {
      */
     public void decreaseQuantity(int amount) {
         this.quantity = Math.max(0, this.quantity - amount);
+        // Update subtotal
+        this.subtotal = this.price * this.quantity;
     }
 
     /**
@@ -265,8 +304,8 @@ public class OrderItem {
     // toString method for debugging
     @Override
     public String toString() {
-        return String.format("OrderItem{id=%d, orderId=%d, menuItemId=%d, quantity=%d, price=%.0f, name='%s'}",
-                id, orderId, menuItemId, quantity, price, menuItemName);
+        return String.format("OrderItem{id=%d, orderId=%d, menuItemId=%d, quantity=%d, price=%.0f, subtotal=%.0f, name='%s'}",
+                id, orderId, menuItemId, quantity, price, subtotal, menuItemName);
     }
 
     // equals and hashCode for collections
@@ -311,5 +350,42 @@ public class OrderItem {
      */
     public double getTotalWithVAT() {
         return getSubtotal() + getVATAmount();
+    }
+
+    // THÊM MỚI: Các utility methods cho business logic
+
+    /**
+     * Reset subtotal để force recalculation
+     */
+    public void resetSubtotal() {
+        this.subtotal = 0;
+    }
+
+    /**
+     * Force recalculate subtotal từ price và quantity hiện tại
+     */
+    public void recalculateSubtotal() {
+        this.subtotal = this.price * this.quantity;
+    }
+
+    /**
+     * Kiểm tra subtotal có được set manually hay không
+     */
+    public boolean hasManualSubtotal() {
+        return subtotal > 0 && subtotal != (price * quantity);
+    }
+
+    /**
+     * Lấy giá trị subtotal tính toán (không dùng cache)
+     */
+    public double getCalculatedSubtotal() {
+        return price * quantity;
+    }
+
+    /**
+     * So sánh subtotal manual vs calculated
+     */
+    public double getSubtotalDifference() {
+        return subtotal - getCalculatedSubtotal();
     }
 }
