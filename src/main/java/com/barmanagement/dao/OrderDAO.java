@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * DAO class for Order operations
- * FIXED: All payment processing and status management
+ * FIXED: All order management and status handling
  */
 public class OrderDAO {
 
@@ -52,6 +52,11 @@ public class OrderDAO {
                 throw new SQLException("Order not found: " + orderId);
             }
 
+            // Verify order is completed
+            if (!"completed".equals(order.getStatus())) {
+                throw new SQLException("Order must be completed before payment. Current status: " + order.getStatus());
+            }
+
             // Calculate total amount
             BigDecimal totalAmount = calcTotal(orderId);
             System.out.println("Order total amount: " + totalAmount);
@@ -60,16 +65,25 @@ public class OrderDAO {
                 throw new SQLException("Invalid order amount: " + totalAmount);
             }
 
+            // Check if already paid
+            if (isOrderPaid(orderId)) {
+                throw new SQLException("Order #" + orderId + " has already been paid");
+            }
+
             // 1. Update order status to paid
-            String updateOrderSql = "UPDATE orders SET status = 'paid', completed_time = NOW(), total_amount = ? WHERE id = ?";
+            String updateOrderSql = "UPDATE orders SET status = 'paid', total_amount = ? WHERE id = ?";
             try (PreparedStatement ps = conn.prepareStatement(updateOrderSql)) {
                 ps.setBigDecimal(1, totalAmount);
                 ps.setInt(2, orderId);
                 int updated = ps.executeUpdate();
                 System.out.println("Updated order status: " + updated + " rows");
+
+                if (updated == 0) {
+                    throw new SQLException("Failed to update order status");
+                }
             }
 
-            // 2. Create payment record - FIXED: using correct column name
+            // 2. Create payment record
             String insertPaymentSql = "INSERT INTO payments (order_id, total_amount, payment_method, payment_time, processed_by) VALUES (?, ?, ?, NOW(), ?)";
             try (PreparedStatement ps = conn.prepareStatement(insertPaymentSql)) {
                 ps.setInt(1, orderId);
@@ -78,9 +92,13 @@ public class OrderDAO {
                 ps.setInt(4, userId);
                 int inserted = ps.executeUpdate();
                 System.out.println("Created payment record: " + inserted + " rows");
+
+                if (inserted == 0) {
+                    throw new SQLException("Failed to create payment record");
+                }
             }
 
-            // 3. Update table status to empty - FIXED: using correct status name
+            // 3. Update table status to empty
             String updateTableSql = "UPDATE tables SET status = 'empty' WHERE id = ?";
             try (PreparedStatement ps = conn.prepareStatement(updateTableSql)) {
                 ps.setInt(1, order.getTableId());
@@ -88,7 +106,7 @@ public class OrderDAO {
                 System.out.println("Updated table status: " + updated + " rows");
             }
 
-            // 4. Update revenue for today - FIXED: proper revenue update
+            // 4. Update revenue for today
             String updateRevenueSql = "INSERT INTO revenue (date, total_amount, total_orders) VALUES (CURDATE(), ?, 1) " +
                     "ON DUPLICATE KEY UPDATE total_amount = total_amount + VALUES(total_amount), total_orders = total_orders + 1";
             try (PreparedStatement ps = conn.prepareStatement(updateRevenueSql)) {
@@ -125,6 +143,25 @@ public class OrderDAO {
     }
 
     /**
+     * Check if order has been paid
+     */
+    public boolean isOrderPaid(int orderId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM payments WHERE order_id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Extract order from ResultSet
      */
     private Order extractOrderFromResultSet(ResultSet rs) throws SQLException {
@@ -152,7 +189,7 @@ public class OrderDAO {
     }
 
     /**
-     * FIXED: Get completed but not paid orders - Only today's real orders
+     * FIXED: Get completed but not paid orders - Only valid orders with items
      */
     public List<Order> findCompletedNotPaidOrders() throws SQLException {
         String sql = "SELECT DISTINCT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
@@ -161,9 +198,10 @@ public class OrderDAO {
                 "LEFT JOIN payments p ON o.id = p.order_id " +
                 "WHERE o.status = 'completed' " +
                 "AND DATE(o.order_time) = CURDATE() " +
-                "AND o.total_amount > 0 " +
                 "AND p.order_id IS NULL " + // NOT YET PAID
-                "ORDER BY o.order_time DESC";
+                "GROUP BY o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+                "HAVING COUNT(oi.id) > 0 " + // HAS ITEMS
+                "ORDER BY o.completed_time DESC";
 
         System.out.println("Finding completed unpaid orders for today...");
 
@@ -194,8 +232,11 @@ public class OrderDAO {
             return findCompletedNotPaidOrders();
         }
 
-        String sql = "SELECT id, table_id, order_time, completed_time, status, total_amount, notes, created_by " +
-                "FROM orders WHERE status = ? ORDER BY order_time DESC";
+        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+                "FROM orders o " +
+                "WHERE o.status = ? " +
+                "AND DATE(o.order_time) = CURDATE() " +
+                "ORDER BY o.order_time DESC";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -214,7 +255,7 @@ public class OrderDAO {
         String sql = "UPDATE orders SET status = 'cancelled' " +
                 "WHERE status = 'completed' " +
                 "AND DATE(order_time) < CURDATE() " +
-                "AND id NOT IN (SELECT DISTINCT order_id FROM payments)";
+                "AND id NOT IN (SELECT DISTINCT order_id FROM payments WHERE order_id IS NOT NULL)";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -252,14 +293,14 @@ public class OrderDAO {
         String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by, " +
                 "COUNT(oi.id) as item_count, SUM(oi.quantity) as total_quantity " +
                 "FROM orders o " +
-                "LEFT JOIN order_items oi ON o.id = oi.order_id " +
+                "INNER JOIN order_items oi ON o.id = oi.order_id " +
                 "LEFT JOIN payments p ON o.id = p.order_id " +
                 "WHERE o.status = 'completed' " +
                 "AND DATE(o.order_time) = CURDATE() " +
                 "AND p.order_id IS NULL " + // NOT YET PAID
                 "GROUP BY o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
                 "HAVING item_count > 0 " +
-                "ORDER BY o.order_time DESC";
+                "ORDER BY o.completed_time DESC";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -279,12 +320,17 @@ public class OrderDAO {
     }
 
     /**
-     * Find pending order by table ID
+     * FIXED: Find pending/active order by table ID - including completed but unpaid orders
      */
     public Order findPendingByTable(int tableId) throws SQLException {
-        String sql = "SELECT id, table_id, order_time, completed_time, status, total_amount, notes, created_by " +
-                "FROM orders WHERE table_id = ? AND status IN ('pending', 'ordering', 'completed') " +
-                "ORDER BY order_time DESC LIMIT 1";
+        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+                "FROM orders o " +
+                "LEFT JOIN payments p ON o.id = p.order_id " +
+                "WHERE o.table_id = ? " +
+                "AND o.status IN ('pending', 'ordering', 'completed') " +
+                "AND DATE(o.order_time) = CURDATE() " +
+                "AND (o.status != 'completed' OR p.order_id IS NULL) " + // Include completed orders that aren't paid
+                "ORDER BY o.order_time DESC LIMIT 1";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -292,17 +338,28 @@ public class OrderDAO {
             ps.setInt(1, tableId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return extractOrderFromResultSet(rs);
+                    Order order = extractOrderFromResultSet(rs);
+                    System.out.println("Found order for table " + tableId + ": #" + order.getId() + " (" + order.getStatus() + ")");
+                    return order;
                 }
             }
         }
+
+        System.out.println("No active order found for table " + tableId);
         return null;
     }
 
     /**
-     * Create empty order for table
+     * FIXED: Create empty order for table - with validation
      */
     public Integer createEmptyOrder(int tableId) throws SQLException {
+        // First check if there's already an active order
+        Order existingOrder = findPendingByTable(tableId);
+        if (existingOrder != null) {
+            System.out.println("Table " + tableId + " already has an active order: #" + existingOrder.getId());
+            return null; // Don't create duplicate order
+        }
+
         String sql = "INSERT INTO orders (table_id, order_time, status, total_amount, created_by) VALUES (?, NOW(), 'pending', 0, 1)";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
@@ -328,6 +385,16 @@ public class OrderDAO {
      * Add item to order
      */
     public void addItem(int orderId, int menuItemId, int quantity) throws SQLException {
+        // First verify the order exists and is not completed
+        Order order = findById(orderId);
+        if (order == null) {
+            throw new SQLException("Order not found: " + orderId);
+        }
+
+        if ("completed".equals(order.getStatus()) || "paid".equals(order.getStatus())) {
+            throw new SQLException("Cannot add items to " + order.getStatus() + " order");
+        }
+
         String sql = "INSERT INTO order_items (order_id, menu_item_id, quantity, price) " +
                 "SELECT ?, ?, ?, price FROM menu_items WHERE id = ?";
 
@@ -338,9 +405,13 @@ public class OrderDAO {
             ps.setInt(2, menuItemId);
             ps.setInt(3, quantity);
             ps.setInt(4, menuItemId);
-            ps.executeUpdate();
 
-            System.out.println("Added item to order: OrderID=" + orderId + ", MenuItemID=" + menuItemId + ", Qty=" + quantity);
+            int inserted = ps.executeUpdate();
+            if (inserted > 0) {
+                System.out.println("Added item to order: OrderID=" + orderId + ", MenuItemID=" + menuItemId + ", Qty=" + quantity);
+            } else {
+                throw new SQLException("Failed to add item - menu item may not exist: " + menuItemId);
+            }
         }
     }
 
@@ -348,6 +419,25 @@ public class OrderDAO {
      * Remove item from order
      */
     public void removeItem(int orderItemId) throws SQLException {
+        // First get order info to verify it's not completed
+        String checkSql = "SELECT o.status FROM orders o " +
+                "INNER JOIN order_items oi ON o.id = oi.order_id " +
+                "WHERE oi.id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+
+            checkPs.setInt(1, orderItemId);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("status");
+                    if ("completed".equals(status) || "paid".equals(status)) {
+                        throw new SQLException("Cannot remove items from " + status + " order");
+                    }
+                }
+            }
+        }
+
         String sql = "DELETE FROM order_items WHERE id = ?";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
@@ -367,7 +457,8 @@ public class OrderDAO {
                 "mi.name as menu_item_name, mi.category as menu_item_category " +
                 "FROM order_items oi " +
                 "LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id " +
-                "WHERE oi.order_id = ?";
+                "WHERE oi.order_id = ? " +
+                "ORDER BY oi.id";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -412,11 +503,34 @@ public class OrderDAO {
     }
 
     /**
-     * Mark order as completed
+     * FIXED: Mark order as completed - with validations
      */
     public void markCompleted(int orderId) throws SQLException {
-        // First calculate and update total amount
+        // Verify order exists and has items
+        if (!hasActualItems(orderId)) {
+            throw new SQLException("Cannot complete order without items");
+        }
+
+        Order order = findById(orderId);
+        if (order == null) {
+            throw new SQLException("Order not found: " + orderId);
+        }
+
+        if ("completed".equals(order.getStatus())) {
+            System.out.println("Order #" + orderId + " is already completed");
+            return;
+        }
+
+        if ("paid".equals(order.getStatus())) {
+            throw new SQLException("Order is already paid and cannot be modified");
+        }
+
+        // Calculate and update total amount
         BigDecimal totalAmount = calcTotal(orderId);
+
+        if (totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new SQLException("Cannot complete order with zero amount");
+        }
 
         String sql = "UPDATE orders SET status = 'completed', completed_time = NOW(), total_amount = ? WHERE id = ?";
 
@@ -427,7 +541,110 @@ public class OrderDAO {
             ps.setInt(2, orderId);
             int updated = ps.executeUpdate();
 
-            System.out.println("Marked order #" + orderId + " as completed with amount: " + totalAmount + " (" + updated + " rows)");
+            if (updated > 0) {
+                System.out.println("Marked order #" + orderId + " as completed with amount: " + totalAmount);
+            } else {
+                throw new SQLException("Failed to update order status");
+            }
+        }
+    }
+
+    /**
+     * Cancel order - for cleanup purposes
+     */
+    public void cancelOrder(int orderId) throws SQLException {
+        String sql = "UPDATE orders SET status = 'cancelled' WHERE id = ? AND status IN ('pending', 'ordering')";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderId);
+            int updated = ps.executeUpdate();
+
+            if (updated > 0) {
+                System.out.println("Cancelled order #" + orderId);
+            }
+        }
+    }
+
+    /**
+     * Delete empty orders (orders with no items)
+     */
+    public void deleteEmptyOrders() throws SQLException {
+        String sql = "DELETE FROM orders WHERE id NOT IN (SELECT DISTINCT order_id FROM order_items) " +
+                "AND status = 'pending' AND DATE(order_time) = CURDATE()";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            int deleted = ps.executeUpdate();
+            if (deleted > 0) {
+                System.out.println("Deleted " + deleted + " empty orders");
+            }
+        }
+    }
+
+    /**
+     * Get all orders for today with basic info
+     */
+    public List<Order> findTodayOrders() throws SQLException {
+        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+                "FROM orders o " +
+                "WHERE DATE(o.order_time) = CURDATE() " +
+                "ORDER BY o.order_time DESC";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            return extractOrdersFromResultSet(rs);
+        }
+    }
+
+    /**
+     * Get order statistics for today
+     */
+    public OrderStats getTodayStats() throws SQLException {
+        String sql = "SELECT " +
+                "COUNT(*) as total_orders, " +
+                "COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders, " +
+                "COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_orders, " +
+                "COUNT(CASE WHEN status = 'paid' THEN 1 END) as paid_orders, " +
+                "COALESCE(SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END), 0) as total_revenue " +
+                "FROM orders WHERE DATE(order_time) = CURDATE()";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                OrderStats stats = new OrderStats();
+                stats.totalOrders = rs.getInt("total_orders");
+                stats.pendingOrders = rs.getInt("pending_orders");
+                stats.completedOrders = rs.getInt("completed_orders");
+                stats.paidOrders = rs.getInt("paid_orders");
+                stats.totalRevenue = rs.getBigDecimal("total_revenue");
+                return stats;
+            }
+        }
+
+        return new OrderStats(); // Return empty stats if no data
+    }
+
+    /**
+     * Inner class for order statistics
+     */
+    public static class OrderStats {
+        public int totalOrders = 0;
+        public int pendingOrders = 0;
+        public int completedOrders = 0;
+        public int paidOrders = 0;
+        public BigDecimal totalRevenue = BigDecimal.ZERO;
+
+        @Override
+        public String toString() {
+            return String.format("OrderStats{total=%d, pending=%d, completed=%d, paid=%d, revenue=%s}",
+                    totalOrders, pendingOrders, completedOrders, paidOrders, totalRevenue);
         }
     }
 }

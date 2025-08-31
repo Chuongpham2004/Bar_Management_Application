@@ -6,19 +6,24 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+/**
+ * Order model - ENHANCED VERSION
+ * Fixed all formatting and validation methods
+ */
 public class Order {
     private int id;
     private int tableId;
     private Timestamp orderTime;
-    private Timestamp completedTime;  // THÊM MỚI
+    private Timestamp completedTime;
     private String status;
-    private String notes;            // THÊM MỚI
-    private BigDecimal totalAmount;  // THÊM MỚI
-    private int createdBy;          // THÊM MỚI
+    private String notes;
+    private BigDecimal totalAmount;
+    private int createdBy;
 
     // Formatters
     private static final NumberFormat currencyFormatter = NumberFormat.getInstance(new Locale("vi", "VN"));
     private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    private static final SimpleDateFormat timeOnlyFormatter = new SimpleDateFormat("HH:mm");
 
     static {
         currencyFormatter.setMaximumFractionDigits(0);
@@ -29,6 +34,7 @@ public class Order {
         this.totalAmount = BigDecimal.ZERO;
         this.status = "pending";
         this.orderTime = new Timestamp(System.currentTimeMillis());
+        this.createdBy = 1; // Default admin user
     }
 
     public Order(int id, int tableId, Timestamp orderTime, String status) {
@@ -37,6 +43,7 @@ public class Order {
         this.orderTime = orderTime;
         this.status = status;
         this.totalAmount = BigDecimal.ZERO;
+        this.createdBy = 1;
     }
 
     public Order(int tableId) {
@@ -45,9 +52,9 @@ public class Order {
     }
 
     public Order(int tableId, String status) {
+        this();
         this.tableId = tableId;
         this.status = status;
-        this.totalAmount = BigDecimal.ZERO;
     }
 
     // Getters and Setters
@@ -75,7 +82,6 @@ public class Order {
         this.orderTime = orderTime;
     }
 
-    // THÊM MỚI - methods bị thiếu
     public Timestamp getCompletedTime() {
         return completedTime;
     }
@@ -101,7 +107,7 @@ public class Order {
     }
 
     public BigDecimal getTotalAmount() {
-        return totalAmount;
+        return totalAmount != null ? totalAmount : BigDecimal.ZERO;
     }
 
     public void setTotalAmount(BigDecimal totalAmount) {
@@ -116,49 +122,101 @@ public class Order {
         this.createdBy = createdBy;
     }
 
-    // Utility methods
+    // Utility methods for formatting
     public String getFormattedTotal() {
-        return currencyFormatter.format(totalAmount) + " VNĐ";
+        return currencyFormatter.format(getTotalAmount()) + " VNĐ";
     }
 
     public String getFormattedOrderTime() {
         return orderTime != null ? dateTimeFormatter.format(orderTime) : "";
     }
 
+    public String getFormattedOrderTimeShort() {
+        return orderTime != null ? timeOnlyFormatter.format(orderTime) : "";
+    }
+
     public String getFormattedCompletedTime() {
         return completedTime != null ? dateTimeFormatter.format(completedTime) : "";
     }
 
+    public String getFormattedCompletedTimeShort() {
+        return completedTime != null ? timeOnlyFormatter.format(completedTime) : "";
+    }
+
+    // Status display methods
     public String getStatusDisplayName() {
         switch (status != null ? status.toLowerCase() : "") {
             case "pending":
                 return "Đang chờ";
+            case "ordering":
+                return "Đang chọn món";
             case "completed":
                 return "Hoàn thành";
+            case "paid":
+                return "Đã thanh toán";
             case "cancelled":
                 return "Đã hủy";
-            case "processing":
-                return "Đang xử lý";
             default:
                 return status != null ? status : "Không xác định";
         }
     }
 
+    public String getStatusColor() {
+        switch (status != null ? status.toLowerCase() : "") {
+            case "pending":
+            case "ordering":
+                return "#FF9800"; // Orange
+            case "completed":
+                return "#4CAF50"; // Green
+            case "paid":
+                return "#2196F3"; // Blue
+            case "cancelled":
+                return "#f44336"; // Red
+            default:
+                return "#9E9E9E"; // Gray
+        }
+    }
+
+    // Status checking methods
     public boolean isPending() {
         return "pending".equals(status);
+    }
+
+    public boolean isOrdering() {
+        return "ordering".equals(status);
     }
 
     public boolean isCompleted() {
         return "completed".equals(status);
     }
 
+    public boolean isPaid() {
+        return "paid".equals(status);
+    }
+
     public boolean isCancelled() {
         return "cancelled".equals(status);
     }
 
-    // Additional utility methods for controllers
+    public boolean isActive() {
+        return isPending() || isOrdering() || isCompleted();
+    }
+
+    public boolean canBeModified() {
+        return isPending() || isOrdering();
+    }
+
+    public boolean canBeCompleted() {
+        return isPending() || isOrdering();
+    }
+
+    public boolean canBePaid() {
+        return isCompleted();
+    }
+
+    // Additional utility methods
     public double getTotalAmountAsDouble() {
-        return totalAmount != null ? totalAmount.doubleValue() : 0.0;
+        return getTotalAmount().doubleValue();
     }
 
     public String getTableDisplayName() {
@@ -166,7 +224,7 @@ public class Order {
     }
 
     public boolean hasItems() {
-        return totalAmount != null && totalAmount.compareTo(BigDecimal.ZERO) > 0;
+        return getTotalAmount().compareTo(BigDecimal.ZERO) > 0;
     }
 
     public String getOrderSummary() {
@@ -174,7 +232,22 @@ public class Order {
                 id, getTableDisplayName(), getFormattedTotal());
     }
 
-    // For duration calculation
+    public String getDetailedSummary() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Đơn hàng #").append(id).append("\n");
+        sb.append("Bàn: ").append(tableId).append("\n");
+        sb.append("Thời gian: ").append(getFormattedOrderTime()).append("\n");
+        sb.append("Trạng thái: ").append(getStatusDisplayName()).append("\n");
+        sb.append("Tổng tiền: ").append(getFormattedTotal());
+
+        if (completedTime != null) {
+            sb.append("\nHoàn thành: ").append(getFormattedCompletedTime());
+        }
+
+        return sb.toString();
+    }
+
+    // Duration calculation methods
     public long getOrderDurationMinutes() {
         if (orderTime != null && completedTime != null) {
             long diffInMillis = completedTime.getTime() - orderTime.getTime();
@@ -183,60 +256,138 @@ public class Order {
         return 0;
     }
 
+    public long getCurrentDurationMinutes() {
+        if (orderTime != null) {
+            long currentTime = System.currentTimeMillis();
+            long diffInMillis = currentTime - orderTime.getTime();
+            return diffInMillis / (60 * 1000);
+        }
+        return 0;
+    }
+
     public String getFormattedDuration() {
         long minutes = getOrderDurationMinutes();
-        if (minutes > 0) {
-            long hours = minutes / 60;
-            long remainingMinutes = minutes % 60;
+        return formatDuration(minutes);
+    }
 
-            if (hours > 0) {
-                return String.format("%d giờ %d phút", hours, remainingMinutes);
-            } else {
-                return String.format("%d phút", remainingMinutes);
-            }
+    public String getFormattedCurrentDuration() {
+        long minutes = getCurrentDurationMinutes();
+        return formatDuration(minutes);
+    }
+
+    private String formatDuration(long minutes) {
+        if (minutes <= 0) return "";
+
+        long hours = minutes / 60;
+        long remainingMinutes = minutes % 60;
+
+        if (hours > 0) {
+            return String.format("%d giờ %d phút", hours, remainingMinutes);
+        } else {
+            return String.format("%d phút", remainingMinutes);
         }
-        return "";
     }
 
     // Priority and urgency methods
     public boolean isUrgent() {
-        if (orderTime != null && "pending".equals(status)) {
-            long diffInMillis = System.currentTimeMillis() - orderTime.getTime();
-            long diffInMinutes = diffInMillis / (60 * 1000);
-            return diffInMinutes > 30; // Orders older than 30 minutes are urgent
+        if (isActive()) {
+            long currentDuration = getCurrentDurationMinutes();
+            return currentDuration > 30; // Orders older than 30 minutes are urgent
         }
         return false;
     }
 
     public String getUrgencyLevel() {
-        if (!isPending()) {
+        if (!isActive()) {
             return "normal";
         }
 
-        if (orderTime != null) {
-            long diffInMillis = System.currentTimeMillis() - orderTime.getTime();
-            long diffInMinutes = diffInMillis / (60 * 1000);
+        long currentDuration = getCurrentDurationMinutes();
 
-            if (diffInMinutes > 45) {
-                return "critical";
-            } else if (diffInMinutes > 30) {
-                return "high";
-            } else if (diffInMinutes > 15) {
-                return "medium";
-            }
+        if (currentDuration > 60) {
+            return "critical";
+        } else if (currentDuration > 45) {
+            return "high";
+        } else if (currentDuration > 30) {
+            return "medium";
+        } else if (currentDuration > 15) {
+            return "low";
         }
+
         return "normal";
+    }
+
+    public String getUrgencyDisplayName() {
+        switch (getUrgencyLevel()) {
+            case "critical": return "Rất khẩn cấp";
+            case "high": return "Khẩn cấp";
+            case "medium": return "Cần chú ý";
+            case "low": return "Bình thường";
+            default: return "Không khẩn cấp";
+        }
     }
 
     // Validation methods
     public boolean isValid() {
-        return tableId > 0 && status != null && !status.isEmpty();
+        return tableId > 0 &&
+                status != null && !status.trim().isEmpty() &&
+                orderTime != null;
+    }
+
+    public String getValidationError() {
+        if (tableId <= 0) return "Table ID không hợp lệ";
+        if (status == null || status.trim().isEmpty()) return "Trạng thái không được để trống";
+        if (orderTime == null) return "Thời gian order không hợp lệ";
+        return null;
+    }
+
+    // Methods for UI display
+    public String getShortDisplay() {
+        return "#" + id + " - " + getTableDisplayName();
+    }
+
+    public String getTimeDisplay() {
+        if (isCompleted() && completedTime != null) {
+            return getFormattedCompletedTimeShort();
+        } else {
+            return getFormattedOrderTimeShort();
+        }
+    }
+
+    // Comparison methods for sorting
+    public int compareByTime(Order other) {
+        if (this.orderTime == null && other.orderTime == null) return 0;
+        if (this.orderTime == null) return 1;
+        if (other.orderTime == null) return -1;
+        return other.orderTime.compareTo(this.orderTime); // Most recent first
+    }
+
+    public int compareByTable(Order other) {
+        return Integer.compare(this.tableId, other.tableId);
+    }
+
+    public int compareByStatus(Order other) {
+        // Custom order: pending, ordering, completed, paid, cancelled
+        int thisOrder = getStatusOrder(this.status);
+        int otherOrder = getStatusOrder(other.status);
+        return Integer.compare(thisOrder, otherOrder);
+    }
+
+    private int getStatusOrder(String status) {
+        switch (status != null ? status.toLowerCase() : "") {
+            case "pending": return 1;
+            case "ordering": return 2;
+            case "completed": return 3;
+            case "paid": return 4;
+            case "cancelled": return 5;
+            default: return 6;
+        }
     }
 
     // For display in lists/tables
     @Override
     public String toString() {
-        return "Order #" + id + " - Bàn " + tableId + " - " + getFormattedTotal();
+        return getShortDisplay() + " - " + getStatusDisplayName() + " - " + getFormattedTotal();
     }
 
     @Override
