@@ -36,12 +36,11 @@
                 <!-- Navigation Buttons -->
                 <VBox prefHeight="720.0" prefWidth="250.0" spacing="5.0">
                     <children>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  🏠 Trang chủ" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  📊 Dashboard" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showPayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  💳 Thanh Toán" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  🍸 Menu" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showOrder" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  🍽 Order" />
-                        <Button fx:id="settingsBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="  ⚙ Quản Lý Bàn">
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="📊 Dashboard" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showPayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="💳 Thanh Toán" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍸 Menu" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showOrder" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍽 Order" />
+                        <Button fx:id="settingsBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="⚙ Quản Lý Bàn">
                             <effect>
                                 <DropShadow />
                             </effect>
@@ -118,7 +117,7 @@
                         <!-- Table Management Section -->
                         <VBox prefWidth="930.0" spacing="15.0">
                             <children>
-                                <Label text="🪑 Thông Tin Bàn" textFill="WHITE">
+                                <Label text="Thông Tin Bàn" textFill="WHITE">
                                     <font>
                                         <Font name="System Bold" size="18.0" />
                                     </font>
@@ -132,7 +131,7 @@
                                                 <!-- Table Name Field -->
                                                 <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                                                     <children>
-                                                        <Label text="🏷️ Tên Bàn" textFill="WHITE">
+                                                        <Label text="Tên Bàn" textFill="WHITE">
                                                             <font>
                                                                 <Font name="System Bold" size="14.0" />
                                                             </font>
@@ -163,12 +162,12 @@
                                                         <Font name="System Bold" size="12.0" />
                                                     </font>
                                                 </Button>
-                                                <Button fx:id="btnUpdate" onAction="#update" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8;" text="✏️ Sửa">
+                                                <Button fx:id="btnUpdate" onAction="#update" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8;" text="📝 Sửa">
                                                     <font>
                                                         <Font name="System Bold" size="12.0" />
                                                     </font>
                                                 </Button>
-                                                <Button fx:id="btnDelete" onAction="#delete" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 8;" text="🗑️ Xóa">
+                                                <Button fx:id="btnDelete" onAction="#delete" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 8;" text="❌ Xóa">
                                                     <font>
                                                         <Font name="System Bold" size="12.0" />
                                                     </font>
@@ -202,17 +201,17 @@
 
                                 <HBox spacing="20.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 20;">
                                     <children>
-                                        <Button fx:id="btnEmpty" onAction="#setEmpty" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 10;" text="🟢 Đặt Trống">
+                                        <Button fx:id="btnEmpty" onAction="#setEmpty" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 10;" text="🟢 Bàn Trống">
                                             <font>
                                                 <Font name="System Bold" size="14.0" />
                                             </font>
                                         </Button>
-                                        <Button fx:id="btnOccupied" onAction="#setOccupied" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 10;" text="🔴 Đặt Đang Dùng">
+                                        <Button fx:id="btnOccupied" onAction="#setOccupied" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 10;" text="🔴 Bàn Đang Dùng">
                                             <font>
                                                 <Font name="System Bold" size="14.0" />
                                             </font>
                                         </Button>
-                                        <Button fx:id="btnReserved" onAction="#setReserved" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 10;" text="🟠 Đặt Đã Đặt">
+                                        <Button fx:id="btnReserved" onAction="#setReserved" prefHeight="50.0" prefWidth="200.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 10;" text="🟠 Bàn Đã Đặt">
                                             <font>
                                                 <Font name="System Bold" size="14.0" />
                                             </font>
@@ -275,7 +274,7 @@
                                         <!-- Total Tables Card -->
                                         <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: #607D8B; -fx-background-radius: 10; -fx-padding: 20;" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="🪑" textFill="WHITE">
+                                                <Label text="🍽" textFill="WHITE">
                                                     <font>
                                                         <Font size="24.0" />
                                                     </font>
@@ -377,7 +376,7 @@
 
                                 <HBox spacing="15.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 20;">
                                     <children>
-                                        <Button onAction="#showOrder" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 10;" text="🍽️ Đến Order">
+                                        <Button onAction="#showOrder" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 10;" text="🍽 Đến Order">
                                             <font>
                                                 <Font name="System Bold" size="12.0" />
                                             </font>

@@ -37,7 +37,6 @@
                 <!-- Navigation Buttons -->
                 <VBox prefHeight="720.0" prefWidth="250.0" spacing="5.0">
                     <children>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🏠 Trang chủ" />
                         <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="📊 Dashboard" />
                         <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showPayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="💳 Thanh Toán" />
                         <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍸 Menu" />
@@ -138,14 +137,7 @@
                                         </HBox>
 
                                         <!-- Instruction Label -->
-                                        <Label text="💡 CÁCH SỬ DỤNG: 1️⃣ Click TRÁI để chọn bàn → 2️⃣ Tạo Order → 3️⃣ Click món để thêm vào order • Click PHẢI bàn để đổi trạng thái" textFill="#B0B0B0">
-                                            <font>
-                                                <Font size="11.0" />
-                                            </font>
-                                            <padding>
-                                                <Insets left="20.0" />
-                                            </padding>
-                                        </Label>
+
 
                                         <!-- Table Grid -->
                                         <VBox style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 25;">
@@ -598,7 +590,7 @@
                                         <!-- Right Column - Order Items -->
                                         <VBox prefWidth="470.0" spacing="15.0">
                                             <children>
-                                                <Label text="🧾 Chi Tiết Order" textFill="WHITE">
+                                                <Label text=" Chi Tiết Order" textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="16.0" />
                                                     </font>
@@ -618,12 +610,17 @@
                                                         <!-- Order Actions -->
                                                         <HBox alignment="CENTER" spacing="15.0" style="-fx-padding: 15 0 0 0;">
                                                             <children>
-                                                                <Button onAction="#clearOrder" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 8;" text="🗑️ Xóa Tất Cả">
+                                                                <Button onAction="#clearOrder" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 8;" text="🚮Xóa Tất Cả">
                                                                     <font>
                                                                         <Font name="System Bold" size="11.0" />
                                                                     </font>
                                                                 </Button>
-                                                                <Button onAction="#completeOrder" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8;" text="✅ Hoàn Thành">
+                                                                <Button fx:id="btnCompleteOrder" onAction="#completeOrder" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8;" text="✅ Hoàn Thành">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="12.0" />
+                                                                    </font>
+                                                                </Button>
+                                                                <Button fx:id="btnPayment" onAction="#goToPayment" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8;" text="💳 Thanh Toán" visible="false">
                                                                     <font>
                                                                         <Font name="System Bold" size="12.0" />
                                                                     </font>
@@ -664,7 +661,7 @@
                                                         <Font name="System Bold" size="12.0" />
                                                     </font>
                                                 </Button>
-                                                <Button onAction="#showTableManagement" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #607D8B; -fx-text-fill: white; -fx-background-radius: 10;" text="⚙️ Cài Đặt Bàn">
+                                                <Button onAction="#showTableManagement" prefHeight="50.0" prefWidth="150.0" style="-fx-background-color: #607D8B; -fx-text-fill: white; -fx-background-radius: 10;" text="⚙Cài Đặt Bàn">
                                                     <font>
                                                         <Font name="System Bold" size="12.0" />
                                                     </font>
@@ -704,7 +701,7 @@
                                 <!-- Header -->
                                 <HBox alignment="CENTER" spacing="10">
                                     <children>
-                                        <Label text="🔄" style="-fx-font-size: 20px;" />
+                                        <Label text="📄" style="-fx-font-size: 20px;" />
                                         <Label fx:id="popupTableTitle" text="Chọn trạng thái cho Bàn X" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #333;" />
                                     </children>
                                 </HBox>
@@ -771,6 +768,47 @@
 
                                 <!-- Footer -->
                                 <Label text="👆 Chọn trạng thái hoặc click bên ngoài để đóng" style="-fx-font-size: 11px; -fx-text-fill: #666; -fx-text-alignment: center;" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+
+                <!-- CONFIRMATION DIALOG OVERLAY -->
+                <VBox fx:id="confirmationDialog" alignment="CENTER" style="-fx-background-color: rgba(0,0,0,0.8);" visible="false">
+                    <children>
+                        <!-- Dialog Content -->
+                        <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 8);" maxWidth="400">
+                            <children>
+                                <!-- Header -->
+                                <HBox alignment="CENTER" spacing="15">
+                                    <children>
+                                        <Label text="❓" style="-fx-font-size: 32px;" />
+                                        <Label text="Xác nhận hoàn thành order?" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #333;" />
+                                    </children>
+                                </HBox>
+
+                                <!-- Message -->
+                                <Label fx:id="confirmationMessage" text="Bạn có chắc chắn muốn hoàn thành order này không? Sau khi hoàn thành, sẽ có nút thanh toán xuất hiện."
+                                       style="-fx-font-size: 14px; -fx-text-fill: #666; -fx-text-alignment: center; -fx-wrap-text: true;" />
+
+                                <!-- Buttons -->
+                                <HBox alignment="CENTER" spacing="15">
+                                    <children>
+                                        <Button fx:id="btnConfirmYes" onAction="#confirmOrderCompletion" prefWidth="100" prefHeight="40"
+                                                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;">
+                                            <graphic>
+                                                <Label text="✅ Có" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                            </graphic>
+                                        </Button>
+
+                                        <Button fx:id="btnConfirmNo" onAction="#cancelOrderCompletion" prefWidth="100" prefHeight="40"
+                                                style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;">
+                                            <graphic>
+                                                <Label text="❌ Không" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                            </graphic>
+                                        </Button>
+                                    </children>
+                                </HBox>
                             </children>
                         </VBox>
                     </children>

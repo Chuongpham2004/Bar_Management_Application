@@ -19,4 +19,11 @@ public class Table {
     public void setTableName(String tableName) { this.tableName = tableName; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    /**
+     * Get display name for table (e.g., "Bàn 1")
+     */
+    public String getTableDisplayName() {
+        return "Bàn " + id;
+    }
 }
