@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
@@ -14,8 +16,13 @@
         <VBox layoutX="0.0" layoutY="0.0" prefHeight="800.0" prefWidth="250.0" style="-fx-background-color: #16213e;" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
                 <!-- Logo Section -->
-                <HBox alignment="CENTER" prefHeight="80.0" prefWidth="250.0" style="-fx-background-color: #0f3460;">
+                <HBox alignment="CENTER" prefHeight="60.0" prefWidth="250.0" style="-fx-background-color: #0f3460;">
                     <children>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/bar-logo.png" />
+                            </image>
+                        </ImageView>
                         <Label text="BarManager" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="18.0" />
@@ -28,18 +35,17 @@
                 </HBox>
 
                 <!-- Navigation Buttons -->
-                <VBox prefHeight="740.0" prefWidth="250.0" spacing="5.0">
+                <VBox prefHeight="720.0" prefWidth="250.0" spacing="5.0">
                     <children>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showHome" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="  🏠 Trang chủ" />
-                        <Button fx:id="dashboardBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="  📊 Dashboard">
+                        <Button fx:id="dashboardBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="📊 Dashboard">
                             <effect>
                                 <DropShadow />
                             </effect>
                         </Button>
-                        <Button fx:id="managePaymentButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handlePayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text=" 💳 Thanh Toán" />
-                        <Button fx:id="manageMenuButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text=" 🹹 Menu" />
-                        <Button fx:id="manageOrderButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageOrder" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text=" 🍽️ Order" />
-                        <Button fx:id="manageTablesButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageTables" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text=" ⚙️ Quản Lý Bàn" />
+                        <Button fx:id="managePaymentButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handlePayment" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="💳 Thanh Toán" />
+                        <Button fx:id="manageMenuButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍸 Menu" />
+                        <Button fx:id="manageOrderButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageOrder" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍽 Order" />
+                        <Button fx:id="manageTablesButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#handleManageTables" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="⚙ Quản Lý Bàn" />
                     </children>
                     <VBox.margin>
                         <Insets top="20.0" />
@@ -81,7 +87,7 @@
                 <!-- Right: User Info -->
                 <HBox alignment="CENTER_RIGHT" prefWidth="475.0" spacing="15.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <Label fx:id="currentTimeLabel" text="12:30 PM" textFill="WHITE">
+                        <Label text="12:30 PM" textFill="WHITE">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -92,7 +98,7 @@
                                 <Font name="System Bold" size="14.0" />
                             </font>
                         </Label>
-                        <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout"
+                        <Button mnemonicParsing="false" onAction="#handleLogout"
                                 prefHeight="32.0" prefWidth="85.0"
                                 style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-size: 12px;"
                                 text="Đăng xuất" />
@@ -177,7 +183,7 @@
                                         <!-- Today Orders Card -->
                                         <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #2196F3; -fx-background-radius: 15; -fx-padding: 25;" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="🧾" textFill="WHITE">
+                                                <Label text="📑" textFill="WHITE">
                                                     <font>
                                                         <Font size="32.0" />
                                                     </font>
@@ -201,7 +207,7 @@
                                         <!-- Active Tables Card -->
                                         <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #FF9800; -fx-background-radius: 15; -fx-padding: 25;" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="🪑" textFill="WHITE">
+                                                <Label text="🍽" textFill="WHITE">
                                                     <font>
                                                         <Font size="32.0" />
                                                     </font>
@@ -225,7 +231,7 @@
                                         <!-- Menu Items Card -->
                                         <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #9C27B0; -fx-background-radius: 15; -fx-padding: 25;" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="🸸" textFill="WHITE">
+                                                <Label text="📋" textFill="WHITE">
                                                     <font>
                                                         <Font size="32.0" />
                                                     </font>
@@ -289,7 +295,7 @@
                                         <!-- Orders Chart -->
                                         <VBox spacing="10.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 20;" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="🧾 Số Đơn Hàng" textFill="WHITE">
+                                                <Label text="Số Đơn Hàng" textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="16.0" />
                                                     </font>
@@ -411,7 +417,7 @@
                                             <children>
                                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                                     <children>
-                                                        <Label text="⏱️ Thời Gian Phục Vụ" textFill="WHITE">
+                                                        <Label text="⏱ Thời Gian Phục Vụ" textFill="WHITE">
                                                             <font>
                                                                 <Font name="System Bold" size="16.0" />
                                                             </font>
@@ -434,7 +440,7 @@
                                                                         <Font name="System Bold" size="13.0" />
                                                                     </font>
                                                                 </Label>
-                                                                <Label text="↗️" textFill="#4CAF50">
+                                                                <Label text="↗" textFill="#4CAF50">
                                                                     <font>
                                                                         <Font size="12.0" />
                                                                     </font>
@@ -662,7 +668,7 @@
                                         <!-- Order Management Card -->
                                         <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 25; -fx-cursor: hand;" onMouseClicked="#handleQuickOrder" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="🍽️" textFill="#FF9800">
+                                                <Label text="🍽" textFill="#FF9800">
                                                     <font>
                                                         <Font size="48.0" />
                                                     </font>
@@ -691,7 +697,7 @@
                                         <!-- Menu Management Card -->
                                         <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 25; -fx-cursor: hand;" onMouseClicked="#handleQuickMenu" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="🸸" textFill="#9C27B0">
+                                                <Label text="📑" textFill="#9C27B0">
                                                     <font>
                                                         <Font size="48.0" />
                                                     </font>
@@ -749,7 +755,7 @@
                                         <!-- Table Management Card -->
                                         <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 25; -fx-cursor: hand;" onMouseClicked="#handleQuickTables" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="⚙️" textFill="#607D8B">
+                                                <Label text="⚙" textFill="#607D8B">
                                                     <font>
                                                         <Font size="48.0" />
                                                     </font>

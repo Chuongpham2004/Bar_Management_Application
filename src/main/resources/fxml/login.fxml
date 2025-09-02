@@ -409,20 +409,7 @@
             <VBox alignment="CENTER" spacing="15.0" maxHeight="180.0">
                <children>
                   <!-- Demo Section -->
-                  <VBox alignment="CENTER" spacing="8.0">
-                     <children>
-                        <Label text="🎯 Demo Account" textFill="#8b949e">
-                           <font>
-                              <Font name="System Bold" size="12.0" />
-                           </font>
-                        </Label>
-                        <Label maxWidth="300.0" text="Username: admin | Password: admin123" textAlignment="CENTER" textFill="#6e7681" wrapText="true">
-                           <font>
-                              <Font name="System Italic" size="10.0" />
-                           </font>
-                        </Label>
-                     </children>
-                  </VBox>
+
 
                   <!-- Trust Badges -->
                   <VBox alignment="CENTER" spacing="12.0">
