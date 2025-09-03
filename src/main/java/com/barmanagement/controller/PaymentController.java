@@ -106,8 +106,11 @@ public class PaymentController implements Initializable {
             paymentProgress.setVisible(false);
         }
 
-        // FIXED: Always start with empty state, don't auto-load orders
+        // FIX COMBOBOX TEXT COLOR - Thêm phần này
         Platform.runLater(() -> {
+            // Fix màu chữ cho ComboBox
+            fixComboBoxTextColor();
+
             if (!orderSetFromExternal) {
                 System.out.println("No external order set, showing empty state");
                 clearOrderDisplay();
@@ -119,6 +122,44 @@ public class PaymentController implements Initializable {
                 System.out.println("External order was set, skipping normal table loading");
             }
         });
+    }
+
+    // NEW METHOD: Fix ComboBox text color
+    private void fixComboBoxTextColor() {
+        try {
+            // Đợi UI render hoàn toàn
+            Platform.runLater(() -> {
+                try {
+                    // Fix cho tableComboBox
+                    if (tableComboBox != null) {
+                        tableComboBox.setStyle("-fx-background-color: #0f3460; -fx-font-size: 14px; -fx-text-inner-color: white;");
+
+                        // Tìm và set màu cho text node
+                        var textNode = tableComboBox.lookup(".text");
+                        if (textNode != null) {
+                            textNode.setStyle("-fx-fill: white; -fx-text-fill: white;");
+                        }
+                    }
+
+                    // Fix cho paymentMethodComboBox
+                    if (paymentMethodComboBox != null) {
+                        paymentMethodComboBox.setStyle("-fx-background-color: #0f3460; -fx-font-size: 14px; -fx-text-inner-color: white;");
+
+                        // Tìm và set màu cho text node
+                        var textNode2 = paymentMethodComboBox.lookup(".text");
+                        if (textNode2 != null) {
+                            textNode2.setStyle("-fx-fill: white; -fx-text-fill: white;");
+                        }
+                    }
+
+                    System.out.println("ComboBox text color fixed successfully");
+                } catch (Exception e) {
+                    System.out.println("Error fixing combobox text color: " + e.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("Error in fixComboBoxTextColor: " + e.getMessage());
+        }
     }
 
     // NEW: Load table options without auto-displaying orders - FIXED VERSION
@@ -171,6 +212,11 @@ public class PaymentController implements Initializable {
             }
 
             tableComboBox.setItems(tableNames);
+
+            // Fix text color sau khi set items
+            Platform.runLater(() -> {
+                fixComboBoxTextColor();
+            });
 
             // Update status message only
             if (tableNames.isEmpty()) {
@@ -233,6 +279,11 @@ public class PaymentController implements Initializable {
                 "Tiền mặt", "Chuyển khoản", "MOMO", "Thẻ tín dụng", "ZaloPay"
         ));
         paymentMethodComboBox.getSelectionModel().select(0); // Default to cash
+
+        // Fix text color sau khi setup
+        Platform.runLater(() -> {
+            fixComboBoxTextColor();
+        });
     }
 
     private void setupOrderTable() {
@@ -277,6 +328,11 @@ public class PaymentController implements Initializable {
         String selectedTableName = tableComboBox.getValue();
         System.out.println("=== LOAD ORDER BY SELECTED TABLE ===");
         System.out.println("Selected: " + selectedTableName);
+
+        // Fix text color khi selection thay đổi
+        Platform.runLater(() -> {
+            fixComboBoxTextColor();
+        });
 
         if (selectedTableName == null) {
             System.out.println("No table selected, clearing display");
@@ -444,7 +500,9 @@ public class PaymentController implements Initializable {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
         });
+
     }
 
     @FXML
@@ -565,11 +623,16 @@ public class PaymentController implements Initializable {
             paymentSummaryBox.getChildren().clear();
         }
 
-        updateStatusLabel("Chọn bàn để bắt đầu thanh toán", Color.GRAY);
+        updateStatusLabel("Chọn bàn để bắt đầu thanh toán", Color.WHITE);
 
         // Reset table selection
         tableComboBox.getSelectionModel().clearSelection();
         paymentMethodComboBox.getSelectionModel().select(0);
+
+        // Fix text color sau khi reset
+        Platform.runLater(() -> {
+            fixComboBoxTextColor();
+        });
     }
 
     @FXML
@@ -664,5 +727,10 @@ public class PaymentController implements Initializable {
 
         // Update display
         updateOrderDisplay();
+
+        // Fix text color sau khi set order
+        Platform.runLater(() -> {
+            fixComboBoxTextColor();
+        });
     }
 }
