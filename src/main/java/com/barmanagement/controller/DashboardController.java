@@ -16,6 +16,7 @@ import javafx.scene.shape.Circle;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
+import javafx.stage.Modality;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -28,6 +29,7 @@ import javafx.util.Duration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.Node;
 
 import com.barmanagement.util.SceneUtil;
 import com.barmanagement.util.LogoutUtil;
@@ -36,8 +38,10 @@ import com.barmanagement.dao.RevenueDAO;
 import com.barmanagement.dao.TableDAO;
 import com.barmanagement.dao.MenuItemDAO;
 import com.barmanagement.dao.OrderDAO;
+import com.barmanagement.dao.OrderItemDAO;
 import com.barmanagement.dao.PaymentDAO;
 import com.barmanagement.model.Order;
+import com.barmanagement.model.OrderItem;
 import com.barmanagement.model.Payment;
 
 import java.io.IOException;
@@ -106,6 +110,7 @@ public class DashboardController {
     private TableDAO tableDAO;
     private MenuItemDAO menuItemDAO;
     private OrderDAO orderDAO;
+    private OrderItemDAO orderItemDAO;
     private PaymentDAO paymentDAO;
 
     // Data
@@ -124,13 +129,14 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
-        System.out.println("🏠 ENHANCED DASHBOARD CONTROLLER INITIALIZING...");
+        System.out.println("📊 ENHANCED DASHBOARD CONTROLLER INITIALIZING...");
 
         // Initialize DAOs
         revenueDAO = new RevenueDAO();
         tableDAO = new TableDAO();
         menuItemDAO = new MenuItemDAO();
         orderDAO = new OrderDAO();
+        orderItemDAO = new OrderItemDAO();
         paymentDAO = new PaymentDAO();
 
         // Setup formatter
@@ -445,10 +451,234 @@ public class DashboardController {
             exitScale.play();
         });
 
-        // Add click handler for details
-        itemBox.setOnMouseClicked(e -> openOrderDetails(order));
+        // Add click handler for details - FIXED VERSION
+        itemBox.setOnMouseClicked(e -> {
+            System.out.println("🖱️ Clicked on order #" + order.getId());
+            openOrderDetailsPopup(order);
+        });
 
         return itemBox;
+    }
+
+    /**
+     * IMPROVED: Open order details in a responsive popup with smart scrolling
+     */
+    private void openOrderDetailsPopup(Order order) {
+        try {
+            System.out.println("📋 Opening details for order #" + order.getId());
+
+            // Create new stage for popup
+            Stage detailStage = new Stage();
+            detailStage.initModality(Modality.APPLICATION_MODAL);
+            detailStage.setTitle("Chi tiết đơn hàng #" + order.getId());
+
+            // Create main container with responsive sizing
+            VBox mainContainer = new VBox(20);
+            mainContainer.setPadding(new Insets(25));
+            mainContainer.setStyle("-fx-background-color: #1a1a2e;");
+            mainContainer.setPrefWidth(650);
+            mainContainer.setMinWidth(650);
+            mainContainer.setMaxWidth(800);
+
+            // Header section
+            HBox headerBox = new HBox(20);
+            headerBox.setAlignment(Pos.CENTER_LEFT);
+            headerBox.setStyle("-fx-background-color: #16213e; -fx-background-radius: 12; -fx-padding: 20;");
+            headerBox.setMinHeight(80);
+
+            Label orderIcon = new Label("📋");
+            orderIcon.setFont(Font.font(32));
+
+            VBox headerInfo = new VBox(5);
+            Label orderTitle = new Label("Đơn hàng #" + order.getId());
+            orderTitle.setTextFill(Color.WHITE);
+            orderTitle.setFont(Font.font("System", FontWeight.BOLD, 22));
+
+            Label orderSubtitle = new Label("Bàn " + order.getTableId() + " • " + order.getFormattedOrderTime());
+            orderSubtitle.setTextFill(Color.web("#B0B0B0"));
+            orderSubtitle.setFont(Font.font(14));
+
+            headerInfo.getChildren().addAll(orderTitle, orderSubtitle);
+
+            // Print button in header (moved to top)
+            Button printButton = new Button("🖨 In hóa đơn");
+            printButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-size: 14px; -fx-padding: 12 20 12 20;");
+            printButton.setOnAction(e -> {
+                showInfo("Chức năng in hóa đơn đang được phát triển!");
+            });
+
+            HBox.setHgrow(headerInfo, javafx.scene.layout.Priority.ALWAYS);
+            headerBox.getChildren().addAll(orderIcon, headerInfo, printButton);
+
+            // Status section
+            HBox statusBox = new HBox(15);
+            statusBox.setAlignment(Pos.CENTER_LEFT);
+            statusBox.setStyle("-fx-background-color: " + order.getStatusColor() + "; -fx-background-radius: 10; -fx-padding: 15;");
+            statusBox.setMinHeight(50);
+
+            Label statusLabel = new Label("Trạng thái: " + order.getStatusDisplayName());
+            statusLabel.setTextFill(Color.WHITE);
+            statusLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
+            statusBox.getChildren().add(statusLabel);
+
+            // Items section with smart scrolling
+            VBox itemsContainer = new VBox(15);
+            itemsContainer.setStyle("-fx-background-color: #16213e; -fx-background-radius: 12; -fx-padding: 20;");
+
+            Label itemsTitle = new Label("🍽 Chi tiết món ăn:");
+            itemsTitle.setTextFill(Color.WHITE);
+            itemsTitle.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+            // Load order items first to determine if scrolling is needed
+            VBox itemsList = new VBox(12);
+            itemsList.setStyle("-fx-background-color: transparent;");
+
+            boolean needsScrolling = false;
+            int itemCount = 0;
+
+            try {
+                List<OrderItem> items = orderItemDAO.findByOrderId(order.getId());
+                itemCount = items.size();
+
+                // Determine if scrolling is needed (more than 4 items)
+                needsScrolling = itemCount > 4;
+
+                if (items.isEmpty()) {
+                    Label noItemsLabel = new Label("Không có món nào trong đơn hàng này");
+                    noItemsLabel.setTextFill(Color.web("#808080"));
+                    noItemsLabel.setFont(Font.font(14));
+                    itemsList.getChildren().add(noItemsLabel);
+                } else {
+                    for (OrderItem item : items) {
+                        HBox itemRow = createItemRow(item);
+                        itemsList.getChildren().add(itemRow);
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("Error loading order items: " + e.getMessage());
+                Label errorLabel = new Label("Lỗi khi tải chi tiết món ăn: " + e.getMessage());
+                errorLabel.setTextFill(Color.web("#f44336"));
+                errorLabel.setFont(Font.font(14));
+                itemsList.getChildren().add(errorLabel);
+            }
+
+            // Create items display with conditional scrolling
+            Node itemsDisplay;
+            if (needsScrolling) {
+                // Use ScrollPane for many items
+                ScrollPane itemsScrollPane = new ScrollPane(itemsList);
+                itemsScrollPane.setPrefHeight(280);
+                itemsScrollPane.setMaxHeight(280);
+                itemsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                itemsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                itemsScrollPane.setFitToWidth(true);
+                itemsScrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
+
+                itemsDisplay = itemsScrollPane;
+
+                // Set container height for scrolling case
+                itemsContainer.setPrefHeight(350);
+                itemsContainer.setMaxHeight(350);
+            } else {
+                // Direct display for few items
+                itemsDisplay = itemsList;
+
+                // Set container height based on content
+                double estimatedHeight = Math.max(150, itemCount * 57 + 80); // 57px per item + padding
+                itemsContainer.setPrefHeight(estimatedHeight);
+                itemsContainer.setMinHeight(estimatedHeight);
+            }
+
+            itemsContainer.getChildren().addAll(itemsTitle, itemsDisplay);
+
+            // Total section (moved above buttons, not overlapping)
+            HBox totalBox = new HBox();
+            totalBox.setAlignment(Pos.CENTER_RIGHT);
+            totalBox.setStyle("-fx-background-color: #4CAF50; -fx-background-radius: 10; -fx-padding: 18;");
+            totalBox.setMinHeight(60);
+
+            Label totalLabel = new Label("💰 Tổng cộng: " + order.getFormattedTotal());
+            totalLabel.setTextFill(Color.WHITE);
+            totalLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+            totalBox.getChildren().add(totalLabel);
+
+            // Bottom buttons section
+            HBox buttonsBox = new HBox(15);
+            buttonsBox.setAlignment(Pos.CENTER_RIGHT);
+
+            Button closeButton = new Button("✕ Đóng");
+            closeButton.setStyle("-fx-background-color: #666; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-size: 14px; -fx-padding: 12 20 12 20;");
+            closeButton.setOnAction(e -> detailStage.close());
+
+            buttonsBox.getChildren().add(closeButton);
+
+            // Add all sections to main container
+            mainContainer.getChildren().addAll(headerBox, statusBox, itemsContainer, totalBox, buttonsBox);
+
+            // Calculate total window height based on content
+            double baseHeight = 500; // Base height for header, status, total, buttons
+            double contentHeight = needsScrolling ? 350 : (itemCount * 57 + 80); // Items container height
+            double totalHeight = Math.min(800, Math.max(550, baseHeight + contentHeight));
+
+            mainContainer.setPrefHeight(totalHeight);
+            mainContainer.setMinHeight(Math.min(550, totalHeight));
+
+            // Create scene and show
+            Scene scene = new Scene(mainContainer);
+            detailStage.setScene(scene);
+            detailStage.setResizable(false); // Fixed size for better UX
+            detailStage.show();
+
+            // Center the stage on screen
+            detailStage.centerOnScreen();
+
+            System.out.println("✅ Responsive order details popup opened - Items: " + itemCount + ", Scrolling: " + needsScrolling);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error opening order details popup: " + e.getMessage());
+            e.printStackTrace();
+            showErrorMessage("Không thể mở chi tiết đơn hàng: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Helper method to create individual item row
+     */
+    private HBox createItemRow(OrderItem item) {
+        HBox itemRow = new HBox();
+        itemRow.setAlignment(Pos.CENTER_LEFT);
+        itemRow.setSpacing(15);
+        itemRow.setStyle("-fx-background-color: #0f3460; -fx-background-radius: 8; -fx-padding: 12;");
+        itemRow.setMinHeight(45);
+        itemRow.setPrefHeight(45);
+
+        Label itemName = new Label(item.getDisplayName());
+        itemName.setTextFill(Color.WHITE);
+        itemName.setFont(Font.font("System", FontWeight.NORMAL, 14));
+        itemName.setPrefWidth(240);
+        itemName.setMaxWidth(240);
+        itemName.setWrapText(true); // Allow text wrapping for long names
+
+        Label itemQty = new Label("x" + item.getQuantity());
+        itemQty.setTextFill(Color.web("#4CAF50"));
+        itemQty.setFont(Font.font("System", FontWeight.BOLD, 14));
+        itemQty.setPrefWidth(40);
+        itemQty.setAlignment(Pos.CENTER);
+
+        Label itemPrice = new Label(item.getFormattedPrice());
+        itemPrice.setTextFill(Color.web("#FF9800"));
+        itemPrice.setFont(Font.font("System", FontWeight.NORMAL, 14));
+        itemPrice.setPrefWidth(100);
+        itemPrice.setAlignment(Pos.CENTER_RIGHT);
+
+        Label itemSubtotal = new Label(item.getFormattedSubtotal());
+        itemSubtotal.setTextFill(Color.WHITE);
+        itemSubtotal.setFont(Font.font("System", FontWeight.BOLD, 14));
+        itemSubtotal.setPrefWidth(120);
+        itemSubtotal.setAlignment(Pos.CENTER_RIGHT);
+
+        itemRow.getChildren().addAll(itemName, itemQty, itemPrice, itemSubtotal);
+        return itemRow;
     }
 
     /**
@@ -768,27 +998,11 @@ public class DashboardController {
                 row.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !row.isEmpty()) {
                         Order selectedOrder = row.getItem();
-                        openOrderDetails(selectedOrder);
+                        openOrderDetailsPopup(selectedOrder);
                     }
                 });
                 return row;
             });
-        }
-    }
-
-    private void openOrderDetails(Order order) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/order_detail.fxml"));
-            VBox detailRoot = loader.load();
-
-            Stage detailStage = new Stage();
-            detailStage.setTitle("Chi tiết đơn hàng #" + order.getId());
-            detailStage.setScene(new Scene(detailRoot, 600, 500));
-            detailStage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            showErrorMessage("Không thể mở chi tiết đơn hàng: " + e.getMessage());
         }
     }
 
@@ -1003,6 +1217,16 @@ public class DashboardController {
         });
     }
 
+    private void showInfo(String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Thông báo");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
+
     /**
      * PUBLIC: Enhanced method called after successful payment
      */
@@ -1046,7 +1270,7 @@ public class DashboardController {
     @FXML
     private void handleLogout(ActionEvent event) {
         cleanup();
-        LogoutUtil.confirmLogout(logoutButton);
+        LogoutUtil.confirmLogout((Button) (event != null ? event.getSource() : logoutButton));
     }
 
     @FXML

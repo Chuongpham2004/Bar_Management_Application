@@ -335,55 +335,6 @@
     -fx-border-radius: 10px;
 }
 
-/* =====================
-   RECENT ACTIVITY (MOCKUP MATCH)
-   ===================== */
-.recent-activity-container {
-    -fx-background-color: #16213e;
-    -fx-background-radius: 15px;
-    -fx-padding: 16px;
-    -fx-effect: dropshadow(gaussian, rgba(13, 19, 33, 0.5), 18, 0, 0, 6);
-}
-
-.recent-activity-item {
-    -fx-background-color: #1a1a2e;
-    -fx-background-radius: 10px;
-    -fx-padding: 12px 16px;
-}
-
-.recent-activity-item + .recent-activity-item {
-    -fx-margin-top: 10px; /* visual gap via VBox spacing still applies */
-}
-
-.recent-activity-title {
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 14px;
-}
-
-.recent-activity-subtitle {
-    -fx-text-fill: #B0B0B0;
-    -fx-font-size: 12px;
-}
-
-.recent-activity-badge-success {
-    -fx-text-fill: #4CAF50;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-}
-
-.recent-activity-badge-info {
-    -fx-text-fill: #2196F3;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-}
-
-.recent-activity-badge-warning {
-    -fx-text-fill: #FF9800;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-}
-
 .activity-item-completed {
     -fx-border-color: #4CAF50;
     -fx-border-width: 2px;
@@ -705,4 +656,11 @@
     -fx-padding: 15 20;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.4), 12, 0, 0, 4);
+}
+.combo-box.dark-theme .text {
+    -fx-fill: white;
+}
+
+.combo-box.dark-theme .combo-box-base {
+    -fx-text-fill: white;
 }

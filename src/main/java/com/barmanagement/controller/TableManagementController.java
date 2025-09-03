@@ -7,15 +7,21 @@ import com.barmanagement.model.Order;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
 import com.barmanagement.util.SceneUtil;
 import com.barmanagement.util.LogoutUtil;
 
 import java.sql.SQLException;
 
 /**
- * Table Management Controller - FIXED VERSION
- * Added proper order checking before status changes
+ * Table Management Controller - UPDATED VERSION with Card Layout
+ * Added card display functionality while maintaining TableView compatibility
  */
 public class TableManagementController {
 
@@ -38,6 +44,10 @@ public class TableManagementController {
     // Statistics labels
     @FXML
     private Label lblTotalTables, lblEmptyTables, lblOccupiedTables, lblReservedTables;
+
+    // Card layout container
+    @FXML
+    private FlowPane tableCardsContainer;
 
     private final TableDAO tableDAO = new TableDAO();
     private final OrderDAO orderDAO = new OrderDAO();
@@ -62,8 +72,11 @@ public class TableManagementController {
         // Set data to table view
         tableView.setItems(data);
 
-        // Selection listener
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> fillForm(b));
+        // Selection listener - only for form filling, not for cards
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, a, b) -> {
+            fillForm(b);
+            // No need to refresh cards for selection
+        });
     }
 
     private void setupTableView() {
@@ -103,6 +116,89 @@ public class TableManagementController {
                 }
             };
         });
+    }
+
+    private void updateTableCards() {
+        if (tableCardsContainer == null) return;
+
+        tableCardsContainer.getChildren().clear();
+
+        for (Table table : data) {
+            VBox card = createTableCard(table);
+            tableCardsContainer.getChildren().add(card);
+        }
+
+        if (data.isEmpty()) {
+            Label noTablesLabel = new Label("Chưa có bàn nào được tạo");
+            noTablesLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 20;");
+            tableCardsContainer.getChildren().add(noTablesLabel);
+        }
+    }
+
+    private VBox createTableCard(Table table) {
+        VBox card = new VBox(10);
+        card.setAlignment(Pos.CENTER);
+        card.setPrefWidth(180);
+        card.setPrefHeight(120);
+        card.setStyle(getCardStyle(table.getStatus()));
+
+        // No click handlers - read-only display
+
+        // Table info
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        Label icon = new Label(getStatusIcon(table.getStatus()));
+        icon.setStyle("-fx-text-fill: white; -fx-font-size: 20px;");
+
+        Label name = new Label(table.getTableName());
+        name.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
+
+        header.getChildren().addAll(icon, name);
+
+        Label status = new Label(getStatusDisplayName(table.getStatus()));
+        status.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        card.getChildren().addAll(header, status);
+
+        // Add drop shadow
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setColor(Color.web("#0f3460"));
+        dropShadow.setRadius(8);
+        card.setEffect(dropShadow);
+
+        return card;
+    }
+
+    private String getCardStyle(String status) {
+        String baseStyle = "-fx-background-radius: 12; -fx-padding: 15; -fx-background-color: ";
+        switch (status) {
+            case "empty":
+                return baseStyle + "#4CAF50;";
+            case "occupied":
+                return baseStyle + "#f44336;";
+            case "reserved":
+                return baseStyle + "#FF9800;";
+            case "ordering":
+                return baseStyle + "#9C27B0;";
+            default:
+                return baseStyle + "#607D8B;";
+        }
+    }
+
+    private String getStatusIcon(String status) {
+        switch (status) {
+            case "empty":
+                return "🟢";
+            case "occupied":
+                return "🔴";
+            case "reserved":
+                return "🟠";
+            case "ordering":
+                return "🟣";
+            default:
+                return "⚪";
+        }
     }
 
     private void fillForm(Table t) {
@@ -180,6 +276,7 @@ public class TableManagementController {
             data.add(t);
             clearForm();
             updateStatistics();
+            updateTableCards();
             showInfo("Đã thêm bàn mới thành công!");
 
         } catch (Exception ex) {
@@ -235,6 +332,7 @@ public class TableManagementController {
             tableDAO.update(sel);
             tableView.refresh();
             updateStatistics();
+            updateTableCards();
             showInfo("Đã cập nhật thông tin bàn thành công!");
 
         } catch (Exception ex) {
@@ -270,6 +368,7 @@ public class TableManagementController {
                 data.remove(sel);
                 clearForm();
                 updateStatistics();
+                updateTableCards();
                 showInfo("Đã xóa bàn thành công!");
             }
 
@@ -333,6 +432,7 @@ public class TableManagementController {
             sel.setStatus(newStatus);
             tableView.refresh();
             updateStatistics();
+            updateTableCards();
 
             showInfo("Đã cập nhật trạng thái bàn " + sel.getTableName() +
                     " thành: " + getStatusDisplayName(newStatus));
@@ -348,6 +448,7 @@ public class TableManagementController {
         try {
             data.addAll(tableDAO.findAll());
             updateStatistics();
+            updateTableCards();
             showInfo("Đã làm mới danh sách bàn!");
         } catch (Exception e) {
             showError(e);
