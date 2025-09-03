@@ -1,4 +1,3 @@
-
 package com.barmanagement.controller;
 
 import com.barmanagement.dao.JDBCConnect;

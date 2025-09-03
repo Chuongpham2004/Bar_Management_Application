@@ -27,4 +27,3 @@ public class RevenueController {
         LogoutUtil.confirmLogout(revenueTable);
     }
 }
-
