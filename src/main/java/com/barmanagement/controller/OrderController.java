@@ -27,7 +27,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 /**
  * Order Controller - COMPLETELY FIXED VERSION
  * Fixed table selection, order loading, and payment flow
+ * Added dynamic table creation
  */
 public class OrderController {
 
@@ -170,7 +173,7 @@ public class OrderController {
     private void loadTables() {
         try {
             cbTable.setItems(FXCollections.observableArrayList(tableDAO.findAll()));
-            refreshTableGrid();
+            dynamicallyCreateTables();
         } catch (SQLException e) {
             showError(e);
         }
@@ -182,32 +185,109 @@ public class OrderController {
         });
     }
 
-    private void refreshTableGrid() {
+    /**
+     * Tạo động các bàn trong lưới từ dữ liệu cơ sở dữ liệu
+     */
+    private void dynamicallyCreateTables() {
         if (tableGrid == null) return;
 
         try {
-            List<Table> tables = tableDAO.findAll();
-            for (javafx.scene.Node node : tableGrid.getChildren()) {
-                if (node.getUserData() != null) {
-                    String tableIdStr = (String) node.getUserData();
-                    try {
-                        int tableId = Integer.parseInt(tableIdStr);
-                        Table table = tables.stream()
-                                .filter(t -> t.getId() == tableId)
-                                .findFirst()
-                                .orElse(null);
+            // Xóa tất cả các bàn hiện tại
+            tableGrid.getChildren().clear();
 
-                        if (table != null) {
-                            updateTableVisualStyle(node, getTableColorByStatus(table.getStatus()));
-                        }
-                    } catch (NumberFormatException e) {
-                        // Ignore invalid table IDs
-                    }
-                }
+            // Lấy danh sách bàn từ database
+            List<Table> tables = tableDAO.findAll();
+
+            // Số bàn tối đa trên mỗi hàng (có thể điều chỉnh)
+            int maxTablesPerRow = 4;
+
+            // Tạo các bàn trong lưới
+            for (int i = 0; i < tables.size(); i++) {
+                Table table = tables.get(i);
+
+                // Tính toán vị trí
+                int row = i / maxTablesPerRow;
+                int col = i % maxTablesPerRow;
+
+                // Tạo bàn với ghế
+                StackPane tableWithChairs = createTableWithChairs(table);
+
+                // Thêm vào grid
+                tableGrid.add(tableWithChairs, col, row);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            showError(e);
         }
+    }
+
+    /**
+     * Tạo một bàn với ghế xung quanh
+     */
+    private StackPane createTableWithChairs(Table table) {
+        StackPane tableWithChairs = new StackPane();
+
+        // Main table rectangle
+        String tableColor = getTableColorByStatus(table.getStatus());
+
+        Rectangle tableRect = new Rectangle(80, 60);
+        tableRect.setArcWidth(10);
+        tableRect.setArcHeight(10);
+        tableRect.setFill(Color.web(tableColor));
+        tableRect.setStroke(Color.WHITE);
+        tableRect.setStrokeWidth(2);
+
+        // Top chair
+        Rectangle topChair = new Rectangle(25, 15);
+        topChair.setArcWidth(5);
+        topChair.setArcHeight(5);
+        topChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        topChair.setTranslateY(-37.5);
+
+        // Bottom chair
+        Rectangle bottomChair = new Rectangle(25, 15);
+        bottomChair.setArcWidth(5);
+        bottomChair.setArcHeight(5);
+        bottomChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        bottomChair.setTranslateY(37.5);
+
+        // Left chair
+        Rectangle leftChair = new Rectangle(15, 25);
+        leftChair.setArcWidth(5);
+        leftChair.setArcHeight(5);
+        leftChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        leftChair.setTranslateX(-47.5);
+
+        // Right chair
+        Rectangle rightChair = new Rectangle(15, 25);
+        rightChair.setArcWidth(5);
+        rightChair.setArcHeight(5);
+        rightChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        rightChair.setTranslateX(47.5);
+
+        // Table label
+        Label tableLabel = new Label(table.getTableName());
+        tableLabel.setTextFill(Color.WHITE);
+        tableLabel.setFont(Font.font("System", FontWeight.BOLD, 12));
+
+        // Add all to StackPane
+        tableWithChairs.getChildren().addAll(tableRect, topChair, bottomChair, leftChair, rightChair, tableLabel);
+
+        // Set user data for table ID
+        tableWithChairs.setUserData(String.valueOf(table.getId()));
+
+        // Add click handler
+        tableWithChairs.setOnMouseClicked(this::selectTable);
+
+        // Add hover effect
+        tableWithChairs.setStyle("-fx-cursor: hand;");
+
+        return tableWithChairs;
+    }
+
+    private void refreshTableGrid() {
+        if (tableGrid == null) return;
+        dynamicallyCreateTables();
     }
 
     private String getTableColorByStatus(String status) {
@@ -217,6 +297,16 @@ public class OrderController {
             case "reserved": return "#FF9800";
             case "ordering": return "#9C27B0";
             default: return "#4CAF50";
+        }
+    }
+
+    private String getChairColorByStatus(String status) {
+        switch (status) {
+            case "empty": return "#2E7D32";
+            case "occupied": return "#B71C1C";
+            case "reserved": return "#E65100";
+            case "ordering": return "#4A148C";
+            default: return "#455A64";
         }
     }
 
@@ -779,18 +869,6 @@ public class OrderController {
         }
         if (menuContainer != null && !menuData.isEmpty()) {
             displayMenuItems();
-        }
-    }
-
-    private void updateTableVisualStyle(javafx.scene.Node node, String color) {
-        if (node instanceof javafx.scene.layout.StackPane) {
-            javafx.scene.layout.StackPane stackPane = (javafx.scene.layout.StackPane) node;
-            for (javafx.scene.Node child : stackPane.getChildren()) {
-                if (child instanceof javafx.scene.shape.Rectangle) {
-                    javafx.scene.shape.Rectangle rect = (javafx.scene.shape.Rectangle) child;
-                    rect.setFill(Color.web(color));
-                }
-            }
         }
     }
 

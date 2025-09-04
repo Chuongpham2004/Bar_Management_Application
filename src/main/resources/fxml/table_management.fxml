@@ -168,7 +168,8 @@
                                                         <DropShadow color="#4CAF50" radius="5.0" />
                                                     </effect>
                                                 </Button>
-                                                <Button fx:id="btnUpdate" onAction="#update" prefHeight="40.0" prefWidth="100.0"
+                                                <!-- Ẩn nút sửa -->
+                                                <Button fx:id="btnUpdate" visible="false" managed="false" onAction="#update" prefHeight="40.0" prefWidth="100.0"
                                                         style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8;" text="🔧 Sửa">
                                                     <font>
                                                         <Font name="System Bold" size="12.0" />
