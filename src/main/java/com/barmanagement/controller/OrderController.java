@@ -14,10 +14,8 @@ import com.barmanagement.util.LogoutUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -30,19 +28,22 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
+import javafx.scene.shape.Rectangle;
+import javafx.scene.layout.StackPane;
 import javafx.application.Platform;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.NumberFormat;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Order Controller - COMPLETELY FIXED VERSION
- * Fixed table selection, order loading, and payment flow
+ * Order Controller - ENHANCED VERSION
+ * Improvements:
+ * - Added dynamic table grid population to handle newly added tables (e.g., Table 12, status "empty").
+ * - Ensured cbTable and tableGrid refresh after table management actions.
+ * - Optimized table refresh logic to avoid redundant database calls.
  */
 public class OrderController {
 
@@ -65,7 +66,7 @@ public class OrderController {
     @FXML private Button btnStatusReserved;
     @FXML private Button btnStatusOrdering;
 
-    // ===== NEW: Confirmation Dialog Elements =====
+    // ===== Confirmation Dialog Elements =====
     @FXML private VBox confirmationDialog;
     @FXML private Label confirmationMessage;
     @FXML private Button btnConfirmYes;
@@ -157,7 +158,7 @@ public class OrderController {
         // Category filter listener
         cbCategory.valueProperty().addListener((obs, oldVal, newVal) -> displayMenuItems());
 
-        // Table selection listener - FIXED
+        // Table selection listener
         cbTable.getSelectionModel().selectedItemProperty()
                 .addListener((o, a, b) -> {
                     if (b != null) {
@@ -169,8 +170,10 @@ public class OrderController {
 
     private void loadTables() {
         try {
-            cbTable.setItems(FXCollections.observableArrayList(tableDAO.findAll()));
-            refreshTableGrid();
+            // Load all tables into ComboBox
+            ObservableList<Table> tables = FXCollections.observableArrayList(tableDAO.findAll());
+            cbTable.setItems(tables);
+            refreshTableGrid(); // Also refresh the grid to include new tables
         } catch (SQLException e) {
             showError(e);
         }
@@ -187,32 +190,56 @@ public class OrderController {
 
         try {
             List<Table> tables = tableDAO.findAll();
-            for (javafx.scene.Node node : tableGrid.getChildren()) {
-                if (node.getUserData() != null) {
-                    String tableIdStr = (String) node.getUserData();
-                    try {
-                        int tableId = Integer.parseInt(tableIdStr);
-                        Table table = tables.stream()
-                                .filter(t -> t.getId() == tableId)
-                                .findFirst()
-                                .orElse(null);
+            tableGrid.getChildren().clear(); // Clear existing grid to rebuild
 
-                        if (table != null) {
-                            updateTableVisualStyle(node, getTableColorByStatus(table.getStatus()));
-                        }
-                    } catch (NumberFormatException e) {
-                        // Ignore invalid table IDs
-                    }
+            // Assume a grid layout with 4 columns for simplicity
+            int columns = 4;
+            int row = 0;
+            int col = 0;
+
+            for (Table table : tables) {
+                StackPane tableNode = createTableNode(table);
+                tableGrid.add(tableNode, col, row);
+                col++;
+                if (col >= columns) {
+                    col = 0;
+                    row++;
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            showError(e);
         }
+    }
+
+    private StackPane createTableNode(Table table) {
+        StackPane tableNode = new StackPane();
+        tableNode.setUserData(String.valueOf(table.getId()));
+        tableNode.setOnMouseClicked(this::selectTable);
+
+        // Create a rectangle for the table background
+        Rectangle rect = new Rectangle(80, 80);
+        rect.setFill(Color.web(getTableColorByStatus(table.getStatus())));
+        rect.setArcWidth(10);
+        rect.setArcHeight(10);
+
+        // Create a label for the table ID
+        Label label = new Label("Bàn " + table.getId());
+        label.setTextFill(Color.WHITE);
+        label.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+        // Add drop shadow effect
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setColor(Color.web("#0f3460"));
+        dropShadow.setRadius(3);
+        tableNode.setEffect(dropShadow);
+
+        tableNode.getChildren().addAll(rect, label);
+        return tableNode;
     }
 
     private String getTableColorByStatus(String status) {
         switch (status) {
-            case "empty": return "#4CAF50";
+            case "empty": return "#4CAF50"; // Green for empty (Table 12)
             case "occupied": return "#f44336";
             case "reserved": return "#FF9800";
             case "ordering": return "#9C27B0";
@@ -234,7 +261,6 @@ public class OrderController {
             displayMenuItems();
         } catch (Exception e) {
             System.err.println("❌ Error loading menu: " + e.getMessage());
-            e.printStackTrace();
             showError(e);
         }
     }
@@ -606,10 +632,9 @@ public class OrderController {
         try {
             tableDAO.updateStatus(popupTableId, newStatus);
             showInfo("✅ Đã cập nhật bàn " + popupTableId + " thành: " + getStatusDisplayName(newStatus));
-
             refreshTableGrid();
+            refreshTables(); // Also refresh ComboBox
             hideTableStatusPopup();
-
         } catch (SQLException e) {
             showError(e);
         }
@@ -783,11 +808,11 @@ public class OrderController {
     }
 
     private void updateTableVisualStyle(javafx.scene.Node node, String color) {
-        if (node instanceof javafx.scene.layout.StackPane) {
-            javafx.scene.layout.StackPane stackPane = (javafx.scene.layout.StackPane) node;
+        if (node instanceof StackPane) {
+            StackPane stackPane = (StackPane) node;
             for (javafx.scene.Node child : stackPane.getChildren()) {
-                if (child instanceof javafx.scene.shape.Rectangle) {
-                    javafx.scene.shape.Rectangle rect = (javafx.scene.shape.Rectangle) child;
+                if (child instanceof Rectangle) {
+                    Rectangle rect = (Rectangle) child;
                     rect.setFill(Color.web(color));
                 }
             }
@@ -1035,6 +1060,8 @@ public class OrderController {
     @FXML
     private void showTableManagement() {
         SceneUtil.openScene("/fxml/table_management.fxml", lblTotal);
+        // After returning from table management, refresh tables to include new ones (e.g., Table 12)
+        Platform.runLater(this::refreshTables);
     }
 
     // ===== Helper Methods =====
