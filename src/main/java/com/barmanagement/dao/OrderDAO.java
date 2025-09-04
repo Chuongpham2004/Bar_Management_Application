@@ -350,6 +350,25 @@ public class OrderDAO {
     }
 
     /**
+     * Check if there is any PAID order for this table today
+     */
+    public boolean existsPaidTodayByTable(int tableId) throws SQLException {
+        String sql = "SELECT EXISTS(SELECT 1 FROM orders WHERE table_id = ? AND status = 'paid' AND DATE(order_time) = CURDATE())";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, tableId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) == 1;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * FIXED: Create empty order for table - with validation
      */
     public Integer createEmptyOrder(int tableId) throws SQLException {

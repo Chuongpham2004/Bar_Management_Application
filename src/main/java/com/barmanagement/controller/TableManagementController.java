@@ -12,16 +12,21 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import com.barmanagement.util.SceneUtil;
 import com.barmanagement.util.LogoutUtil;
 
 import java.sql.SQLException;
 
 /**
- * Table Management Controller - UPDATED VERSION with Card Layout
- * Added card display functionality while maintaining TableView compatibility
+ * Table Management Controller - MODIFIED VERSION
+ * Removed table edit functionality, enhanced delete and card display
+ * Updated with consistent table visualization
  */
 public class TableManagementController {
 
@@ -58,11 +63,18 @@ public class TableManagementController {
         setupComponents();
         setupTableView();
         refresh();
+
+        // Ẩn nút sửa theo yêu cầu
+        if (btnUpdate != null) {
+            btnUpdate.setVisible(false);
+            btnUpdate.setManaged(false);
+        }
     }
 
     private void setupComponents() {
         // Setup status combo box
         cbStatus.getItems().addAll("empty", "occupied", "reserved", "ordering");
+        cbStatus.setValue("empty"); // Default to empty status
 
         // Setup table columns
         colId.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getId()));
@@ -139,27 +151,82 @@ public class TableManagementController {
         VBox card = new VBox(10);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(180);
-        card.setPrefHeight(120);
+        card.setPrefHeight(150);
         card.setStyle(getCardStyle(table.getStatus()));
 
-        // No click handlers - read-only display
+        // Set user data for delete functionality
+        card.setUserData(table);
 
-        // Table info
+        // Create a StackPane for the table with chairs
+        StackPane tableWithChairs = new StackPane();
+
+        // Main table rectangle
+        String tableColor = getCardColor(table.getStatus());
+        String chairColor = getChairColor(table.getStatus());
+
+        Rectangle tableRect = new Rectangle(80, 60);
+        tableRect.setArcWidth(10);
+        tableRect.setArcHeight(10);
+        tableRect.setFill(Color.web(tableColor));
+        tableRect.setStroke(Color.WHITE);
+        tableRect.setStrokeWidth(2);
+
+        // Top chair
+        Rectangle topChair = new Rectangle(25, 15);
+        topChair.setArcWidth(5);
+        topChair.setArcHeight(5);
+        topChair.setFill(Color.web(chairColor));
+        topChair.setTranslateY(-37.5);
+
+        // Bottom chair
+        Rectangle bottomChair = new Rectangle(25, 15);
+        bottomChair.setArcWidth(5);
+        bottomChair.setArcHeight(5);
+        bottomChair.setFill(Color.web(chairColor));
+        bottomChair.setTranslateY(37.5);
+
+        // Left chair
+        Rectangle leftChair = new Rectangle(15, 25);
+        leftChair.setArcWidth(5);
+        leftChair.setArcHeight(5);
+        leftChair.setFill(Color.web(chairColor));
+        leftChair.setTranslateX(-47.5);
+
+        // Right chair
+        Rectangle rightChair = new Rectangle(15, 25);
+        rightChair.setArcWidth(5);
+        rightChair.setArcHeight(5);
+        rightChair.setFill(Color.web(chairColor));
+        rightChair.setTranslateX(47.5);
+
+        // Table label
+        Label tableLabel = new Label(table.getTableName());
+        tableLabel.setTextFill(Color.WHITE);
+        tableLabel.setFont(Font.font("System", FontWeight.BOLD, 12));
+
+        tableWithChairs.getChildren().addAll(tableRect, topChair, bottomChair, leftChair, rightChair, tableLabel);
+
+        // Table info section
         HBox header = new HBox(10);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        Label icon = new Label(getStatusIcon(table.getStatus()));
-        icon.setStyle("-fx-text-fill: white; -fx-font-size: 20px;");
-
-        Label name = new Label(table.getTableName());
-        name.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
-
-        header.getChildren().addAll(icon, name);
+        header.setAlignment(Pos.CENTER);
 
         Label status = new Label(getStatusDisplayName(table.getStatus()));
         status.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;");
 
-        card.getChildren().addAll(header, status);
+        // Thêm nút xóa vào card
+        Button deleteBtn = new Button("❌");
+        deleteBtn.setStyle("-fx-background-color: rgba(244,67,54,0.8); -fx-text-fill: white; -fx-background-radius: 50%;");
+        deleteBtn.setPrefWidth(30);
+        deleteBtn.setPrefHeight(30);
+        deleteBtn.setOnAction(e -> {
+            // Lấy bàn từ user data của card
+            Table t = (Table) card.getUserData();
+            if (t != null) {
+                deleteTable(t);
+            }
+        });
+
+        card.getChildren().addAll(tableWithChairs, status, deleteBtn);
 
         // Add drop shadow
         DropShadow dropShadow = new DropShadow();
@@ -168,6 +235,26 @@ public class TableManagementController {
         card.setEffect(dropShadow);
 
         return card;
+    }
+
+    private String getCardColor(String status) {
+        switch (status) {
+            case "empty": return "#4CAF50";
+            case "occupied": return "#f44336";
+            case "reserved": return "#FF9800";
+            case "ordering": return "#9C27B0";
+            default: return "#607D8B";
+        }
+    }
+
+    private String getChairColor(String status) {
+        switch (status) {
+            case "empty": return "#2E7D32";
+            case "occupied": return "#B71C1C";
+            case "reserved": return "#E65100";
+            case "ordering": return "#4A148C";
+            default: return "#455A64";
+        }
     }
 
     private String getCardStyle(String status) {
@@ -183,6 +270,43 @@ public class TableManagementController {
                 return baseStyle + "#9C27B0;";
             default:
                 return baseStyle + "#607D8B;";
+        }
+    }
+
+    // Thêm hàm xóa bàn riêng cho card
+    private void deleteTable(Table table) {
+        try {
+            // 1) Chặn xóa nếu HÔM NAY có đơn đã thanh toán
+            if (orderDAO.existsPaidTodayByTable(table.getId())) {
+                showError(new Exception("Không thể xóa bàn vì hôm nay đã có đơn đã thanh toán."));
+                return;
+            }
+
+            // 2) Chặn xóa nếu còn đơn đang hoạt động trong ngày
+            Order activeOrder = orderDAO.findPendingByTable(table.getId());
+            if (activeOrder != null) {
+                showError(new Exception("Không thể xóa bàn có đơn hàng chưa hoàn thành!\n" +
+                        "Order #" + activeOrder.getId() + " (" + activeOrder.getStatusDisplayName() + ")"));
+                return;
+            }
+
+            // Hiển thị hộp thoại xác nhận
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Xác nhận xóa");
+            confirmAlert.setHeaderText("Xóa bàn " + table.getTableName() + "?");
+            confirmAlert.setContentText("Hành động này không thể hoàn tác!");
+
+            ButtonType result = confirmAlert.showAndWait().orElse(ButtonType.CANCEL);
+            if (result == ButtonType.OK) {
+                tableDAO.delete(table.getId());
+                data.remove(table);
+                updateStatistics();
+                updateTableCards();
+                showInfo("Đã xóa bàn " + table.getTableName() + " thành công!");
+            }
+
+        } catch (Exception ex) {
+            showError(ex);
         }
     }
 
@@ -213,7 +337,7 @@ public class TableManagementController {
 
     private void clearForm() {
         txtName.clear();
-        cbStatus.getSelectionModel().clearSelection();
+        cbStatus.setValue("empty"); // Default to empty
         tableView.getSelectionModel().clearSelection();
     }
 
@@ -277,67 +401,17 @@ public class TableManagementController {
             clearForm();
             updateStatistics();
             updateTableCards();
-            showInfo("Đã thêm bàn mới thành công!");
+            showInfo("Đã thêm bàn " + name + " thành công!");
 
         } catch (Exception ex) {
             showError(ex);
         }
     }
 
+    // Phương thức update đã bị ẩn nút nên không cần xóa hoàn toàn
     @FXML
     public void update(ActionEvent e) {
-        Table sel = tableView.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            showInfo("Vui lòng chọn bàn để cập nhật!");
-            return;
-        }
-
-        String name = txtName.getText().trim();
-        String newStatus = cbStatus.getValue();
-
-        if (name.isEmpty()) {
-            showError(new Exception("Tên bàn không được để trống!"));
-            return;
-        }
-
-        try {
-            // Check if trying to change to empty and there's an active order
-            if ("empty".equals(newStatus) && !"empty".equals(sel.getStatus())) {
-                Order activeOrder = orderDAO.findPendingByTable(sel.getId());
-                if (activeOrder != null) {
-                    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmAlert.setTitle("Xác nhận");
-                    confirmAlert.setHeaderText("Bàn có đơn hàng chưa thanh toán");
-                    confirmAlert.setContentText("Bàn " + sel.getTableName() + " có order #" + activeOrder.getId() +
-                            " (" + activeOrder.getStatusDisplayName() + ") chưa được xử lý hoàn tất.\n" +
-                            "Bạn có chắc muốn đặt trạng thái Empty không?");
-
-                    ButtonType result = confirmAlert.showAndWait().orElse(ButtonType.CANCEL);
-                    if (result != ButtonType.OK) {
-                        return;
-                    }
-                }
-            }
-
-            // Check if name conflicts with other tables (excluding current)
-            for (Table existing : data) {
-                if (existing.getId() != sel.getId() && existing.getTableName().equalsIgnoreCase(name)) {
-                    showError(new Exception("Tên bàn đã tồn tại!"));
-                    return;
-                }
-            }
-
-            sel.setTableName(name);
-            sel.setStatus(newStatus);
-            tableDAO.update(sel);
-            tableView.refresh();
-            updateStatistics();
-            updateTableCards();
-            showInfo("Đã cập nhật thông tin bàn thành công!");
-
-        } catch (Exception ex) {
-            showError(ex);
-        }
+        showInfo("Chức năng sửa bàn đã bị vô hiệu hóa theo yêu cầu!");
     }
 
     @FXML
@@ -348,33 +422,7 @@ public class TableManagementController {
             return;
         }
 
-        try {
-            // Check if table has active orders
-            Order activeOrder = orderDAO.findPendingByTable(sel.getId());
-            if (activeOrder != null) {
-                showError(new Exception("Không thể xóa bàn có đơn hàng chưa hoàn thành!\n" +
-                        "Order #" + activeOrder.getId() + " (" + activeOrder.getStatusDisplayName() + ")"));
-                return;
-            }
-
-            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmAlert.setTitle("Xác nhận xóa");
-            confirmAlert.setHeaderText("Xóa bàn " + sel.getTableName() + "?");
-            confirmAlert.setContentText("Hành động này không thể hoàn tác!");
-
-            ButtonType result = confirmAlert.showAndWait().orElse(ButtonType.CANCEL);
-            if (result == ButtonType.OK) {
-                tableDAO.delete(sel.getId());
-                data.remove(sel);
-                clearForm();
-                updateStatistics();
-                updateTableCards();
-                showInfo("Đã xóa bàn thành công!");
-            }
-
-        } catch (Exception ex) {
-            showError(ex);
-        }
+        deleteTable(sel); // Sử dụng lại hàm xóa bàn
     }
 
     @FXML

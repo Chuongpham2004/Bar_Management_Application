@@ -14,8 +14,10 @@ import com.barmanagement.util.LogoutUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -25,25 +27,25 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.layout.StackPane;
+
 import javafx.application.Platform;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Order Controller - ENHANCED VERSION
- * Improvements:
- * - Added dynamic table grid population to handle newly added tables (e.g., Table 12, status "empty").
- * - Ensured cbTable and tableGrid refresh after table management actions.
- * - Optimized table refresh logic to avoid redundant database calls.
+ * Order Controller - COMPLETELY FIXED VERSION
+ * Fixed table selection, order loading, and payment flow
+ * Added dynamic table creation
  */
 public class OrderController {
 
@@ -66,7 +68,7 @@ public class OrderController {
     @FXML private Button btnStatusReserved;
     @FXML private Button btnStatusOrdering;
 
-    // ===== Confirmation Dialog Elements =====
+    // ===== NEW: Confirmation Dialog Elements =====
     @FXML private VBox confirmationDialog;
     @FXML private Label confirmationMessage;
     @FXML private Button btnConfirmYes;
@@ -158,7 +160,7 @@ public class OrderController {
         // Category filter listener
         cbCategory.valueProperty().addListener((obs, oldVal, newVal) -> displayMenuItems());
 
-        // Table selection listener
+        // Table selection listener - FIXED
         cbTable.getSelectionModel().selectedItemProperty()
                 .addListener((o, a, b) -> {
                     if (b != null) {
@@ -170,10 +172,8 @@ public class OrderController {
 
     private void loadTables() {
         try {
-            // Load all tables into ComboBox
-            ObservableList<Table> tables = FXCollections.observableArrayList(tableDAO.findAll());
-            cbTable.setItems(tables);
-            refreshTableGrid(); // Also refresh the grid to include new tables
+            cbTable.setItems(FXCollections.observableArrayList(tableDAO.findAll()));
+            dynamicallyCreateTables();
         } catch (SQLException e) {
             showError(e);
         }
@@ -185,65 +185,128 @@ public class OrderController {
         });
     }
 
-    private void refreshTableGrid() {
+    /**
+     * Tạo động các bàn trong lưới từ dữ liệu cơ sở dữ liệu
+     */
+    private void dynamicallyCreateTables() {
         if (tableGrid == null) return;
 
         try {
+            // Xóa tất cả các bàn hiện tại
+            tableGrid.getChildren().clear();
+
+            // Lấy danh sách bàn từ database
             List<Table> tables = tableDAO.findAll();
-            tableGrid.getChildren().clear(); // Clear existing grid to rebuild
 
-            // Assume a grid layout with 4 columns for simplicity
-            int columns = 4;
-            int row = 0;
-            int col = 0;
+            // Số bàn tối đa trên mỗi hàng (có thể điều chỉnh)
+            int maxTablesPerRow = 4;
 
-            for (Table table : tables) {
-                StackPane tableNode = createTableNode(table);
-                tableGrid.add(tableNode, col, row);
-                col++;
-                if (col >= columns) {
-                    col = 0;
-                    row++;
-                }
+            // Tạo các bàn trong lưới
+            for (int i = 0; i < tables.size(); i++) {
+                Table table = tables.get(i);
+
+                // Tính toán vị trí
+                int row = i / maxTablesPerRow;
+                int col = i % maxTablesPerRow;
+
+                // Tạo bàn với ghế
+                StackPane tableWithChairs = createTableWithChairs(table);
+
+                // Thêm vào grid
+                tableGrid.add(tableWithChairs, col, row);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             showError(e);
         }
     }
 
-    private StackPane createTableNode(Table table) {
-        StackPane tableNode = new StackPane();
-        tableNode.setUserData(String.valueOf(table.getId()));
-        tableNode.setOnMouseClicked(this::selectTable);
+    /**
+     * Tạo một bàn với ghế xung quanh
+     */
+    private StackPane createTableWithChairs(Table table) {
+        StackPane tableWithChairs = new StackPane();
 
-        // Create a rectangle for the table background
-        Rectangle rect = new Rectangle(80, 80);
-        rect.setFill(Color.web(getTableColorByStatus(table.getStatus())));
-        rect.setArcWidth(10);
-        rect.setArcHeight(10);
+        // Main table rectangle
+        String tableColor = getTableColorByStatus(table.getStatus());
 
-        // Create a label for the table ID
-        Label label = new Label("Bàn " + table.getId());
-        label.setTextFill(Color.WHITE);
-        label.setFont(Font.font("System", FontWeight.BOLD, 14));
+        Rectangle tableRect = new Rectangle(80, 60);
+        tableRect.setArcWidth(10);
+        tableRect.setArcHeight(10);
+        tableRect.setFill(Color.web(tableColor));
+        tableRect.setStroke(Color.WHITE);
+        tableRect.setStrokeWidth(2);
 
-        // Add drop shadow effect
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setColor(Color.web("#0f3460"));
-        dropShadow.setRadius(3);
-        tableNode.setEffect(dropShadow);
+        // Top chair
+        Rectangle topChair = new Rectangle(25, 15);
+        topChair.setArcWidth(5);
+        topChair.setArcHeight(5);
+        topChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        topChair.setTranslateY(-37.5);
 
-        tableNode.getChildren().addAll(rect, label);
-        return tableNode;
+        // Bottom chair
+        Rectangle bottomChair = new Rectangle(25, 15);
+        bottomChair.setArcWidth(5);
+        bottomChair.setArcHeight(5);
+        bottomChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        bottomChair.setTranslateY(37.5);
+
+        // Left chair
+        Rectangle leftChair = new Rectangle(15, 25);
+        leftChair.setArcWidth(5);
+        leftChair.setArcHeight(5);
+        leftChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        leftChair.setTranslateX(-47.5);
+
+        // Right chair
+        Rectangle rightChair = new Rectangle(15, 25);
+        rightChair.setArcWidth(5);
+        rightChair.setArcHeight(5);
+        rightChair.setFill(Color.web(getChairColorByStatus(table.getStatus())));
+        rightChair.setTranslateX(47.5);
+
+        // Table label
+        Label tableLabel = new Label(table.getTableName());
+        tableLabel.setTextFill(Color.WHITE);
+        tableLabel.setFont(Font.font("System", FontWeight.BOLD, 12));
+
+        // Add all to StackPane
+        tableWithChairs.getChildren().addAll(tableRect, topChair, bottomChair, leftChair, rightChair, tableLabel);
+
+        // Set user data for table ID
+        tableWithChairs.setUserData(String.valueOf(table.getId()));
+
+        // Add click handler
+        tableWithChairs.setOnMouseClicked(this::selectTable);
+
+        // Add hover effect
+        tableWithChairs.setStyle("-fx-cursor: hand;");
+
+        return tableWithChairs;
+    }
+
+    private void refreshTableGrid() {
+        if (tableGrid == null) return;
+        dynamicallyCreateTables();
     }
 
     private String getTableColorByStatus(String status) {
         switch (status) {
-            case "empty": return "#4CAF50"; // Green for empty (Table 12)
+            case "empty": return "#4CAF50";
             case "occupied": return "#f44336";
             case "reserved": return "#FF9800";
             case "ordering": return "#9C27B0";
             default: return "#4CAF50";
+        }
+    }
+
+    private String getChairColorByStatus(String status) {
+        switch (status) {
+            case "empty": return "#2E7D32";
+            case "occupied": return "#B71C1C";
+            case "reserved": return "#E65100";
+            case "ordering": return "#4A148C";
+            default: return "#455A64";
         }
     }
 
@@ -261,6 +324,7 @@ public class OrderController {
             displayMenuItems();
         } catch (Exception e) {
             System.err.println("❌ Error loading menu: " + e.getMessage());
+            e.printStackTrace();
             showError(e);
         }
     }
@@ -632,9 +696,10 @@ public class OrderController {
         try {
             tableDAO.updateStatus(popupTableId, newStatus);
             showInfo("✅ Đã cập nhật bàn " + popupTableId + " thành: " + getStatusDisplayName(newStatus));
+
             refreshTableGrid();
-            refreshTables(); // Also refresh ComboBox
             hideTableStatusPopup();
+
         } catch (SQLException e) {
             showError(e);
         }
@@ -804,18 +869,6 @@ public class OrderController {
         }
         if (menuContainer != null && !menuData.isEmpty()) {
             displayMenuItems();
-        }
-    }
-
-    private void updateTableVisualStyle(javafx.scene.Node node, String color) {
-        if (node instanceof StackPane) {
-            StackPane stackPane = (StackPane) node;
-            for (javafx.scene.Node child : stackPane.getChildren()) {
-                if (child instanceof Rectangle) {
-                    Rectangle rect = (Rectangle) child;
-                    rect.setFill(Color.web(color));
-                }
-            }
         }
     }
 
@@ -1060,8 +1113,6 @@ public class OrderController {
     @FXML
     private void showTableManagement() {
         SceneUtil.openScene("/fxml/table_management.fxml", lblTotal);
-        // After returning from table management, refresh tables to include new ones (e.g., Table 12)
-        Platform.runLater(this::refreshTables);
     }
 
     // ===== Helper Methods =====
