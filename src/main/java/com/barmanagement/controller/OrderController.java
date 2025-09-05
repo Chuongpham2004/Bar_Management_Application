@@ -779,7 +779,7 @@ public class OrderController {
                 if ("completed".equals(existingOrder.getStatus())) {
                     // Show completed order ready for payment
                     selectTableWithOrder(table, existingOrder);
-                    showInfo("✅ Bàn " + tableId + " có đơn hàng hoàn thành sẵn sàng thanh toán!");
+                    showInfo("✅ " + table.getTableName() + " có đơn hàng hoàn thành sẵn sàng thanh toán!");
                     return;
                 } else if ("pending".equals(existingOrder.getStatus())) {
                     // Show pending order for editing
@@ -835,9 +835,9 @@ public class OrderController {
                 tableDAO.updateStatus(tableId, "ordering");
             }
 
-            // Update UI
+            // Update UI with current table name from database
             if (selectedTableLabel != null) {
-                selectedTableLabel.setText("Đã chọn bàn " + tableId);
+                selectedTableLabel.setText("Đã chọn " + table.getTableName());
             }
 
             // Find and select in ComboBox
@@ -859,7 +859,7 @@ public class OrderController {
 
             refreshTableGrid();
             loadMenuByCategory();
-            showInfo("✅ Đã chọn bàn " + tableId + " để tạo order");
+            showInfo("✅ Đã chọn " + table.getTableName() + " để tạo order");
 
         } catch (SQLException e) {
             showError(e);

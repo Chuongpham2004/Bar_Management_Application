@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fe4efaff-5fba-4853-9684-77b6d2b23d2a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/barmanagement/config/JDBCConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/barmanagement/config/JDBCConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/barmanagement/controller/TableManagementController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/barmanagement/controller/TableManagementController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/barmanagement/dao/OrderDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/barmanagement/dao/OrderDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/barmanagement/controller/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/barmanagement/controller/OrderController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/barmanagement/dao/TableDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/barmanagement/dao/TableDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/LoginView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/LoginView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/fxml/payment.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/fxml/payment.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,12 +23,12 @@
     &quot;assignee&quot;: &quot;dong0802&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Chuongpham2004/Bar_Management_Application.git",
-    "accountId": "9ca7dc5d-6549-4f1f-94a7-54af42f4d8c1"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Chuongpham2004/Bar_Management_Application.git&quot;,
+    &quot;accountId&quot;: &quot;9ca7dc5d-6549-4f1f-94a7-54af42f4d8c1&quot;
   }
-}]]></component>
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -69,6 +64,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Administrator\IdeaProjects\Bar_Management_Application\src\main\resources\images\menu" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="LoginView" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="view.LoginView" />
@@ -106,7 +106,9 @@
       <option name="presentableId" value="Default" />
       <updated>1757047628346</updated>
       <workItem from="1757047630151" duration="596000" />
-      <workItem from="1757065037331" duration="2628000" />
+      <workItem from="1757065037331" duration="2921000" />
+      <workItem from="1757071299863" duration="693000" />
+      <workItem from="1757072116738" duration="374000" />
     </task>
     <servers />
   </component>
