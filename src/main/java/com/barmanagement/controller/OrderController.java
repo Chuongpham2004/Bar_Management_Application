@@ -13,7 +13,10 @@ import com.barmanagement.util.LogoutUtil;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import com.barmanagement.util.TimeService;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -75,6 +78,9 @@ public class OrderController {
     @FXML private Button btnCompleteOrder;
     @FXML private Button btnPayment;
 
+    @FXML private Label currentTimeLabel;
+    @FXML private Label welcomeTimeLabel;
+
     // ===== Data và Services =====
     private final TableDAO tableDAO = new TableDAO();
     private final MenuItemDAO menuDAO = new MenuItemDAO();
@@ -98,6 +104,14 @@ public class OrderController {
 
     @FXML
     public void initialize() {
+
+        if (currentTimeLabel != null) {
+            currentTimeLabel.textProperty().bind(TimeService.get().timeTextProperty());
+        }
+        if (welcomeTimeLabel != null) {
+            welcomeTimeLabel.textProperty().bind(TimeService.get().dateTextProperty());
+        }
+
         System.out.println("🚀 ORDER CONTROLLER INITIALIZING...");
         setupComponents();
         loadData();

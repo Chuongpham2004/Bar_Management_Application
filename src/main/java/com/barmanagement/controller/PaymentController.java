@@ -23,7 +23,9 @@ import com.barmanagement.util.LogoutUtil;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import com.barmanagement.util.TimeService;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -73,6 +75,9 @@ public class PaymentController implements Initializable {
     @FXML private Label lblCashPayments;
     @FXML private Label lblCardPayments;
 
+    @FXML private Label currentTimeLabel;
+    @FXML private Label welcomeTimeLabel;
+
     // DAOs
     private OrderDAO orderDAO = new OrderDAO();
     private OrderItemDAO orderItemDAO = new OrderItemDAO();
@@ -97,6 +102,14 @@ public class PaymentController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        if (currentTimeLabel != null) {
+            currentTimeLabel.textProperty().bind(TimeService.get().timeTextProperty());
+        }
+        if (welcomeTimeLabel != null) {
+            welcomeTimeLabel.textProperty().bind(TimeService.get().dateTextProperty());
+        }
+
         System.out.println("=== PAYMENT CONTROLLER INITIALIZE ===");
 
         // Setup formatter

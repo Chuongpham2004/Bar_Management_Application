@@ -28,6 +28,7 @@ import javafx.animation.ScaleTransition;
 import javafx.util.Duration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.Node;
 
@@ -54,6 +55,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Map;
 import java.util.List;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * Dashboard Controller - ENHANCED WITH IMPROVED ACTIVITY SECTION
@@ -1006,19 +1011,25 @@ public class DashboardController {
         }
     }
 
+    private final Locale VI_VN = new Locale("vi","VN");
+    private final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss", VI_VN);
+    private final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy", VI_VN);
+
     private void updateTimeDisplay() {
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
 
         if (currentTimeLabel != null) {
-            currentTimeLabel.setText(now.format(timeFormatter));
+            currentTimeLabel.setText(now.format(TIME_FMT));
         }
-
-        if (welcomeTimeLabel != null && isFirstLoad) {
-            welcomeTimeLabel.setText(now.format(dateFormatter));
+        if (welcomeTimeLabel != null) {
+            String niceDate = now.format(DATE_FMT);
+            if (!niceDate.isEmpty()) {
+                niceDate = Character.toUpperCase(niceDate.charAt(0)) + niceDate.substring(1);
+            }
+            welcomeTimeLabel.setText(niceDate);
         }
     }
+
 
     private void loadDashboardData() {
         Platform.runLater(() -> {

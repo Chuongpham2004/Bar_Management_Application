@@ -6,7 +6,9 @@ import com.barmanagement.model.Table;
 import com.barmanagement.model.Order;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
+import com.barmanagement.util.TimeService;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
@@ -58,8 +60,18 @@ public class TableManagementController {
     private final OrderDAO orderDAO = new OrderDAO();
     private final ObservableList<Table> data = FXCollections.observableArrayList();
 
+    @FXML private Label currentTimeLabel;
+    @FXML private Label welcomeTimeLabel;
+
     @FXML
     public void initialize() {
+
+        if (currentTimeLabel != null) {
+            currentTimeLabel.textProperty().bind(TimeService.get().timeTextProperty());
+        }
+        if (welcomeTimeLabel != null) {
+            welcomeTimeLabel.textProperty().bind(TimeService.get().dateTextProperty());
+        }
         setupComponents();
         setupTableView();
         refresh();

@@ -226,5 +226,6 @@ public class MenuItem {
                 .replaceAll("[^a-z0-9]", "_")
                 .replaceAll("_+", "_")
                 .replaceAll("^_|_$", "") + ".jpg";
+
     }
 }
