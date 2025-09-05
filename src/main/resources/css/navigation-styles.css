@@ -9,17 +9,21 @@
     -fx-background-radius: 12;
     -fx-border-radius: 12;
     -fx-cursor: hand;
-    -fx-transition: all 0.3s ease;
+    -fx-transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
 }
 
-/* Navigation Button Hover Effects */
+/* Navigation Button Hover Effects - ENHANCED SCALE */
 .nav-button:hover {
     -fx-background-color: linear-gradient(to right, #e16428, #ff7b47);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
-    -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.6), 15, 0.3, 0, 5);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.8), 20, 0.4, 0, 8);
+    -fx-translate-x: 5px;
+    -fx-translate-y: -2px;
 }
 
 /* Active Navigation Button */
@@ -36,42 +40,64 @@
     -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.8), 20, 0.4, 0, 8);
 }
 
-/* Active Button Hover (slightly different effect) */
+/* Active Button Hover (enhanced scale effect) */
 .nav-button-active:hover {
     -fx-background-color: linear-gradient(to right, #ff7b47, #e16428);
-    -fx-scale-x: 1.01;
-    -fx-scale-y: 1.01;
+    -fx-scale-x: 1.06;
+    -fx-scale-y: 1.06;
     -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.9), 25, 0.5, 0, 10);
+    -fx-translate-x: 3px;
+    -fx-translate-y: -1px;
 }
 
-/* Home Button Specific Hover */
+/* Home Button Specific Hover - ENHANCED SCALE */
 .nav-home:hover {
     -fx-background-color: linear-gradient(to right, #4CAF50, #66BB6A);
-    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.6), 15, 0.3, 0, 5);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.8), 20, 0.4, 0, 8);
+    -fx-translate-x: 5px;
+    -fx-translate-y: -2px;
 }
 
-/* Payment Button Specific Hover */
+/* Payment Button Specific Hover - ENHANCED SCALE */
 .nav-payment:hover {
     -fx-background-color: linear-gradient(to right, #2196F3, #42A5F5);
-    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.6), 15, 0.3, 0, 5);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.8), 20, 0.4, 0, 8);
+    -fx-translate-x: 5px;
+    -fx-translate-y: -2px;
 }
 
-/* Menu Button Specific Hover */
+/* Menu Button Specific Hover - ENHANCED SCALE */
 .nav-menu:hover {
     -fx-background-color: linear-gradient(to right, #9C27B0, #BA68C8);
-    -fx-effect: dropshadow(gaussian, rgba(156, 39, 176, 0.6), 15, 0.3, 0, 5);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(156, 39, 176, 0.8), 20, 0.4, 0, 8);
+    -fx-translate-x: 5px;
+    -fx-translate-y: -2px;
 }
 
-/* Order Button Specific Hover */
+/* Order Button Specific Hover - ENHANCED SCALE */
 .nav-order:hover {
     -fx-background-color: linear-gradient(to right, #FF9800, #FFB74D);
-    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.6), 15, 0.3, 0, 5);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.8), 20, 0.4, 0, 8);
+    -fx-translate-x: 5px;
+    -fx-translate-y: -2px;
 }
 
-/* Tables Button Specific Hover */
+/* Tables Button Specific Hover - ENHANCED SCALE */
 .nav-tables:hover {
     -fx-background-color: linear-gradient(to right, #607D8B, #78909C);
-    -fx-effect: dropshadow(gaussian, rgba(96, 125, 139, 0.6), 15, 0.3, 0, 5);
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(96, 125, 139, 0.8), 20, 0.4, 0, 8);
+    -fx-translate-x: 5px;
+    -fx-translate-y: -2px;
 }
 
 /* Sidebar Hover Effects */
@@ -91,17 +117,36 @@
     -fx-spacing: 8;
 }
 
-/* Button Press Effect */
+/* Button Press Effect - ENHANCED */
 .nav-button:pressed {
-    -fx-scale-x: 0.98;
-    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
     -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.8), 10, 0.2, 0, 2);
+    -fx-translate-x: 2px;
+    -fx-translate-y: 1px;
 }
 
-/* Smooth Transition for all buttons */
+/* Smooth Transition for all buttons - ENHANCED */
 .nav-button, .nav-button-active {
-    -fx-transition: -fx-background-color 0.3s ease,
-    -fx-scale-x 0.2s ease,
-    -fx-scale-y 0.2s ease,
-    -fx-effect 0.3s ease;
+    -fx-transition: -fx-background-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    -fx-scale-x 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    -fx-scale-y 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    -fx-effect 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    -fx-translate-x 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    -fx-translate-y 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Additional hover effects for better visual feedback */
+.nav-button:hover .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Logo section hover enhancement */
+.logo-section:hover {
+    -fx-background-color: linear-gradient(to right, #0f3460, #1565C0);
+    -fx-effect: dropshadow(gaussian, rgba(21, 101, 192, 0.4), 10, 0.3, 0, 3);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-transition: all 0.3s ease;
 }

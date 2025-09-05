@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * Fixed table selection, order loading, and payment flow
  * Added dynamic table creation
  */
-public class OrdersController {
+public class OrderController {
 
     // ===== FXML Elements =====
     @FXML private ComboBox<Table> cbTable;

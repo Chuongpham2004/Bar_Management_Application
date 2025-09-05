@@ -8,7 +8,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #1a1a2e;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.PaymentController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #1a1a2e;" stylesheets="@../css/navigation-styles.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.PaymentController">
     <children>
         <!-- Sidebar Navigation -->
         <VBox layoutX="0.0" layoutY="0.0" prefHeight="800.0" prefWidth="250.0" style="-fx-background-color: #16213e;" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -35,15 +35,15 @@
                 <!-- Navigation Buttons -->
                 <VBox prefHeight="720.0" prefWidth="250.0" spacing="5.0">
                     <children>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showDashboard" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="📊 Dashboard" />
-                        <Button fx:id="paymentBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="💳 Thanh Toán">
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showDashboard" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-home" text="📊 Dashboard" />
+                        <Button fx:id="paymentBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-button-active nav-payment" text="💳 Thanh Toán">
                             <effect>
                                 <DropShadow />
                             </effect>
                         </Button>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showMenu" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍸 Menu" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showOrder" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍽 Order" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showTableManagement" prefHeight="50.0" prefWidth="250.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="⚙ Quản Lý Bàn" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showMenu" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-menu" text="🍸 Menu" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showOrder" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-order" text="🍽 Order" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showTableManagement" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-tables" text="⚙ Quản Lý Bàn" />
                     </children>
                     <VBox.margin>
                         <Insets top="20.0" />
