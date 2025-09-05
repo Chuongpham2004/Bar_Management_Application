@@ -26,7 +26,7 @@ public class LoginView extends Application {
         String absolutePath = fxmlFile.getAbsolutePath();
         Parent root = FXMLLoader.load(new File(absolutePath).toURI().toURL());
         stage.setScene(new Scene(root));
-        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.initStyle(StageStyle.DECORATED);
 
 
         // Mouse pressed event handler

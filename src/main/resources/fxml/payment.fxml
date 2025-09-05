@@ -150,7 +150,7 @@
                                         <!-- Table Selection -->
                                         <VBox spacing="10.0">
                                             <children>
-                                                <Label text="🪑 Chọn bàn thanh toán" textFill="WHITE">
+                                                <Label text="Chọn bàn thanh toán" textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="16.0" />
                                                     </font>

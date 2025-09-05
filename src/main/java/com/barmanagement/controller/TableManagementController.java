@@ -21,6 +21,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import com.barmanagement.util.SceneUtil;
+import com.barmanagement.util.DashboardUpdateUtil;
 import com.barmanagement.util.LogoutUtil;
 
 import java.sql.SQLException;
@@ -76,16 +77,16 @@ public class TableManagementController {
         setupTableView();
         refresh();
 
-        // Ẩn nút sửa theo yêu cầu
+        // Hiển thị nút sửa để cho phép đổi tên bàn
         if (btnUpdate != null) {
-            btnUpdate.setVisible(false);
-            btnUpdate.setManaged(false);
+            btnUpdate.setVisible(true);
+            btnUpdate.setManaged(true);
         }
     }
 
     private void setupComponents() {
         // Setup status combo box
-        cbStatus.getItems().addAll("empty", "occupied", "reserved", "ordering");
+        cbStatus.getItems().addAll("empty", "occupied", "reserved", "ordering", "inactive");
         cbStatus.setValue("empty"); // Default to empty status
 
         // Setup table columns
@@ -169,6 +170,16 @@ public class TableManagementController {
         // Set user data for delete functionality
         card.setUserData(table);
 
+        // Allow clicking the card to select and edit this table
+        card.setOnMouseClicked(event -> {
+            tableView.getSelectionModel().select(table);
+            fillForm(table);
+            if (txtName != null) {
+                txtName.requestFocus();
+                txtName.selectAll();
+            }
+        });
+
         // Create a StackPane for the table with chairs
         StackPane tableWithChairs = new StackPane();
 
@@ -217,6 +228,15 @@ public class TableManagementController {
         tableLabel.setFont(Font.font("System", FontWeight.BOLD, 12));
 
         tableWithChairs.getChildren().addAll(tableRect, topChair, bottomChair, leftChair, rightChair, tableLabel);
+        // Also allow clicking the inner graphic to select
+        tableWithChairs.setOnMouseClicked(event -> {
+            tableView.getSelectionModel().select(table);
+            fillForm(table);
+            if (txtName != null) {
+                txtName.requestFocus();
+                txtName.selectAll();
+            }
+        });
 
         // Table info section
         HBox header = new HBox(10);
@@ -420,10 +440,59 @@ public class TableManagementController {
         }
     }
 
-    // Phương thức update đã bị ẩn nút nên không cần xóa hoàn toàn
     @FXML
     public void update(ActionEvent e) {
-        showInfo("Chức năng sửa bàn đã bị vô hiệu hóa theo yêu cầu!");
+        Table selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showInfo("Vui lòng chọn bàn để sửa!");
+            return;
+        }
+
+        String newName = txtName.getText().trim();
+        if (newName.isEmpty()) {
+            showError(new Exception("Tên bàn không được để trống!"));
+            return;
+        }
+
+        // Nếu không thay đổi gì thì bỏ qua
+        if (normalizeName(newName).equals(normalizeName(selected.getTableName()))) {
+            showInfo("Tên bàn không thay đổi.");
+            return;
+        }
+
+        // Kiểm tra trùng tên trong danh sách hiện tại
+        for (Table t : data) {
+            if (t.getId() != selected.getId() && normalizeName(newName).equals(normalizeName(t.getTableName()))) {
+                showError(new Exception("Tên bàn đã tồn tại!"));
+                return;
+            }
+        }
+
+        try {
+            selected.setTableName(newName);
+            selected.setStatus(cbStatus.getValue());
+            tableDAO.update(selected);
+            tableView.refresh();
+            updateTableCards();
+            // Thông báo các màn hình khác (Order/Payment) làm mới dữ liệu bàn
+            DashboardUpdateUtil.notifyDashboardUpdate();
+            showInfo("Đã cập nhật bàn thành công!");
+        } catch (SQLException ex) {
+            String sqlState = ex.getSQLState();
+            String msg = ex.getMessage() == null ? "" : ex.getMessage();
+            if ("23000".equals(sqlState) || msg.contains("Duplicate entry") || msg.contains("table_name")) {
+                showError(new Exception("Tên bàn đã tồn tại, vui lòng chọn tên khác!"));
+            } else {
+                showError(ex);
+            }
+        }
+    }
+
+    // Chuẩn hóa tên để so sánh trùng (bỏ thừa khoảng trắng, không phân biệt hoa-thường)
+    private String normalizeName(String input) {
+        if (input == null) return "";
+        // thay nhiều khoảng trắng liên tiếp thành 1 khoảng trắng, trim và chuyển về lower-case
+        return input.replaceAll("\\s+", " ").trim().toLowerCase();
     }
 
     @FXML
@@ -506,7 +575,8 @@ public class TableManagementController {
     public void refresh() {
         data.clear();
         try {
-            data.addAll(tableDAO.findAll());
+            // On management screen, load all tables including inactive to allow renaming
+            data.addAll(tableDAO.findAllIncludingInactive());
             updateStatistics();
             updateTableCards();
             showInfo("Đã làm mới danh sách bàn!");
