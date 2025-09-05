@@ -227,11 +227,16 @@ public class LoginController implements Initializable {
 
         // Hiệu ứng hover cho close button
         closeButton.setOnMouseEntered(e -> {
-            closeButton.setStyle("-fx-background-color: #da3633; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 18px; -fx-cursor: hand; -fx-border-color: transparent;");
+            closeButton.setStyle("-fx-background-color: #ff3742; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: #ff2f3a; -fx-border-width: 2; -fx-border-radius: 20; -fx-scale-x: 1.1; -fx-scale-y: 1.1;");
         });
 
         closeButton.setOnMouseExited(e -> {
-            closeButton.setStyle("-fx-background-color: #f85149; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 18px; -fx-cursor: hand; -fx-border-color: transparent;");
+            closeButton.setStyle("-fx-background-color: #ff4757; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: #ff3742; -fx-border-width: 2; -fx-border-radius: 20; -fx-scale-x: 1.0; -fx-scale-y: 1.0;");
+        });
+        
+        // Hiệu ứng pressed cho close button
+        closeButton.setOnMousePressed(e -> {
+            closeButton.setStyle("-fx-background-color: #ff2f3a; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: #ff1e2a; -fx-border-width: 2; -fx-border-radius: 20; -fx-scale-x: 0.95; -fx-scale-y: 0.95;");
         });
     }
 }

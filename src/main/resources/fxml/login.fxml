@@ -15,12 +15,12 @@
 
       <!-- Close Button - Positioned at top right corner -->
       <Button fx:id="closeButton" onAction="#handleCloseApp"
-              layoutX="955.0" layoutY="10.0"
-              prefHeight="35.0" prefWidth="35.0"
-              text="×"
-              style="-fx-background-color: #f85149; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 18px; -fx-cursor: hand; -fx-border-color: transparent;">
+              layoutX="950.0" layoutY="15.0"
+              prefHeight="40.0" prefWidth="40.0"
+              text="✕"
+              style="-fx-background-color: #ff4757; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: #ff3742; -fx-border-width: 2; -fx-border-radius: 20;">
          <effect>
-            <DropShadow color="rgba(248,81,73,0.6)" radius="10.0"/>
+            <DropShadow color="rgba(255,71,87,0.8)" radius="15.0"/>
          </effect>
       </Button>
 
