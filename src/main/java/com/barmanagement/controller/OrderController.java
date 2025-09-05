@@ -56,7 +56,6 @@ public class OrderController {
     @FXML private GridPane tableGrid;
     @FXML private VBox menuContainer;
     @FXML private VBox orderContainer;
-    @FXML private Spinner<Integer> spQty;
     @FXML private Label lblOrderId, lblTotal;
 
     // ===== Popup Elements =====
@@ -108,9 +107,6 @@ public class OrderController {
     }
 
     private void setupComponents() {
-        // Setup Spinner
-        spQty.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1));
-
         // Setup Category ComboBox
         cbCategory.getItems().clear();
         cbCategory.getItems().addAll("Tất cả", "Đồ uống", "Khai vị", "Món chính", "Tráng miệng");
@@ -471,38 +467,29 @@ public class OrderController {
 
         selectedMenuItem = item;
 
-        // Visual feedback
-        for (javafx.scene.Node node : menuContainer.getChildren()) {
-            if (node instanceof HBox) {
-                HBox hbox = (HBox) node;
-                if (hbox.getUserData() == item) {
-                    hbox.setStyle("-fx-background-color: #e16428; -fx-background-radius: 10; -fx-padding: 10; -fx-cursor: hand;");
-                } else {
-                    hbox.setStyle("-fx-background-color: #0f3460; -fx-background-radius: 10; -fx-padding: 10; -fx-cursor: hand;");
-                }
-            }
-        }
-
-        // Auto-add nếu có order
+        // Auto-add nếu có order - luôn thêm với số lượng = 1
         if (current != null) {
             try {
-                int quantity = spQty.getValue();
-                System.out.println("➕ Adding to order: " + item.getName() + " x" + quantity);
+                System.out.println("➕ Adding to order: " + item.getName() + " x1");
 
-                orderDAO.addItem(current.getId(), selectedMenuItem.getId(), quantity);
-                reloadItems();
-                showInfo("✅ Đã thêm " + item.getName() + " x" + quantity + " vào order");
-
-                // Reset UI
-                spQty.getValueFactory().setValue(1);
-                Platform.runLater(() -> {
-                    for (javafx.scene.Node node : menuContainer.getChildren()) {
-                        if (node instanceof HBox) {
-                            HBox hbox = (HBox) node;
-                            hbox.setStyle("-fx-background-color: #0f3460; -fx-background-radius: 10; -fx-padding: 10; -fx-cursor: hand;");
-                        }
+                // Kiểm tra xem món đã có trong order chưa
+                boolean itemExists = false;
+                for (OrderItem existingItem : itemData) {
+                    if (existingItem.getMenuItemId() == item.getId()) {
+                        // Nếu đã có, tăng số lượng lên 1
+                        updateOrderItemQuantity(existingItem, existingItem.getQuantity() + 1);
+                        itemExists = true;
+                        break;
                     }
-                });
+                }
+
+                // Nếu chưa có, thêm mới với số lượng = 1
+                if (!itemExists) {
+                    orderDAO.addItem(current.getId(), item.getId(), 1);
+                    reloadItems();
+                }
+
+                showInfo("✅ Đã thêm " + item.getName() + " vào order");
 
             } catch (SQLException e) {
                 System.err.println("❌ Error adding item: " + e.getMessage());
@@ -589,16 +576,49 @@ public class OrderController {
 
         // Chi tiết món
         HBox detailBox = new HBox(10);
-        Label qtyLabel = new Label("SL: " + orderItem.getQuantity());
-        qtyLabel.setTextFill(Color.web("#B0B0B0"));
-        qtyLabel.setFont(Font.font("System", 10));
-
         Label priceLabel = new Label("Đơn giá: " + orderItem.getFormattedPrice());
         priceLabel.setTextFill(Color.web("#B0B0B0"));
         priceLabel.setFont(Font.font("System", 10));
 
-        detailBox.getChildren().addAll(qtyLabel, priceLabel);
+        detailBox.getChildren().addAll(priceLabel);
         infoContainer.getChildren().addAll(nameLabel, detailBox);
+
+        // Quantity Controls Container
+        VBox quantityContainer = new VBox(5);
+        quantityContainer.setAlignment(Pos.CENTER);
+
+        // Quantity Label
+        Label qtyLabel = new Label("SL: " + orderItem.getQuantity());
+        qtyLabel.setTextFill(Color.web("#4CAF50"));
+        qtyLabel.setFont(Font.font("System", FontWeight.BOLD, 12));
+        qtyLabel.setUserData(orderItem); // Store reference for updates
+
+        // Quantity Buttons
+        HBox qtyButtons = new HBox(5);
+        qtyButtons.setAlignment(Pos.CENTER);
+
+        // Decrease Button
+        Button decreaseBtn = new Button("-");
+        decreaseBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-size: 10px; -fx-font-weight: bold;");
+        decreaseBtn.setPrefHeight(25);
+        decreaseBtn.setPrefWidth(25);
+        decreaseBtn.setOnAction(e -> {
+            if (orderItem.getQuantity() > 1) {
+                updateOrderItemQuantity(orderItem, orderItem.getQuantity() - 1);
+            } else {
+                removeOrderItem(orderItem);
+            }
+        });
+
+        // Increase Button
+        Button increaseBtn = new Button("+");
+        increaseBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-size: 10px; -fx-font-weight: bold;");
+        increaseBtn.setPrefHeight(25);
+        increaseBtn.setPrefWidth(25);
+        increaseBtn.setOnAction(e -> updateOrderItemQuantity(orderItem, orderItem.getQuantity() + 1));
+
+        qtyButtons.getChildren().addAll(decreaseBtn, increaseBtn);
+        quantityContainer.getChildren().addAll(qtyLabel, qtyButtons);
 
         // Subtotal and Remove Button Container
         VBox actionContainer = new VBox(5);
@@ -616,7 +636,7 @@ public class OrderController {
 
         actionContainer.getChildren().addAll(subtotalLabel, removeBtn);
 
-        itemBox.getChildren().addAll(imageContainer, infoContainer, actionContainer);
+        itemBox.getChildren().addAll(imageContainer, infoContainer, quantityContainer, actionContainer);
 
         // Add drop shadow
         DropShadow dropShadow = new DropShadow();
@@ -875,32 +895,32 @@ public class OrderController {
     // ===== Order Management Methods =====
 
     @FXML
-    public void addItem() {
-        if (current == null) {
-            showInfo("Hãy tạo order trước khi thêm món!");
-            return;
-        }
-        if (selectedMenuItem == null) {
-            showInfo("Vui lòng chọn món từ menu!");
-            return;
-        }
-        try {
-            orderDAO.addItem(current.getId(), selectedMenuItem.getId(), spQty.getValue());
-            reloadItems();
-            showInfo("✅ Đã thêm " + selectedMenuItem.getName() + " x" + spQty.getValue());
-            spQty.getValueFactory().setValue(1);
-        } catch (SQLException e) {
-            showError(e);
-        }
-    }
-
-    @FXML
     public void removeOrderItem(OrderItem orderItem) {
         try {
             orderDAO.removeItem(orderItem.getId());
             reloadItems();
             showInfo("✅ Đã xóa món khỏi order!");
         } catch (SQLException e) {
+            showError(e);
+        }
+    }
+
+    /**
+     * Update quantity of an order item
+     */
+    private void updateOrderItemQuantity(OrderItem orderItem, int newQuantity) {
+        try {
+            if (newQuantity <= 0) {
+                removeOrderItem(orderItem);
+                return;
+            }
+
+            orderDAO.updateItemQuantity(orderItem.getId(), newQuantity);
+            reloadItems();
+            System.out.println("✅ Updated quantity for item " + orderItem.getId() + " to " + newQuantity);
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error updating quantity: " + e.getMessage());
             showError(e);
         }
     }

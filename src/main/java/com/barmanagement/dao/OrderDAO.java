@@ -435,6 +435,41 @@ public class OrderDAO {
     }
 
     /**
+     * Update quantity of an order item
+     */
+    public void updateItemQuantity(int orderItemId, int newQuantity) throws SQLException {
+        // First get order info to verify it's not completed
+        String checkSql = "SELECT o.status FROM orders o " +
+                "INNER JOIN order_items oi ON o.id = oi.order_id " +
+                "WHERE oi.id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+
+            checkPs.setInt(1, orderItemId);
+            try (ResultSet rs = checkPs.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("status");
+                    if ("completed".equals(status) || "paid".equals(status)) {
+                        throw new SQLException("Cannot modify items in " + status + " order");
+                    }
+                }
+            }
+        }
+
+        String sql = "UPDATE order_items SET quantity = ? WHERE id = ?";
+
+        try (Connection conn = JDBCConnect.getJDBCConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, newQuantity);
+            ps.setInt(2, orderItemId);
+            int updated = ps.executeUpdate();
+            System.out.println("Updated order item #" + orderItemId + " quantity to " + newQuantity + ": " + updated + " rows updated");
+        }
+    }
+
+    /**
      * Remove item from order
      */
     public void removeItem(int orderItemId) throws SQLException {
