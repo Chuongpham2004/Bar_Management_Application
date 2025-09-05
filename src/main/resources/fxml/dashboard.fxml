@@ -87,10 +87,8 @@
                 <!-- Right: User Info -->
                 <HBox alignment="CENTER_RIGHT" prefWidth="475.0" spacing="15.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <Label text="12:30 PM" textFill="WHITE">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
+                        <Label fx:id="currentTimeLabel" textFill="WHITE">
+                            <font><Font size="14.0"/></font>
                         </Label>
                         <Circle fill="#e16428" radius="18.0" />
                         <Label text="Admin" textFill="WHITE">

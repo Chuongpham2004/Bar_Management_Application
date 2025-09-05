@@ -86,10 +86,8 @@
                 <!-- Right: User Info -->
                 <HBox alignment="CENTER_RIGHT" prefWidth="475.0" spacing="15.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <Label text="12:30 PM" textFill="WHITE">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
+                        <Label fx:id="currentTimeLabel" textFill="WHITE">
+                            <font><Font size="14.0"/></font>
                         </Label>
                         <Circle fill="#e16428" radius="18.0" />
                         <Label text="Admin" textFill="WHITE">
@@ -163,6 +161,16 @@
                                                         <ComboBox fx:id="cbCategory" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #0f3460; -fx-text-fill: white;" />
                                                     </children>
                                                 </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Image picker + preview -->
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <Button fx:id="btnChooseImage" text="Chọn ảnh..." onAction="#handleChooseImage"
+                                                        prefHeight="35.0" style="-fx-background-color: #0f3460; -fx-text-fill: white; -fx-background-radius: 6;" />
+                                                <ImageView fx:id="imgPreview" fitWidth="80.0" fitHeight="80.0" preserveRatio="true" />
+                                                <Label text="(Tuỳ chọn) Chọn ảnh để gắn cho món" textFill="#B0B0B0" />
                                             </children>
                                         </HBox>
 
