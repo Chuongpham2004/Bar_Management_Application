@@ -14,11 +14,8 @@
     -fx-scale-y: 1.0;
 }
 
-/* Navigation Button Hover Effects - ENHANCED SCALE */
+/* Navigation Button Hover Effects - ENHANCED SCALE ONLY */
 .nav-button:hover {
-    -fx-background-color: linear-gradient(to right, #e16428, #ff7b47);
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
     -fx-scale-x: 1.08;
     -fx-scale-y: 1.08;
     -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.8), 20, 0.4, 0, 8);
@@ -42,7 +39,6 @@
 
 /* Active Button Hover (enhanced scale effect) */
 .nav-button-active:hover {
-    -fx-background-color: linear-gradient(to right, #ff7b47, #e16428);
     -fx-scale-x: 1.06;
     -fx-scale-y: 1.06;
     -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.9), 25, 0.5, 0, 10);
@@ -50,55 +46,7 @@
     -fx-translate-y: -1px;
 }
 
-/* Home Button Specific Hover - ENHANCED SCALE */
-.nav-home:hover {
-    -fx-background-color: linear-gradient(to right, #4CAF50, #66BB6A);
-    -fx-scale-x: 1.08;
-    -fx-scale-y: 1.08;
-    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.8), 20, 0.4, 0, 8);
-    -fx-translate-x: 5px;
-    -fx-translate-y: -2px;
-}
-
-/* Payment Button Specific Hover - ENHANCED SCALE */
-.nav-payment:hover {
-    -fx-background-color: linear-gradient(to right, #2196F3, #42A5F5);
-    -fx-scale-x: 1.08;
-    -fx-scale-y: 1.08;
-    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.8), 20, 0.4, 0, 8);
-    -fx-translate-x: 5px;
-    -fx-translate-y: -2px;
-}
-
-/* Menu Button Specific Hover - ENHANCED SCALE */
-.nav-menu:hover {
-    -fx-background-color: linear-gradient(to right, #9C27B0, #BA68C8);
-    -fx-scale-x: 1.08;
-    -fx-scale-y: 1.08;
-    -fx-effect: dropshadow(gaussian, rgba(156, 39, 176, 0.8), 20, 0.4, 0, 8);
-    -fx-translate-x: 5px;
-    -fx-translate-y: -2px;
-}
-
-/* Order Button Specific Hover - ENHANCED SCALE */
-.nav-order:hover {
-    -fx-background-color: linear-gradient(to right, #FF9800, #FFB74D);
-    -fx-scale-x: 1.08;
-    -fx-scale-y: 1.08;
-    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.8), 20, 0.4, 0, 8);
-    -fx-translate-x: 5px;
-    -fx-translate-y: -2px;
-}
-
-/* Tables Button Specific Hover - ENHANCED SCALE */
-.nav-tables:hover {
-    -fx-background-color: linear-gradient(to right, #607D8B, #78909C);
-    -fx-scale-x: 1.08;
-    -fx-scale-y: 1.08;
-    -fx-effect: dropshadow(gaussian, rgba(96, 125, 139, 0.8), 20, 0.4, 0, 8);
-    -fx-translate-x: 5px;
-    -fx-translate-y: -2px;
-}
+/* All navigation buttons use the same hover effect - only scale, no color change */
 
 /* Sidebar Hover Effects */
 .sidebar-container:hover {

@@ -36,15 +36,15 @@
                 <!-- Navigation Buttons -->
                 <VBox prefHeight="720.0" prefWidth="250.0" spacing="5.0">
                     <children>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-home" text="📊 Dashboard" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showPayment" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-payment" text="💳 Thanh Toán" />
-                        <Button fx:id="menuBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-button-active nav-menu" text="🍸 Menu">
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#goBack" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="📊 Dashboard" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showPayment" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="💳 Thanh Toán" />
+                        <Button fx:id="menuBtn" alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-button-active" style="-fx-background-color: #e16428; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="🍸 Menu">
                             <effect>
                                 <DropShadow />
                             </effect>
                         </Button>
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showOrder" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-order" text="🍽 Order" />
-                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showSettings" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button nav-tables" text="⚙ Quản Lý Bàn" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showOrder" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="🍽 Order" />
+                        <Button alignment="BASELINE_LEFT" graphicTextGap="15.0" mnemonicParsing="false" onAction="#showSettings" prefHeight="50.0" prefWidth="250.0" styleClass="nav-button" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;" text="⚙ Quản Lý Bàn" />
                     </children>
                     <VBox.margin>
                         <Insets top="20.0" />
