@@ -183,43 +183,61 @@
     -fx-border-color: #0D47A1;
 }
 
-/* Action Buttons - Enhanced */
+/* Action Buttons - Enhanced & Bright */
 .payment-confirm-button {
-    -fx-background-color: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-    -fx-background-radius: 15;
-    -fx-border-radius: 15;
+    -fx-background-color: #4CAF50;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #2E7D32;
+    -fx-border-width: 2;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 16px;
     -fx-padding: 15 30;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.5), 15, 0.3, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.8), 20, 0.5, 0, 8);
 }
 
 .payment-confirm-button:hover {
-    -fx-background-color: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
-    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.7), 20, 0.4, 0, 10);
+    -fx-background-color: #66BB6A;
+    -fx-border-color: #4CAF50;
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 1.0), 25, 0.6, 0, 12);
+}
+
+.payment-confirm-button:pressed {
+    -fx-background-color: #2E7D32;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
 }
 
 .payment-cancel-button {
-    -fx-background-color: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-    -fx-background-radius: 15;
-    -fx-border-radius: 15;
+    -fx-background-color: #f44336;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #C62828;
+    -fx-border-width: 2;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 16px;
     -fx-padding: 15 30;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.5), 15, 0.3, 0, 8);
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.8), 20, 0.5, 0, 8);
 }
 
 .payment-cancel-button:hover {
-    -fx-background-color: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
-    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.7), 20, 0.4, 0, 10);
+    -fx-background-color: #EF5350;
+    -fx-border-color: #f44336;
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 1.0), 25, 0.6, 0, 12);
+}
+
+.payment-cancel-button:pressed {
+    -fx-background-color: #C62828;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
 }
 
 /* Status Indicators */
@@ -297,6 +315,28 @@
     }
 }
 
+/* Button Focus & Active States */
+.payment-confirm-button:focused {
+    -fx-background-color: #66BB6A;
+    -fx-border-color: #4CAF50;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 1.0), 30, 0.7, 0, 15);
+}
+
+.payment-cancel-button:focused {
+    -fx-background-color: #EF5350;
+    -fx-border-color: #f44336;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 1.0), 30, 0.7, 0, 15);
+}
+
+/* Ensure buttons are always visible */
+.payment-confirm-button, .payment-cancel-button {
+    -fx-opacity: 1.0;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+}
+
 /* Dark Theme Enhancements */
 .dark-theme .payment-form-container {
     -fx-background-color: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -312,4 +352,19 @@
 
 .dark-theme .order-table .table-row-cell:hover {
     -fx-background-color: #1a1a2e;
+}
+
+/* High Contrast Mode for Better Visibility */
+.high-contrast .payment-confirm-button {
+    -fx-background-color: #00FF00;
+    -fx-text-fill: #000000;
+    -fx-border-color: #000000;
+    -fx-border-width: 3;
+}
+
+.high-contrast .payment-cancel-button {
+    -fx-background-color: #FF0000;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #000000;
+    -fx-border-width: 3;
 }
