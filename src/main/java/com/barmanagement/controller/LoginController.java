@@ -37,6 +37,9 @@ public class LoginController implements Initializable {
 
     @FXML
     private Button closeButton;
+    
+    @FXML
+    private Button closeButton2;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -236,7 +239,18 @@ public class LoginController implements Initializable {
         
         // Hiệu ứng pressed cho close button
         closeButton.setOnMousePressed(e -> {
-            closeButton.setStyle("-fx-background-color: #ff2f3a; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: #ff1e2a; -fx-border-width: 2; -fx-border-radius: 20; -fx-scale-x: 0.95; -fx-scale-y: 0.95;");
+            closeButton.setStyle("-fx-background-color: #ff2f3a; -fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 24px; -fx-cursor: hand; -fx-border-color: #ff1e2a; -fx-border-width: 3; -fx-border-radius: 25; -fx-scale-x: 0.95; -fx-scale-y: 0.95;");
         });
+        
+        // Hiệu ứng cho close button 2 (nếu có)
+        if (closeButton2 != null) {
+            closeButton2.setOnMouseEntered(e -> {
+                closeButton2.setStyle("-fx-background-color: #ff3742; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-color: #ff2f3a; -fx-border-width: 2; -fx-border-radius: 10; -fx-scale-x: 1.05; -fx-scale-y: 1.05;");
+            });
+
+            closeButton2.setOnMouseExited(e -> {
+                closeButton2.setStyle("-fx-background-color: #ff4757; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-color: #ff3742; -fx-border-width: 2; -fx-border-radius: 10; -fx-scale-x: 1.0; -fx-scale-y: 1.0;");
+            });
+        }
     }
 }

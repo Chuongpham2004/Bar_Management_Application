@@ -15,12 +15,23 @@
 
       <!-- Close Button - Positioned at top right corner -->
       <Button fx:id="closeButton" onAction="#handleCloseApp"
-              layoutX="950.0" layoutY="15.0"
-              prefHeight="40.0" prefWidth="40.0"
+              layoutX="920.0" layoutY="20.0"
+              prefHeight="50.0" prefWidth="50.0"
               text="✕"
-              style="-fx-background-color: #ff4757; -fx-text-fill: white; -fx-background-radius: 20; -fx-font-weight: bold; -fx-font-size: 20px; -fx-cursor: hand; -fx-border-color: #ff3742; -fx-border-width: 2; -fx-border-radius: 20;">
+              style="-fx-background-color: #ff4757; -fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 24px; -fx-cursor: hand; -fx-border-color: #ff3742; -fx-border-width: 3; -fx-border-radius: 25; -fx-opacity: 1.0; -fx-background-insets: 0; -fx-border-insets: 0;">
          <effect>
-            <DropShadow color="rgba(255,71,87,0.8)" radius="15.0"/>
+            <DropShadow color="rgba(255,71,87,1.0)" radius="20.0"/>
+         </effect>
+      </Button>
+
+      <!-- Alternative Close Button - Bottom right for visibility -->
+      <Button fx:id="closeButton2" onAction="#handleCloseApp"
+              layoutX="900.0" layoutY="720.0"
+              prefHeight="60.0" prefWidth="80.0"
+              text="ĐÓNG"
+              style="-fx-background-color: #ff4757; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-color: #ff3742; -fx-border-width: 2; -fx-border-radius: 10; -fx-opacity: 1.0;">
+         <effect>
+            <DropShadow color="rgba(255,71,87,1.0)" radius="15.0"/>
          </effect>
       </Button>
 
