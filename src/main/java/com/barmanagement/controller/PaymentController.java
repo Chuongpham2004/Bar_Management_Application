@@ -54,6 +54,14 @@ public class PaymentController implements Initializable {
     @FXML private TableColumn<OrderItem, Double> totalCol;
     @FXML private Label totalLabel;
     @FXML private ComboBox<String> paymentMethodComboBox;
+    
+    // Discount UI Elements
+    @FXML private TextField discountAmountField;
+    @FXML private ComboBox<String> discountTypeComboBox;
+    @FXML private Label discountAmountLabel;
+    @FXML private Label finalTotalLabel;
+    @FXML private VBox discountSection;
+    @FXML private HBox paymentMethodButtons;
 
     // Enhanced UI elements
     @FXML private Label statusLabel;
@@ -78,6 +86,11 @@ public class PaymentController implements Initializable {
 
     // NEW: Flag to track if order was set from external source
     private boolean orderSetFromExternal = false;
+    
+    // Discount data
+    private double originalTotal = 0.0;
+    private double discountAmount = 0.0;
+    private String discountType = "percentage"; // "percentage" or "fixed"
 
     // Formatter
     private final NumberFormat currencyFormatter = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -94,6 +107,9 @@ public class PaymentController implements Initializable {
 
         // Setup table columns
         setupOrderTable();
+        
+        // Setup discount functionality
+        setupDiscountControls();
 
         // Load initial data
         loadPaymentStatistics();
@@ -285,6 +301,32 @@ public class PaymentController implements Initializable {
             fixComboBoxTextColor();
         });
     }
+    
+    private void setupDiscountControls() {
+        // Setup discount type combo box
+        if (discountTypeComboBox != null) {
+            discountTypeComboBox.setItems(FXCollections.observableArrayList(
+                    "Phần trăm (%)", "Số tiền cố định (VND)"
+            ));
+            discountTypeComboBox.getSelectionModel().select(0);
+            discountTypeComboBox.setOnAction(e -> onDiscountTypeChanged());
+        }
+        
+        // Setup discount amount field
+        if (discountAmountField != null) {
+            discountAmountField.textProperty().addListener((observable, oldValue, newValue) -> {
+                onDiscountAmountChanged();
+            });
+        }
+        
+        // Initialize discount labels
+        if (discountAmountLabel != null) {
+            discountAmountLabel.setText("0 VND");
+        }
+        if (finalTotalLabel != null) {
+            finalTotalLabel.setText("0 VND");
+        }
+    }
 
     private void setupOrderTable() {
         itemNameCol.setCellValueFactory(new PropertyValueFactory<>("menuItemName"));
@@ -432,6 +474,9 @@ public class PaymentController implements Initializable {
         if (paymentSummaryBox == null) return;
 
         paymentSummaryBox.getChildren().clear();
+        
+        // Store original total for discount calculations
+        originalTotal = total;
 
         // Add summary header
         Label summaryHeader = new Label("📋 Tóm tắt đơn hàng");
@@ -449,10 +494,100 @@ public class PaymentController implements Initializable {
         totalQuantity.setStyle("-fx-text-fill: #B0B0B0; -fx-font-size: 14px;");
         paymentSummaryBox.getChildren().add(totalQuantity);
 
-        // Add total amount (large)
-        Label totalAmount = new Label("Tổng tiền: " + formatCurrency(total));
-        totalAmount.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: #4CAF50;");
-        paymentSummaryBox.getChildren().add(totalAmount);
+        // Add original total amount
+        Label originalTotalLabel = new Label("Tổng tiền: " + formatCurrency(total));
+        originalTotalLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #4CAF50;");
+        paymentSummaryBox.getChildren().add(originalTotalLabel);
+        
+        // Update discount calculations
+        updateDiscountCalculations();
+    }
+    
+    private void onDiscountTypeChanged() {
+        if (discountTypeComboBox != null) {
+            String selectedType = discountTypeComboBox.getValue();
+            if (selectedType != null) {
+                if (selectedType.contains("Phần trăm")) {
+                    discountType = "percentage";
+                    if (discountAmountField != null) {
+                        discountAmountField.setPromptText("Nhập % giảm giá (0-100)");
+                    }
+                } else {
+                    discountType = "fixed";
+                    if (discountAmountField != null) {
+                        discountAmountField.setPromptText("Nhập số tiền giảm (VND)");
+                    }
+                }
+                updateDiscountCalculations();
+            }
+        }
+    }
+    
+    private void onDiscountAmountChanged() {
+        if (discountAmountField != null) {
+            String text = discountAmountField.getText();
+            if (text != null && !text.trim().isEmpty()) {
+                try {
+                    double value = Double.parseDouble(text);
+                    if (discountType.equals("percentage")) {
+                        if (value < 0 || value > 100) {
+                            showAlert(Alert.AlertType.WARNING, "Phần trăm giảm giá phải từ 0-100%");
+                            discountAmountField.setText("");
+                            return;
+                        }
+                    } else {
+                        if (value < 0 || value > originalTotal) {
+                            showAlert(Alert.AlertType.WARNING, "Số tiền giảm không hợp lệ!");
+                            discountAmountField.setText("");
+                            return;
+                        }
+                    }
+                    discountAmount = value;
+                    updateDiscountCalculations();
+                } catch (NumberFormatException e) {
+                    showAlert(Alert.AlertType.WARNING, "Vui lòng nhập số hợp lệ!");
+                    discountAmountField.setText("");
+                }
+            } else {
+                discountAmount = 0;
+                updateDiscountCalculations();
+            }
+        }
+    }
+    
+    private void updateDiscountCalculations() {
+        double calculatedDiscount = 0;
+        double finalTotal = originalTotal;
+        
+        if (discountAmount > 0) {
+            if (discountType.equals("percentage")) {
+                calculatedDiscount = originalTotal * (discountAmount / 100.0);
+            } else {
+                calculatedDiscount = discountAmount;
+            }
+            finalTotal = originalTotal - calculatedDiscount;
+            
+            // Ensure final total is not negative
+            if (finalTotal < 0) {
+                finalTotal = 0;
+                calculatedDiscount = originalTotal;
+            }
+        }
+        
+        // Update discount amount label
+        if (discountAmountLabel != null) {
+            discountAmountLabel.setText("-" + formatCurrency(calculatedDiscount));
+            discountAmountLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #FF9800;");
+        }
+        
+        // Update final total label
+        if (finalTotalLabel != null) {
+            finalTotalLabel.setText(formatCurrency(finalTotal));
+            finalTotalLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #4CAF50;");
+        }
+        
+        // Update main total label
+        totalLabel.setText(formatCurrency(finalTotal));
     }
 
     private void updateStatusLabel(String message, Color color) {
@@ -618,6 +753,19 @@ public class PaymentController implements Initializable {
         currentOrder = null;
         orderItems.clear();
         totalLabel.setText("0 VND");
+        
+        // Reset discount
+        originalTotal = 0.0;
+        discountAmount = 0.0;
+        if (discountAmountField != null) {
+            discountAmountField.setText("");
+        }
+        if (discountAmountLabel != null) {
+            discountAmountLabel.setText("0 VND");
+        }
+        if (finalTotalLabel != null) {
+            finalTotalLabel.setText("0 VND");
+        }
 
         if (paymentSummaryBox != null) {
             paymentSummaryBox.getChildren().clear();
@@ -639,8 +787,47 @@ public class PaymentController implements Initializable {
     private void onCancel() {
         resetPaymentForm();
     }
+    
+    @FXML
+    private void selectPaymentMethod(javafx.event.ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
+        String method = clickedButton.getText();
+        
+        // Remove emoji and get clean method name
+        String cleanMethod = method.replaceAll("[^\\p{L}\\p{N}\\s]", "").trim();
+        
+        // Update payment method combo box
+        if (paymentMethodComboBox != null) {
+            paymentMethodComboBox.setValue(cleanMethod);
+        }
+        
+        // Update button styles
+        if (paymentMethodButtons != null) {
+            for (javafx.scene.Node node : paymentMethodButtons.getChildren()) {
+                if (node instanceof Button) {
+                    Button btn = (Button) node;
+                    if (btn == clickedButton) {
+                        btn.getStyleClass().add("selected");
+                    } else {
+                        btn.getStyleClass().remove("selected");
+                    }
+                }
+            }
+        }
+        
+        System.out.println("Selected payment method: " + cleanMethod);
+    }
 
     private double parseTotalAmount() {
+        // Use final total (after discount) for payment
+        if (finalTotalLabel != null) {
+            String totalText = finalTotalLabel.getText().replaceAll("[^0-9]", "");
+            if (!totalText.isEmpty()) {
+                return Double.parseDouble(totalText);
+            }
+        }
+        
+        // Fallback to main total label
         String totalText = totalLabel.getText().replaceAll("[^0-9]", "");
         if (totalText.isEmpty()) return 0;
         return Double.parseDouble(totalText);

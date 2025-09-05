@@ -8,7 +8,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #1a1a2e;" stylesheets="@../css/navigation-styles.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.PaymentController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #1a1a2e;" stylesheets="@../css/navigation-styles.css, @../css/payment-styles.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.barmanagement.controller.PaymentController">
     <children>
         <!-- Sidebar Navigation -->
         <VBox layoutX="0.0" layoutY="0.0" prefHeight="800.0" prefWidth="250.0" style="-fx-background-color: #16213e;" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -170,7 +170,7 @@
                                                         <Font name="System Bold" size="16.0" />
                                                     </font>
                                                 </Label>
-                                                <TableView fx:id="orderTable" prefHeight="250.0" style="-fx-background-color: #0f3460;">
+                                                <TableView fx:id="orderTable" prefHeight="250.0" styleClass="order-table">
                                                     <columns>
                                                         <TableColumn fx:id="itemNameCol" prefWidth="180.0" text="Tên Món" />
                                                         <TableColumn fx:id="quantityCol" prefWidth="60.0" text="SL" />
@@ -184,16 +184,43 @@
                                             </children>
                                         </VBox>
 
+                                        <!-- Discount Section -->
+                                        <VBox fx:id="discountSection" spacing="10.0" styleClass="discount-section">
+                                            <children>
+                                                <Label text="🎯 Giảm Giá" textFill="WHITE" styleClass="discount-label">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <ComboBox fx:id="discountTypeComboBox" prefHeight="35.0" prefWidth="150.0"
+                                                                  style="-fx-background-color: white; -fx-text-fill: #333; -fx-font-size: 12px;" />
+                                                        <TextField fx:id="discountAmountField" prefHeight="35.0" prefWidth="120.0"
+                                                                   styleClass="discount-input" promptText="Nhập % giảm giá" />
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
+
                                         <!-- Payment Method -->
-                                        <VBox spacing="10.0">
+                                        <VBox spacing="10.0" styleClass="payment-method-section">
                                             <children>
                                                 <Label text="💳 Phương thức thanh toán" textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="16.0" />
                                                     </font>
                                                 </Label>
+                                                <HBox fx:id="paymentMethodButtons" spacing="10.0" alignment="CENTER_LEFT">
+                                                    <children>
+                                                        <Button text="💵 Tiền mặt" styleClass="payment-method-button" onAction="#selectPaymentMethod" />
+                                                        <Button text="🏦 Chuyển khoản" styleClass="payment-method-button" onAction="#selectPaymentMethod" />
+                                                        <Button text="📱 MOMO" styleClass="payment-method-button" onAction="#selectPaymentMethod" />
+                                                        <Button text="💳 Thẻ" styleClass="payment-method-button" onAction="#selectPaymentMethod" />
+                                                    </children>
+                                                </HBox>
                                                 <ComboBox fx:id="paymentMethodComboBox" prefHeight="40.0" maxWidth="Infinity"
-                                                          style="-fx-background-color: #0f3460; -fx-text-fill: white; -fx-font-size: 14px;" />
+                                                          style="-fx-background-color: #0f3460; -fx-text-fill: white; -fx-font-size: 14px;" visible="false" />
                                             </children>
                                         </VBox>
 
@@ -201,19 +228,11 @@
                                         <HBox alignment="CENTER" spacing="15.0">
                                             <children>
                                                 <Button onAction="#onConfirmPayment" prefHeight="50.0" prefWidth="180.0"
-                                                        style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-size: 16px; -fx-font-weight: bold;"
-                                                        text="✅ Xác nhận thanh toán">
-                                                    <effect>
-                                                        <DropShadow color="#4CAF50" radius="10.0" />
-                                                    </effect>
-                                                </Button>
+                                                        styleClass="payment-confirm-button"
+                                                        text="✅ Xác nhận thanh toán" />
                                                 <Button onAction="#onCancel" prefHeight="50.0" prefWidth="120.0"
-                                                        style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-size: 16px; -fx-font-weight: bold;"
-                                                        text="❌ Hủy">
-                                                    <effect>
-                                                        <DropShadow color="#f44336" radius="10.0" />
-                                                    </effect>
-                                                </Button>
+                                                        styleClass="payment-cancel-button"
+                                                        text="❌ Hủy" />
                                             </children>
                                         </HBox>
                                     </children>
@@ -223,27 +242,44 @@
                                 </VBox>
 
                                 <!-- Right: Payment Summary -->
-                                <VBox spacing="20.0" style="-fx-background-color: #16213e; -fx-background-radius: 15; -fx-padding: 25;" prefWidth="300.0">
+                                <VBox spacing="20.0" styleClass="payment-summary" prefWidth="300.0">
                                     <children>
-                                        <!-- Total Amount Display -->
+                                        <!-- Payment Summary Details -->
+                                        <VBox fx:id="paymentSummaryBox" spacing="10.0">
+                                            <!-- Dynamic content added by controller -->
+                                        </VBox>
+                                        
+                                        <!-- Discount Summary -->
+                                        <VBox spacing="10.0" styleClass="summary-item">
+                                            <children>
+                                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                    <children>
+                                                        <Label text="🎯 Giảm giá:" styleClass="summary-label" />
+                                                        <Label fx:id="discountAmountLabel" text="0 VND" styleClass="summary-value" />
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Final Total Amount Display -->
                                         <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #0f3460; -fx-background-radius: 15; -fx-padding: 25;">
                                             <children>
-                                                <Label text="💰 TỔNG TIỀN" textFill="#B0B0B0">
+                                                <Label text="💰 THANH TOÁN" textFill="#B0B0B0">
                                                     <font>
                                                         <Font name="System Bold" size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="totalLabel" text="0 VND" textFill="#4CAF50">
+                                                <Label fx:id="finalTotalLabel" text="0 VND" styleClass="total-amount">
+                                                    <font>
+                                                        <Font name="System Bold" size="24.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="totalLabel" text="0 VND" textFill="#4CAF50" visible="false">
                                                     <font>
                                                         <Font name="System Bold" size="24.0" />
                                                     </font>
                                                 </Label>
                                             </children>
-                                        </VBox>
-
-                                        <!-- Payment Summary Details -->
-                                        <VBox fx:id="paymentSummaryBox" spacing="10.0">
-                                            <!-- Dynamic content added by controller -->
                                         </VBox>
 
                                         <!-- Payment Methods Info -->

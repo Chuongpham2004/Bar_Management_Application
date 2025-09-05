@@ -1,0 +1,315 @@
+/* ===== PAYMENT STYLES - PROFESSIONAL DESIGN ===== */
+
+/* Payment Form Container */
+.payment-form-container {
+    -fx-background-color: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-color: #e16428;
+    -fx-border-width: 2;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(gaussian, rgba(225, 100, 40, 0.3), 20, 0.3, 0, 10);
+}
+
+/* Order Details Table - Enhanced */
+.order-table {
+    -fx-background-color: #0f3460;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: #4CAF50;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.2), 15, 0.2, 0, 5);
+}
+
+.order-table .column-header {
+    -fx-background-color: linear-gradient(to bottom, #4CAF50, #45a049);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 12 8;
+}
+
+.order-table .table-row-cell {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+}
+
+.order-table .table-row-cell:selected {
+    -fx-background-color: #e16428;
+    -fx-text-fill: white;
+}
+
+.order-table .table-row-cell:hover {
+    -fx-background-color: #1a1a2e;
+    -fx-text-fill: white;
+}
+
+.order-table .table-cell {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-padding: 8 12;
+    -fx-border-color: transparent;
+}
+
+/* Discount Section */
+.discount-section {
+    -fx-background-color: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.4), 15, 0.3, 0, 8);
+}
+
+.discount-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+.discount-input {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #FF9800;
+    -fx-border-width: 2;
+    -fx-text-fill: #333;
+    -fx-font-size: 14px;
+    -fx-padding: 10 15;
+}
+
+.discount-input:focused {
+    -fx-border-color: #F57C00;
+    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.5), 10, 0.2, 0, 3);
+}
+
+.discount-type-button {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #FF9800;
+    -fx-border-width: 2;
+    -fx-text-fill: #FF9800;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.discount-type-button:hover {
+    -fx-background-color: #FF9800;
+    -fx-text-fill: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.6), 10, 0.3, 0, 5);
+}
+
+.discount-type-button.selected {
+    -fx-background-color: #F57C00;
+    -fx-text-fill: white;
+    -fx-border-color: #E65100;
+}
+
+/* Payment Summary - Enhanced */
+.payment-summary {
+    -fx-background-color: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.4), 20, 0.3, 0, 10);
+}
+
+.summary-item {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10;
+    -fx-padding: 12 15;
+    -fx-spacing: 5;
+}
+
+.summary-label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+}
+
+.summary-value {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.total-amount {
+    -fx-text-fill: white;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0.2, 0, 2);
+}
+
+/* Payment Method Selection */
+.payment-method-section {
+    -fx-background-color: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.4), 15, 0.3, 0, 8);
+}
+
+.payment-method-button {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2;
+    -fx-text-fill: #2196F3;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 12 20;
+    -fx-cursor: hand;
+    -fx-min-width: 120;
+}
+
+.payment-method-button:hover {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.6), 10, 0.3, 0, 5);
+}
+
+.payment-method-button.selected {
+    -fx-background-color: #1976D2;
+    -fx-text-fill: white;
+    -fx-border-color: #0D47A1;
+}
+
+/* Action Buttons - Enhanced */
+.payment-confirm-button {
+    -fx-background-color: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-padding: 15 30;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.5), 15, 0.3, 0, 8);
+}
+
+.payment-confirm-button:hover {
+    -fx-background-color: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.7), 20, 0.4, 0, 10);
+}
+
+.payment-cancel-button {
+    -fx-background-color: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-padding: 15 30;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.5), 15, 0.3, 0, 8);
+}
+
+.payment-cancel-button:hover {
+    -fx-background-color: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.7), 20, 0.4, 0, 10);
+}
+
+/* Status Indicators */
+.payment-status-success {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(76, 175, 80, 0.5), 10, 0.2, 0, 3);
+}
+
+.payment-status-warning {
+    -fx-background-color: #FF9800;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 152, 0, 0.5), 10, 0.2, 0, 3);
+}
+
+.payment-status-error {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 15;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(244, 67, 54, 0.5), 10, 0.2, 0, 3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { translate-x: -20; opacity: 0; }
+    to { translate-x: 0; opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { scale-x: 1; scale-y: 1; }
+    50% { scale-x: 1.05; scale-y: 1.05; }
+    100% { scale-x: 1; scale-y: 1; }
+}
+
+.animate-fade-in {
+    -fx-opacity: 0;
+    -fx-transition: opacity 0.5s ease;
+}
+
+.animate-slide-in {
+    -fx-translate-x: -20;
+    -fx-opacity: 0;
+    -fx-transition: translate-x 0.5s ease, opacity 0.5s ease;
+}
+
+.animate-pulse {
+    -fx-transition: scale-x 0.3s ease, scale-y 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .payment-form-container {
+        -fx-padding: 15;
+    }
+    
+    .payment-summary {
+        -fx-padding: 15;
+    }
+    
+    .total-amount {
+        -fx-font-size: 24px;
+    }
+}
+
+/* Dark Theme Enhancements */
+.dark-theme .payment-form-container {
+    -fx-background-color: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.dark-theme .order-table {
+    -fx-background-color: #0f3460;
+}
+
+.dark-theme .order-table .table-row-cell {
+    -fx-background-color: #0f3460;
+}
+
+.dark-theme .order-table .table-row-cell:hover {
+    -fx-background-color: #1a1a2e;
+}
