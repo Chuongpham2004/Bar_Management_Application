@@ -35,6 +35,7 @@ import javafx.scene.Node;
 import com.barmanagement.util.SceneUtil;
 import com.barmanagement.util.LogoutUtil;
 import com.barmanagement.util.DashboardUpdateUtil;
+import com.barmanagement.util.InvoiceHelper;
 import com.barmanagement.dao.RevenueDAO;
 import com.barmanagement.dao.TableDAO;
 import com.barmanagement.dao.MenuItemDAO;
@@ -509,7 +510,20 @@ public class DashboardController {
             Button printButton = new Button("🖨 In hóa đơn");
             printButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-size: 14px; -fx-padding: 12 20 12 20;");
             printButton.setOnAction(e -> {
-                showInfo("Chức năng in hóa đơn đang được phát triển!");
+                try {
+                    // Load order items
+                    List<OrderItem> items = orderItemDAO.findByOrderId(order.getId());
+                    
+                    // Generate and open invoice (TXT format - works on all machines)
+                    InvoiceHelper.createAndOpenInvoice(order, items);
+                    
+                    showInfo("✅ Đã tạo hóa đơn thành công!\nFile hóa đơn đã được mở tự động.");
+                    
+                } catch (Exception ex) {
+                    System.err.println("❌ Lỗi tạo hóa đơn: " + ex.getMessage());
+                    ex.printStackTrace();
+                    showInfo("❌ Lỗi tạo hóa đơn: " + ex.getMessage());
+                }
             });
 
             HBox.setHgrow(headerInfo, javafx.scene.layout.Priority.ALWAYS);
@@ -597,15 +611,37 @@ public class DashboardController {
             itemsContainer.getChildren().addAll(itemsTitle, itemsDisplay);
 
             // Total section (moved above buttons, not overlapping)
-            HBox totalBox = new HBox();
-            totalBox.setAlignment(Pos.CENTER_RIGHT);
-            totalBox.setStyle("-fx-background-color: #4CAF50; -fx-background-radius: 10; -fx-padding: 18;");
-            totalBox.setMinHeight(60);
+            VBox totalContainer = new VBox(8);
+            totalContainer.setAlignment(Pos.CENTER_RIGHT);
+            totalContainer.setStyle("-fx-background-color: #4CAF50; -fx-background-radius: 10; -fx-padding: 18;");
+            totalContainer.setMinHeight(60);
 
-            Label totalLabel = new Label("💰 Tổng cộng: " + order.getFormattedTotal());
-            totalLabel.setTextFill(Color.WHITE);
-            totalLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
-            totalBox.getChildren().add(totalLabel);
+            // Hiển thị giảm giá nếu có
+            if (order.getDiscountPercent() > 0) {
+                // Tổng cộng (trước giảm giá)
+                String originalAmount = String.format("%,.0f VNĐ", order.getOriginalAmount().doubleValue());
+                Label originalTotalLabel = new Label("💰 Tổng cộng: " + originalAmount);
+                originalTotalLabel.setTextFill(Color.WHITE);
+                originalTotalLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
+                
+                // Giảm giá
+                Label discountLabel = new Label("🎯 Giảm giá (" + String.format("%.0f", order.getDiscountPercent()) + "%): -" + order.getFormattedDiscountAmount());
+                discountLabel.setTextFill(Color.web("#FFE082"));
+                discountLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+                
+                // Thành tiền (sau giảm giá)
+                Label finalTotalLabel = new Label("💳 Thành tiền: " + order.getFormattedFinalAmount());
+                finalTotalLabel.setTextFill(Color.WHITE);
+                finalTotalLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+                
+                totalContainer.getChildren().addAll(originalTotalLabel, discountLabel, finalTotalLabel);
+            } else {
+                // Không có giảm giá, hiển thị tổng cộng bình thường
+                Label totalLabel = new Label("💰 Tổng cộng: " + order.getFormattedTotal());
+                totalLabel.setTextFill(Color.WHITE);
+                totalLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+                totalContainer.getChildren().add(totalLabel);
+            }
 
             // Bottom buttons section
             HBox buttonsBox = new HBox(15);
@@ -618,7 +654,7 @@ public class DashboardController {
             buttonsBox.getChildren().add(closeButton);
 
             // Add all sections to main container
-            mainContainer.getChildren().addAll(headerBox, statusBox, itemsContainer, totalBox, buttonsBox);
+            mainContainer.getChildren().addAll(headerBox, statusBox, itemsContainer, totalContainer, buttonsBox);
 
             // Calculate total window height based on content
             double baseHeight = 500; // Base height for header, status, total, buttons

@@ -38,6 +38,7 @@ import javafx.scene.text.FontWeight;
 
 import javafx.application.Platform;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.NumberFormat;
@@ -104,6 +105,7 @@ public class OrderController {
 
     @FXML
     public void initialize() {
+        // Khởi tạo database trước
 
         if (currentTimeLabel != null) {
             currentTimeLabel.textProperty().bind(TimeService.get().timeTextProperty());
@@ -395,11 +397,24 @@ public class OrderController {
         imageView.setFitWidth(60);
         imageView.setPreserveRatio(true);
 
-        // Load image
+        // Load image - FIXED: Support both absolute path and resource path
         try {
-            String imagePath = "/images/menu/" + item.getImagePath();
-            Image image = new Image(getClass().getResourceAsStream(imagePath));
-            if (image.isError()) {
+            String rawPath = item.getImagePath();
+            Image image = null;
+
+            if (rawPath != null && !rawPath.isEmpty()) {
+                File asFile = new File(rawPath);
+                if (asFile.isAbsolute() && asFile.exists()) {
+                    // Use absolute path if file exists
+                    image = new Image(asFile.toURI().toString());
+                } else {
+                    // Use resource path
+                    String resourcePath = rawPath.startsWith("/") ? rawPath : "/images/menu/" + rawPath;
+                    image = new Image(getClass().getResourceAsStream(resourcePath));
+                }
+            }
+
+            if (image == null || image.isError()) {
                 imageView.setImage(createPlaceholderImage());
             } else {
                 imageView.setImage(image);
@@ -456,6 +471,7 @@ public class OrderController {
                     "/images/menu/default.png",
                     "/images/menu/Snack.png",
                     "/images/menu/CocaCola.png",
+                    "/images/menu/unnamed (1).png",
                     "/images/bar-logo.png"
             };
 
@@ -557,9 +573,22 @@ public class OrderController {
 
         if (menuItem != null) {
             try {
-                String imagePath = "/images/menu/" + menuItem.getImagePath();
-                Image image = new Image(getClass().getResourceAsStream(imagePath));
-                if (image.isError()) {
+                String rawPath = menuItem.getImagePath();
+                Image image = null;
+
+                if (rawPath != null && !rawPath.isEmpty()) {
+                    File asFile = new File(rawPath);
+                    if (asFile.isAbsolute() && asFile.exists()) {
+                        // Use absolute path if file exists
+                        image = new Image(asFile.toURI().toString());
+                    } else {
+                        // Use resource path
+                        String resourcePath = rawPath.startsWith("/") ? rawPath : "/images/menu/" + rawPath;
+                        image = new Image(getClass().getResourceAsStream(resourcePath));
+                    }
+                }
+
+                if (image == null || image.isError()) {
                     imageView.setImage(createPlaceholderImage());
                 } else {
                     imageView.setImage(image);

@@ -96,12 +96,14 @@ public class PaymentController implements Initializable {
     private double originalTotal = 0.0;
     private double discountAmount = 0.0;
     private String discountType = "percentage"; // "percentage" or "fixed"
+    private double finalTotal = 0.0; // Final total after discount
 
     // Formatter
     private final NumberFormat currencyFormatter = NumberFormat.getInstance(new Locale("vi", "VN"));
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Khởi tạo database trước
 
         if (currentTimeLabel != null) {
             currentTimeLabel.textProperty().bind(TimeService.get().timeTextProperty());
@@ -570,7 +572,7 @@ public class PaymentController implements Initializable {
     
     private void updateDiscountCalculations() {
         double calculatedDiscount = 0;
-        double finalTotal = originalTotal;
+        finalTotal = originalTotal;
         
         if (discountAmount > 0) {
             if (discountType.equals("percentage")) {
@@ -706,8 +708,10 @@ public class PaymentController implements Initializable {
 
                 Platform.runLater(() -> {
                     try {
-                        // Process the payment using OrderDAO
-                        orderDAO.processPayment(currentOrder.getId(), method, 1);
+                        // Process the payment using OrderDAO with discount info
+                        BigDecimal finalAmount = BigDecimal.valueOf(finalTotal);
+                        double discountPercent = discountType.equals("percentage") ? discountAmount : 0.0;
+                        orderDAO.processPayment(currentOrder.getId(), method, 1, finalAmount, discountPercent);
 
                         // Hide progress
                         if (paymentProgress != null) {

@@ -18,6 +18,7 @@ public class Order {
     private String status;
     private String notes;
     private BigDecimal totalAmount;
+    private double discountPercent; // Phần trăm giảm giá (0-100)
     private int createdBy;
 
     // Formatters
@@ -114,6 +115,14 @@ public class Order {
         this.totalAmount = totalAmount != null ? totalAmount : BigDecimal.ZERO;
     }
 
+    public double getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(double discountPercent) {
+        this.discountPercent = Math.max(0, Math.min(100, discountPercent)); // Đảm bảo trong khoảng 0-100
+    }
+
     public int getCreatedBy() {
         return createdBy;
     }
@@ -125,6 +134,52 @@ public class Order {
     // Utility methods for formatting
     public String getFormattedTotal() {
         return currencyFormatter.format(getTotalAmount()) + " VNĐ";
+    }
+
+    /**
+     * Tính số tiền được giảm
+     * Lưu ý: total_amount trong database đã là tiền sau giảm giá
+     * Cần tính ngược lại để có số tiền gốc
+     */
+    public BigDecimal getDiscountAmount() {
+        if (discountPercent <= 0) {
+            return BigDecimal.ZERO;
+        }
+        // Tính ngược từ total_amount (đã giảm giá) để có số tiền gốc
+        BigDecimal originalAmount = getTotalAmount().divide(BigDecimal.ONE.subtract(BigDecimal.valueOf(discountPercent / 100.0)), 2, BigDecimal.ROUND_HALF_UP);
+        return originalAmount.subtract(getTotalAmount());
+    }
+
+    /**
+     * Tính tổng tiền gốc (trước giảm giá)
+     */
+    public BigDecimal getOriginalAmount() {
+        if (discountPercent <= 0) {
+            return getTotalAmount();
+        }
+        // Tính ngược từ total_amount (đã giảm giá) để có số tiền gốc
+        return getTotalAmount().divide(BigDecimal.ONE.subtract(BigDecimal.valueOf(discountPercent / 100.0)), 2, BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * Tính tổng tiền sau khi giảm giá (chính là total_amount)
+     */
+    public BigDecimal getFinalAmount() {
+        return getTotalAmount();
+    }
+
+    /**
+     * Format số tiền giảm giá
+     */
+    public String getFormattedDiscountAmount() {
+        return currencyFormatter.format(getDiscountAmount()) + " VNĐ";
+    }
+
+    /**
+     * Format tổng tiền cuối cùng
+     */
+    public String getFormattedFinalAmount() {
+        return currencyFormatter.format(getFinalAmount()) + " VNĐ";
     }
 
     public String getFormattedOrderTime() {

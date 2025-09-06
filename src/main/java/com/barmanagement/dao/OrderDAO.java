@@ -15,11 +15,12 @@ import java.util.List;
  */
 public class OrderDAO {
 
+
     /**
      * Find order by ID
      */
     public Order findById(int orderId) throws SQLException {
-        String sql = "SELECT id, table_id, order_time, completed_time, status, total_amount, notes, created_by " +
+        String sql = "SELECT id, table_id, order_time, completed_time, status, total_amount, notes, created_by, discount_percent " +
                 "FROM orders WHERE id = ?";
 
         try (Connection conn = JDBCConnect.getJDBCConnection();
@@ -39,6 +40,15 @@ public class OrderDAO {
      * Process payment for an order - COMPLETELY FIXED VERSION
      */
     public void processPayment(int orderId, String paymentMethod, int userId) throws SQLException {
+        // Calculate total from order items (without discount)
+        BigDecimal originalTotal = calcTotal(orderId);
+        processPayment(orderId, paymentMethod, userId, originalTotal, 0.0);
+    }
+    
+    /**
+     * Process payment for an order with discount
+     */
+    public void processPayment(int orderId, String paymentMethod, int userId, BigDecimal finalAmount, double discountPercent) throws SQLException {
         Connection conn = null;
         try {
             conn = JDBCConnect.getJDBCConnection();
@@ -57,9 +67,10 @@ public class OrderDAO {
                 throw new SQLException("Order must be completed before payment. Current status: " + order.getStatus());
             }
 
-            // Calculate total amount
-            BigDecimal totalAmount = calcTotal(orderId);
-            System.out.println("Order total amount: " + totalAmount);
+            // Use provided final amount (already includes discount)
+            BigDecimal totalAmount = finalAmount;
+            System.out.println("Order final amount (with discount): " + totalAmount);
+            System.out.println("Discount percent: " + discountPercent + "%");
 
             if (totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new SQLException("Invalid order amount: " + totalAmount);
@@ -70,11 +81,12 @@ public class OrderDAO {
                 throw new SQLException("Order #" + orderId + " has already been paid");
             }
 
-            // 1. Update order status to paid
-            String updateOrderSql = "UPDATE orders SET status = 'paid', total_amount = ? WHERE id = ?";
+            // 1. Update order status to paid with discount info
+            String updateOrderSql = "UPDATE orders SET status = 'paid', total_amount = ?, discount_percent = ? WHERE id = ?";
             try (PreparedStatement ps = conn.prepareStatement(updateOrderSql)) {
                 ps.setBigDecimal(1, totalAmount);
-                ps.setInt(2, orderId);
+                ps.setDouble(2, discountPercent);
+                ps.setInt(3, orderId);
                 int updated = ps.executeUpdate();
                 System.out.println("Updated order status: " + updated + " rows");
 
@@ -174,6 +186,15 @@ public class OrderDAO {
         order.setTotalAmount(rs.getBigDecimal("total_amount"));
         order.setNotes(rs.getString("notes"));
         order.setCreatedBy(rs.getInt("created_by"));
+        
+        // Set discount percent (handle null values)
+        BigDecimal discountPercent = rs.getBigDecimal("discount_percent");
+        if (discountPercent != null) {
+            order.setDiscountPercent(discountPercent.doubleValue());
+        } else {
+            order.setDiscountPercent(0.0);
+        }
+        
         return order;
     }
 
@@ -192,7 +213,7 @@ public class OrderDAO {
      * FIXED: Get completed but not paid orders - Only valid orders with items
      */
     public List<Order> findCompletedNotPaidOrders() throws SQLException {
-        String sql = "SELECT DISTINCT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+        String sql = "SELECT DISTINCT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by, o.discount_percent " +
                 "FROM orders o " +
                 "INNER JOIN order_items oi ON o.id = oi.order_id " +
                 "LEFT JOIN payments p ON o.id = p.order_id " +
@@ -232,7 +253,7 @@ public class OrderDAO {
             return findCompletedNotPaidOrders();
         }
 
-        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by, o.discount_percent " +
                 "FROM orders o " +
                 "WHERE o.status = ? " +
                 "AND DATE(o.order_time) = CURDATE() " +
@@ -290,7 +311,7 @@ public class OrderDAO {
      * Get completed orders with details (unpaid only)
      */
     public List<Order> findCompletedOrdersWithDetails() throws SQLException {
-        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by, " +
+        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by, o.discount_percent, " +
                 "COUNT(oi.id) as item_count, SUM(oi.quantity) as total_quantity " +
                 "FROM orders o " +
                 "INNER JOIN order_items oi ON o.id = oi.order_id " +
@@ -323,7 +344,7 @@ public class OrderDAO {
      * FIXED: Find pending/active order by table ID - including completed but unpaid orders
      */
     public Order findPendingByTable(int tableId) throws SQLException {
-        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by, o.discount_percent " +
                 "FROM orders o " +
                 "LEFT JOIN payments p ON o.id = p.order_id " +
                 "WHERE o.table_id = ? " +
@@ -642,7 +663,7 @@ public class OrderDAO {
      * Get all orders for today with basic info
      */
     public List<Order> findTodayOrders() throws SQLException {
-        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by " +
+        String sql = "SELECT o.id, o.table_id, o.order_time, o.completed_time, o.status, o.total_amount, o.notes, o.created_by, o.discount_percent " +
                 "FROM orders o " +
                 "WHERE DATE(o.order_time) = CURDATE() " +
                 "ORDER BY o.order_time DESC";
